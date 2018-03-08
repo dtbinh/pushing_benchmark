@@ -1,0 +1,67 @@
+group "visualization" {
+    cmd "0-show-robot-arena" {
+        exec = "rosrun pnpush_planning robot_arena_visualizer.py ";
+        host = "localhost";
+    }
+    cmd "1-show-block" {
+        exec = "rosrun pnpush_planning vicon_object_visualizer.py -s rect2";
+        host = "localhost";
+    }
+    cmd "2-show-surface" {
+        exec = "rosrun pnpush_planning surface_visualizer.py -s plywood";
+        host = "localhost";
+    }
+}
+
+cmd "0-roscore" {
+    exec = "roscore";
+    host = "localhost";
+}
+cmd "1-perception-real" {
+    exec = "roslaunch cpush_config robot_perception_point_pusher.launch have_robot:=true";
+    host = "localhost";
+}
+
+cmd "2-perception-virtual" {
+    exec = "roslaunch cpush_config robot_perception_point_pusher.launch have_robot:=false";
+    host = "localhost";
+}
+
+cmd "3-abb" {
+    exec = "roslaunch cpush_config abb.launch";
+    host = "localhost";
+}
+cmd "4-vicon" {
+    exec = "roslaunch cpush_config vicon.launch";
+    host = "localhost";
+}
+
+cmd "5-rviz" {
+    exec = "rosrun rviz rviz -d $FPUSH_BENCHMARK_BASE/catkin_ws/src/cpush_config/rviz/rvizconfig.rviz";
+    host = "localhost";
+}
+
+cmd "6-control" {
+    exec = "rosrun push_control push_control";
+    host = "localhost";
+}
+
+
+script "run_real" {
+    start cmd "0-roscore";
+    wait ms 1000;
+    start cmd "1-perception-real";
+    start cmd "3-abb";
+    start cmd "4-vicon";
+    start cmd "5-rviz";
+    start group "visualization";
+}
+
+script "run_virtual" {
+    start cmd "0-roscore";
+    wait ms 1000;
+    start cmd "2-perception-virtual";
+    start cmd "4-vicon";
+    start cmd "5-rviz";
+    start group "visualization";
+}
