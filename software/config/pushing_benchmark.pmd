@@ -4,7 +4,7 @@ group "visualization" {
         host = "localhost";
     }
     cmd "1-show-block" {
-        exec = "rosrun pnpush_planning vicon_object_visualizer.py -s rect2";
+        exec = "rosrun pnpush_planning vicon_object_visualizer.py -s rect1";
         host = "localhost";
     }
     cmd "2-show-surface" {

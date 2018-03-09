@@ -1,7 +1,12 @@
 #!/usr/bin/env python
 import time
 import socket
-import egm_pb2
+import egm_pb2, egm_helper
+import rospy
+from sensor_msgs.msg import JointState
+from std_msgs.msg import Header
+from ik.helper import quat_from_yaw, qwxyz_from_qxyzw, transform_back
+
 
 def GetTickCount():
     return int((time.time() + 0.5) * 1000)
@@ -13,17 +18,60 @@ class EGMController():
         self.sequenceNumber = 0
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.sock.bind(("", self.UDP_PORT))
+        self.starttick = egm_helper.GetTickCount()
         data, self.addr = self.sock.recvfrom(1024)
+        self.joint_pub = rospy.Publisher("/joint_states", JointState, queue_size = 2)
 
     def get_robot_pos(self):
         try:
             egm_robot = egm_pb2.EgmRobot()
             data, addr = self.sock.recvfrom(1024)
-
             egm_robot.ParseFromString(data)
             pos_read = egm_robot.feedBack.cartesian.pos
             orient_read = egm_robot.feedBack.cartesian.orient
             pos_read = pos_read.x,  pos_read.y,  pos_read.z
-            return pos_read,egm_robot
+            return pos_read,egm_robot.feedBack.joints.joints
         except Exception as e:
             return None
+
+    def publish_robot_joints(self, joints):
+        js = JointState()
+        js.header = Header()
+        js.header.stamp = rospy.Time.now()
+        js.name = ['joint1', 'joint2', 'joint3', 'joint4', 'joint5', 'joint6']
+        js.position = [j for j in joints]
+        js.velocity = [0.0 for i in xrange(6)]
+        js.effort = [0.0 for i in xrange(6)]
+        self.joint_pub.publish(js)
+
+    def send_robot_pos(self, position, theta=0):
+        #Get header info
+        egm_sensor_write = egm_pb2.EgmSensor()
+        header = egm_pb2.EgmHeader()
+        header.mtype = egm_pb2.EgmHeader.MSGTYPE_CORRECTION
+        header.seqno = self.sequenceNumber
+        self.sequenceNumber += 1
+        header.tm = egm_helper.GetTickCount()-self.starttick
+        egm_sensor_write.header.CopyFrom(header)
+        #build robot pose object
+        pos = egm_pb2.EgmCartesian()
+        pos.x, pos.y, pos.z = position[0], position[1], position[2]
+        orient = egm_pb2.EgmQuaternion()
+        q = transform_back([0,0,0,0,1,0,0], [0,0,0]+quat_from_yaw(theta))[3:7]
+        qtuple = tuple(qwxyz_from_qxyzw(q))
+        orient.u0, orient.u1, orient.u2, orient.u3 = qtuple
+        pose = egm_pb2.EgmPose()
+        pose.orient.CopyFrom(orient)
+        pose.pos.CopyFrom(pos)
+        #build pose plan object
+        planned = egm_pb2.EgmPlanned()
+        planned.cartesian.CopyFrom(pose)
+        egm_sensor_write.planned.CopyFrom(planned)
+        #send robot command message
+        sent = self.sock.sendto(egm_sensor_write.SerializeToString(),self.addr)
+
+    def send_robot_vel(self, pos, vel, rate):
+        #Get new position from velocity
+        h = 1./rate
+        pos += vel*h
+        self.send_robot_pos(pos)
