@@ -37,7 +37,7 @@ cmd "4-vicon" {
 }
 
 cmd "5-rviz" {
-    exec = "rosrun rviz rviz -d $FPUSH_BENCHMARK_BASE/catkin_ws/src/cpush_config/rviz/rvizconfig.rviz";
+    exec = "rosrun rviz rviz -d $PUSHING_BENCHMARK_BASE/catkin_ws/src/cpush_config/rviz/rvizconfig.rviz";
     host = "localhost";
 }
 

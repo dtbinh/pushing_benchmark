@@ -8,43 +8,43 @@ then
   thisFile=${BASH_SOURCE[0]}
 fi
 
-set_FPUSH_BENCHMARK_BASE()
+set_PUSHING_BENCHMARK_BASE()
 {
   # use cd and pwd to get an absolute path
   configParentDir="$(cd "$(dirname "$thisFile")/.." && pwd)"
 
   # different cases for software/config or software/build/config
   case "$(basename $configParentDir)" in
-    "software") export FPUSH_BENCHMARK_BASE=$(dirname $configParentDir);;
-    "build") export FPUSH_BENCHMARK_BASE=$(dirname $(dirname $configParentDir));;
+    "software") export PUSHING_BENCHMARK_BASE=$(dirname $configParentDir);;
+    "build") export PUSHING_BENCHMARK_BASE=$(dirname $(dirname $configParentDir));;
     *) echo "Warning: pushing_benchmark environment file is stored in unrecognized location: $thisFile";;
   esac
-  export pushing_benchmarkDATA_BASE=$FPUSH_BENCHMARK_BASE/../pushing_benchmarkdata
-  export PATH=$PATH:$FPUSH_BENCHMARK_BASE/software/build/bin
+  export pushing_benchmarkDATA_BASE=$PUSHING_BENCHMARK_BASE/../pushing_benchmarkdata
+  export PATH=$PATH:$PUSHING_BENCHMARK_BASE/software/build/bin
 }
 
 setup_pushing_benchmark()
 {
-  export PATH=$PATH:$FPUSH_BENCHMARK_BASE/software/build/bin
+  export PATH=$PATH:$PUSHING_BENCHMARK_BASE/software/build/bin
   export PATH=$PATH:$HOME/software/libbot/build/bin  # for lcm and libbot install
   export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
-  export LD_LIBRARY_PATH=$FPUSH_BENCHMARK_BASE/software/build/lib:$FPUSH_BENCHMARK_BASE/software/build/lib64:$LD_LIBRARY_PATH
+  export LD_LIBRARY_PATH=$PUSHING_BENCHMARK_BASE/software/build/lib:$PUSHING_BENCHMARK_BASE/software/build/lib64:$LD_LIBRARY_PATH
   #~ export LD_LIBRARY_PATH=$HOME/software/gurobi702/linux64/lib:$LD_LIBRARY_PATH  # for gurobi
 
   export GUROBI_HOME="$HOME/software/gurobi702/linux64"
   export PATH="${PATH}:${GUROBI_HOME}/bin"
   export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${GUROBI_HOME}/lib"
 
-  export CLASSPATH=$CLASSPATH:/usr/local/share/java/lcm.jar:$FPUSH_BENCHMARK_BASE/software/build/share/java/lcmtypes_pushing_benchmark_lcmtypes.jar
-  export CLASSPATH=$CLASSPATH:$FPUSH_BENCHMARK_BASE/software/build/share/java/drake.jar:$FPUSH_BENCHMARK_BASE/software/build/share/java/bot2-lcmgl.jar
-  export PKG_CONFIG_PATH=$FPUSH_BENCHMARK_BASE/software/build/lib/pkgconfig:$FPUSH_BENCHMARK_BASE/software/build/lib64/pkgconfig:$PKG_CONFIG_PATH
+  export CLASSPATH=$CLASSPATH:/usr/local/share/java/lcm.jar:$PUSHING_BENCHMARK_BASE/software/build/share/java/lcmtypes_pushing_benchmark_lcmtypes.jar
+  export CLASSPATH=$CLASSPATH:$PUSHING_BENCHMARK_BASE/software/build/share/java/drake.jar:$PUSHING_BENCHMARK_BASE/software/build/share/java/bot2-lcmgl.jar
+  export PKG_CONFIG_PATH=$PUSHING_BENCHMARK_BASE/software/build/lib/pkgconfig:$PUSHING_BENCHMARK_BASE/software/build/lib64/pkgconfig:$PKG_CONFIG_PATH
   export GRB_LICENSE_FILE=$HOME/gurobi.lic
   export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/cuda/lib64:/usr/local/cudnn/v6.0/lib64
   export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/cuda-8.0/lib64:/usr/local/cuda-8.0/extras/CUPTI/lib64
   # python path
 
   # python path
-  export PYTHONPATH=$PYTHONPATH:$FPUSH_BENCHMARK_BASE/software/build/lib/python2.7/site-packages:$FPUSH_BENCHMARK_BASE/software/build/lib/python2.7/dist-packages
+  export PYTHONPATH=$PYTHONPATH:$PUSHING_BENCHMARK_BASE/software/build/lib/python2.7/site-packages:$PUSHING_BENCHMARK_BASE/software/build/lib/python2.7/dist-packages
   # enable some warnings by default
   export CXXFLAGS="$CXXFLAGS -Wreturn-type -Wuninitialized"
   export CFLAGS="$CFLAGS -Wreturn-type -Wuninitialized"
@@ -56,8 +56,8 @@ setup_pushing_benchmark()
 
 set_ros()
 {
-  if [ -f $FPUSH_BENCHMARK_BASE/catkin_ws/devel/setup.bash ]; then
-    source $FPUSH_BENCHMARK_BASE/catkin_ws/devel/setup.bash
+  if [ -f $PUSHING_BENCHMARK_BASE/catkin_ws/devel/setup.bash ]; then
+    source $PUSHING_BENCHMARK_BASE/catkin_ws/devel/setup.bash
     echo "Setting pushing_benchmark environment"
   else
     source /opt/ros/kinetic/setup.bash
@@ -66,9 +66,9 @@ set_ros()
 }
 
 # some useful commands
-alias cdpushing_benchmark='cd $FPUSH_BENCHMARK_BASE'
+alias cdpushing_benchmark='cd $PUSHING_BENCHMARK_BASE'
 alias gitsub='git submodule update --init --recursive'
-alias gitpull='git -C $FPUSH_BENCHMARK_BASE pull'
+alias gitpull='git -C $PUSHING_BENCHMARK_BASE pull'
 
 alias rebash='source ~/.bashrc'
 alias open='gnome-open'
@@ -81,9 +81,9 @@ alias slow='rosservice call /robot2_SetSpeed 50 15'
 alias gohome='rosservice call robot2_SetJoints "{j1: 0, j2: 0, j3: 0, j4: 0, j5: 90, j6: 0}"'
 
 alias teleop='rosrun teleop teleop'
-alias pythonpushing_benchmark='ipython -i -c "run $FPUSH_BENCHMARK_BASE/catkin_ws/src/pushing_benchmark_config/python/pythonpushing_benchmark.py"'
+alias pythonpushing_benchmark='ipython -i -c "run $PUSHING_BENCHMARK_BASE/catkin_ws/src/pushing_benchmark_config/python/pythonpushing_benchmark.py"'
 
-alias pman='bot-procman-sheriff -l $FPUSH_BENCHMARK_BASE/software/config/pushing_benchmark.pmd'
+alias pman='bot-procman-sheriff -l $PUSHING_BENCHMARK_BASE/software/config/pushing_benchmark.pmd'
 
 alias roslocal='export ROS_MASTER_URI=http://localhost:11311'
 
@@ -97,10 +97,10 @@ alias zeroft='rosservice call zero'
 alias lcmlocal='sudo ifconfig lo multicast; sudo route add -net 224.0.0.0 netmask 240.0.0.0 dev lo'
 
 
-alias catmake='cd $FPUSH_BENCHMARK_BASE/catkin_ws; catkin_make; cd -;'
-alias simrun='cd $FPUSH_BENCHMARK_BASE;  rosrun  push_control push_control'
-alias realrun='cd $FPUSH_BENCHMARK_BASE/catkin_ws; catkin_make && rosrun  push_control push_control'
-alias pythonssh='f(){ FILEPATH_TMP="$1" ; CURRENTPATH="$PWD"; cd $FPUSH_BENCHMARK_BASE/../mcube_learning/helper/; FOLDER_NAME=$(python transfer_files.py server "string_as_arg"); cd $FPUSH_BENCHMARK_BASE/../mcube_learning/ ;./run_server.sh $CURRENTPATH $FILEPATH_TMP $FOLDER_NAME mcube@192.168.0.191; cd $CURRENTPATH; unset -f f; }; f'
+alias catmake='cd $PUSHING_BENCHMARK_BASE/catkin_ws; catkin_make; cd -;'
+alias simrun='cd $PUSHING_BENCHMARK_BASE;  rosrun  push_control push_control'
+alias realrun='cd $PUSHING_BENCHMARK_BASE/catkin_ws; catkin_make && rosrun  push_control push_control'
+alias pythonssh='f(){ FILEPATH_TMP="$1" ; CURRENTPATH="$PWD"; cd $PUSHING_BENCHMARK_BASE/../mcube_learning/helper/; FOLDER_NAME=$(python transfer_files.py server "string_as_arg"); cd $PUSHING_BENCHMARK_BASE/../mcube_learning/ ;./run_server.sh $CURRENTPATH $FILEPATH_TMP $FOLDER_NAME mcube@192.168.0.191; cd $CURRENTPATH; unset -f f; }; f'
 alias pythonssh2='f(){ FILEPATH_TMP="$1" ; CURRENTPATH="$PWD"; cd ../../helper/; FOLDER_NAME=$(python transfer_files.py main "string_as_arg"); cd $CODE_BASE ;./run_server.sh $CURRENTPATH $FILEPATH_TMP $FOLDER_NAME mcube@192.168.0.15; cd $CURRENTPATH; unset -f f; }; f'
 alias sshserver='sshpass -p "thecube" ssh mcube@192.168.0.191 -X'
 alias sshmain='sshpass -p "thecube" ssh mcube@192.168.0.15 -X'
@@ -134,7 +134,7 @@ function set_bash {
    export HISTTIMEFORMAT="%d/%m/%y %T "
 }
 
-set_FPUSH_BENCHMARK_BASE
+set_PUSHING_BENCHMARK_BASE
 setup_pushing_benchmark
 set_ros
 set_bash

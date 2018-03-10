@@ -30,6 +30,8 @@ class EGMController():
             pos_read = egm_robot.feedBack.cartesian.pos
             orient_read = egm_robot.feedBack.cartesian.orient
             pos_read = pos_read.x,  pos_read.y,  pos_read.z
+            # publish robot joints (visualize rviz)
+            self.publish_robot_joints(egm_robot.feedBack.joints.joints)
             return pos_read,egm_robot.feedBack.joints.joints
         except Exception as e:
             return None
@@ -45,6 +47,15 @@ class EGMController():
         self.joint_pub.publish(js)
 
     def send_robot_pos(self, position, theta=0):
+        #apply workspace limits for safety
+        x_limits = [0.1, 0.5]
+        y_limits = [-0.2, 0.2]
+        z_limits = [0, 0.5]
+        position[0] = max(min(position[0], x_limits[1]), x_limits[0])
+        position[1] = max(min(position[1], y_limits[1]), y_limits[0])
+        position[2] = max(min(position[2], z_limits[1]), z_limits[0])
+        #convert to mm
+        position = position*1000
         #Get header info
         egm_sensor_write = egm_pb2.EgmSensor()
         header = egm_pb2.EgmHeader()
@@ -75,3 +86,4 @@ class EGMController():
         h = 1./rate
         pos += vel*h
         self.send_robot_pos(pos)
+        return pos

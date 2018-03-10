@@ -1,41 +1,50 @@
 #!/usr/bin/env python
-from helper import egm_pb2
-from helper import egm_helper
+from helper import egm_pb2, egm_helper, vicon
 from time import sleep
 import rospy
 import math
+
 import numpy as np
 import time
 import tf
+import threading
+from std_msgs.msg import Float32MultiArray
+
+lock = threading.Lock()
+
+def callback(data):
+    rospy.loginfo(rospy.get_caller_id() + "I heard %s", data.data)
+    return data.data
 
 if __name__=='__main__':
     rospy.init_node('egm_control')
     listener = tf.TransformListener()
-
     rospy.sleep(1)
+
+    #initialize controller object
     EGM = egm_helper.EGMController()
 
-    position = np.array([300, 0, 178.2])
+    #initial desired position of robot in world frame
+    position = np.array([.300, 0, .1782])
     rate = 250 # 250hz
 
+    #start control loop
     while True:
+        #enforce desired controller frequency
         rospy.Rate(rate).sleep()
 
-        # 0. Update desired robot position
-        position = position + 1./250*np.array([50.,0.,0.])
+        # 1. get robot pose (robot_pos = [x,y,z], robot_joints = ['joint_1','joint_2','joint_3','joint_4','joint_5','joint_6'])
+        robot_pos, robot_joints = EGM.get_robot_pos()
 
-        # 1. get robot pose
-        robot_pos, robot_joint = EGM.get_robot_pos()
+        # 2. get object pose and publish
+        vicon.get_object_pose(listener)
 
-        # 2. get object pose
-        object_pose = vicon.get_object_pose()
+        #3. apply control policy
+        vel_robot = rospy.Subscriber(object_pose_pub, Float32MultiArray, callback)
 
-        # 2. publish robot joints (visualize rviz)
-        EGM.publish_robot_joints(robot_joints)
-
-        #3. send desired position
-        # EGM.send_robot_pos(position)
-        EGM.send_robot_vel(position, np.array([0.05,0,0]), rate)
+        #4. send desired robot velocity
+        position = EGM.send_robot_vel(position, vel_robot, rate)
+        print position
 
     sock.close()
     print 'End of program'
