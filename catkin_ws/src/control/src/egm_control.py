@@ -12,10 +12,6 @@ from std_msgs.msg import Float32MultiArray
 
 lock = threading.Lock()
 
-def callback(data):
-    rospy.loginfo(rospy.get_caller_id() + "I heard %s", data.data)
-    return data.data
-
 if __name__=='__main__':
     rospy.init_node('egm_control')
     listener = tf.TransformListener()
@@ -40,7 +36,7 @@ if __name__=='__main__':
         vicon.get_object_pose(listener)
 
         #3. apply control policy
-        vel_robot = rospy.Subscriber(object_pose_pub, Float32MultiArray, callback)
+        vel_robot = rospy.wait_for_message("/robot_velocity", Float32MultiArray, 1)
 
         #4. send desired robot velocity
         position = EGM.send_robot_vel(position, vel_robot, rate)
