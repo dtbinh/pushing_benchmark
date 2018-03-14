@@ -6,6 +6,7 @@ import rospy
 from sensor_msgs.msg import JointState
 from std_msgs.msg import Header
 from ik.helper import quat_from_yaw, qwxyz_from_qxyzw, transform_back
+import numpy as np
 
 
 def GetTickCount():
@@ -21,6 +22,8 @@ class EGMController():
         self.starttick = egm_helper.GetTickCount()
         data, self.addr = self.sock.recvfrom(1024)
         self.joint_pub = rospy.Publisher("/joint_states", JointState, queue_size = 2)
+        self.cart_sensed_pub = rospy.Publisher("/cart_sensed_states", JointState, queue_size = 2)
+        self.cart_command_pub = rospy.Publisher("/cart_command_states", JointState, queue_size = 2)
 
     def get_robot_pos(self):
         try:
@@ -32,7 +35,9 @@ class EGMController():
             pos_read = pos_read.x,  pos_read.y,  pos_read.z
             # publish robot joints (visualize rviz)
             self.publish_robot_joints(egm_robot.feedBack.joints.joints)
-            return pos_read,egm_robot.feedBack.joints.joints
+            self.publish_robot_cart([egm_robot.feedBack.cartesian.pos.x/1000., egm_robot.feedBack.cartesian.pos.y/1000.], self.cart_sensed_pub)
+            print [egm_robot.feedBack.cartesian.pos.x, egm_robot.feedBack.cartesian.pos.y]
+            return
         except Exception as e:
             return None
 
@@ -45,6 +50,16 @@ class EGMController():
         js.velocity = [0.0 for i in xrange(6)]
         js.effort = [0.0 for i in xrange(6)]
         self.joint_pub.publish(js)
+
+    def publish_robot_cart(self, pos, pub):
+        js = JointState()
+        js.header = Header()
+        js.header.stamp = rospy.Time.now()
+        js.name = ['xp', 'yp']
+        js.position = [pos[0], pos[1]]
+        js.velocity = [0.0 for i in xrange(2)]
+        js.effort = [0.0 for i in xrange(2)]
+        pub.publish(js)
 
     def send_robot_pos(self, position, theta=0):
         #apply workspace limits for safety
@@ -81,9 +96,16 @@ class EGMController():
         #send robot command message
         sent = self.sock.sendto(egm_sensor_write.SerializeToString(),self.addr)
 
-    def send_robot_vel(self, pos, vel, rate):
+    def send_robot_vel(self, vel, rate):
         #Get new position from velocity
         h = 1./rate
-        pos += vel*h
-        self.send_robot_pos(pos)
-        return pos
+        #convert velocity to 3d array
+        vel = np.array(vel)
+        vel = np.append(vel, 0.)
+        #update position
+        self.position += vel*h
+        #send position command to robot
+        self.send_robot_pos(self.position)
+        #publish position command
+        self.publish_robot_cart(self.position, self.cart_command_pub)
+        return

@@ -19,10 +19,10 @@ if __name__ == '__main__':
     counter = 0
     rate = 250
     while True:
-        print counter
+        # print counter
         rospy.Rate(rate).sleep()
         counter+=1
-        us = np.array([counter, 0.])
+        us = np.array([0.05, 0.])
         #publish desired velocity
         robot_velocity_msg = Float32MultiArray()
         robot_velocity_msg.data = us

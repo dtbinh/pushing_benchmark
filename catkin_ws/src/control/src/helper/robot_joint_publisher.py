@@ -6,11 +6,11 @@ import rospy
 from std_msgs.msg import Float32MultiArray
 import tf
 
-def publish_object_pose(listener):
-    object_pose_pub=rospy.Publisher('/object_pose', Float32MultiArray, queue_size = 10, latch=True)
+def publish_robot_joints(listener):
+    robot_joints_pub=rospy.Publisher("/joint_states", JointState, queue_size = 2)
 
     while True:
-        (trans, quat) = listener.lookupTransform("map", "/vicon/StainlessSteel/StainlessSteel_rect", rospy.Time(0))
+        robot_pos, robot_joints = EGM.get_robot_pos()
         rpy = tf.transformations.euler_from_quaternion(quat)
         theta = rpy[2]
         object_pose_msg = Float32MultiArray()
@@ -19,7 +19,7 @@ def publish_object_pose(listener):
         print object_pose_msg
 
 if __name__ == '__main__':
-    rospy.init_node('vicon_publisher', anonymous=True)
+    rospy.init_node('robot_joint_publisher', anonymous=True)
     listener = tf.TransformListener()
     rospy.sleep(1)
-    publish_object_pose(listener)
+    publish_robot_joints(listener)
