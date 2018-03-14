@@ -3,7 +3,7 @@ import time
 import socket
 import egm_pb2, egm_helper
 import rospy
-from sensor_msgs.msg import JointState
+from sensor_msgs.msg import JointState, Float32MultiArray
 from std_msgs.msg import Header
 from ik.helper import quat_from_yaw, qwxyz_from_qxyzw, transform_back
 import numpy as np
@@ -22,8 +22,8 @@ class EGMController():
         self.starttick = egm_helper.GetTickCount()
         data, self.addr = self.sock.recvfrom(1024)
         self.joint_pub = rospy.Publisher("/joint_states", JointState, queue_size = 2)
-        self.cart_sensed_pub = rospy.Publisher("/cart_sensed_states", JointState, queue_size = 2)
-        self.cart_command_pub = rospy.Publisher("/cart_command_states", JointState, queue_size = 2)
+        self.cart_sensed_pub = rospy.Publisher("/cart_sensed_states", Float32MultiArray, queue_size = 2)
+        self.cart_command_pub = rospy.Publisher("/cart_command_states", Float32MultiArray, queue_size = 2)
 
     def get_robot_pos(self):
         try:
@@ -36,7 +36,6 @@ class EGMController():
             # publish robot joints (visualize rviz)
             self.publish_robot_joints(egm_robot.feedBack.joints.joints)
             self.publish_robot_cart([egm_robot.feedBack.cartesian.pos.x/1000., egm_robot.feedBack.cartesian.pos.y/1000.], self.cart_sensed_pub)
-            print [egm_robot.feedBack.cartesian.pos.x, egm_robot.feedBack.cartesian.pos.y]
             return
         except Exception as e:
             return None
@@ -52,13 +51,9 @@ class EGMController():
         self.joint_pub.publish(js)
 
     def publish_robot_cart(self, pos, pub):
-        js = JointState()
-        js.header = Header()
-        js.header.stamp = rospy.Time.now()
-        js.name = ['xp', 'yp']
-        js.position = [pos[0], pos[1]]
-        js.velocity = [0.0 for i in xrange(2)]
-        js.effort = [0.0 for i in xrange(2)]
+        pos_xy = np.array(pos[0:2])
+        js = Float32MultiArray()
+        js.data = np.array(pos_xy)
         pub.publish(js)
 
     def send_robot_pos(self, position, theta=0):
