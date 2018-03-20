@@ -41,10 +41,16 @@ cmd "5-rviz" {
     host = "localhost";
 }
 
-cmd "6-control" {
+cmd "6-push-control" {
     exec = "rosrun push_control push_control";
     host = "localhost";
 }
+
+cmd "7-object-tracker" {
+    exec = "rosrun control object_tracker.py";
+    host = "localhost";
+}
+
 
 
 script "run_real" {
@@ -54,6 +60,8 @@ script "run_real" {
     start cmd "3-abb";
     start cmd "4-vicon";
     start cmd "5-rviz";
+    start cmd "6-push-control";
+    start cmd "7-object-tracker";
     start group "visualization";
 }
 
