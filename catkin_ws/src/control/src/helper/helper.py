@@ -6,6 +6,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 from std_msgs.msg import Float32MultiArray, Float32
 import os
+from visualization_msgs.msg import Marker
+import geometry_msgs
+import json
 
 def terminate_ros_node(s):
     list_cmd = subprocess.Popen("rosnode list", shell=True, stdout=subprocess.PIPE)
@@ -38,6 +41,32 @@ def csv2dict(filename):
         for data in range(len(lines)):
             d[key].append(float(lines[data][key]))
     return d
+
+def trajectory_viz(x_vec, y_vec, z_vec, frame_id = "/track_start", line_thick = 0.005, color = (0.,0.,1., 1.)):
+    line_strip = Marker()
+    line_strip.header.frame_id  = frame_id
+    line_strip.header.stamp = rospy.Time.now()
+    line_strip.action =  Marker.ADD
+    line_strip.pose.orientation.w =  1.0
+    line_strip.type = Marker.LINE_STRIP
+    line_strip.scale.x = line_thick
+    # // Line strip is blue
+    line_strip.color.r = color[0]
+    line_strip.color.g = color[1]
+    line_strip.color.b = color[2]
+    line_strip.color.a = color[3]
+    for i in range(0, len(x_vec), 15):
+        x= x_vec[i]
+        y= y_vec[i]
+        z= z_vec[i]
+
+        p =geometry_msgs.msg.Point()
+        p.x = x
+        p.y = y
+        p.z = z
+
+        line_strip.points.append(p)
+    return line_strip
 
 def plot_trajectory(date):
     #Compile rosbag to .csv and plot trajectory

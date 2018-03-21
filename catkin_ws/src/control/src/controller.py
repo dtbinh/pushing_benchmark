@@ -36,22 +36,9 @@ if __name__ == '__main__':
 
     rospy.sleep(1)
     while True:
-        # print counter
-        # import pdb; pdb.set_trace()
-        # print time
         t0 = rospy.get_time()
-
         xs = object_pose +robot_pos
-        # out = nominal_srv(time) #np.array([0.05, 0.])
-        # print 'xs', xs
-        out = controller_srv(np.array(xs), time) #np.array([0.05, 0.])
-        # print 'object_pose: ', object_pose
-        # print 'robot_pos: ', robot_pos
-        print 'xs: ', xs
-        print 'robot vel: ', out.us
-        # print rospy.get_time() - t0
-        # us = np.array([0.05, 0.])
-        # print out.us
+        out = controller_srv(np.array(xs), time) 
         # #publish desired velocity
         robot_velocity_msg = Float32MultiArray()
         robot_velocity_msg.data = out.us
