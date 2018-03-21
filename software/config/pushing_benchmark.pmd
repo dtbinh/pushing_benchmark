@@ -11,6 +11,10 @@ group "visualization" {
         exec = "rosrun pnpush_planning surface_visualizer.py -s plywood";
         host = "localhost";
     }
+    cmd "3-show-desired-trajectory" {
+        exec = "rosrun control marker_publisher.py";
+        host = "localhost";
+    }
 }
 
 cmd "0-roscore" {
@@ -45,9 +49,13 @@ cmd "6-push-control" {
     exec = "rosrun push_control push_control";
     host = "localhost";
 }
-
 cmd "7-object-tracker" {
     exec = "rosrun control object_tracker.py";
+    host = "localhost";
+}
+
+cmd "8-controller" {
+    exec = "rosrun control controller.py";
     host = "localhost";
 }
 
@@ -62,6 +70,8 @@ script "run_real" {
     start cmd "5-rviz";
     start cmd "6-push-control";
     start cmd "7-object-tracker";
+    wait ms 2000;
+    start cmd "8-controller";
     start group "visualization";
 }
 

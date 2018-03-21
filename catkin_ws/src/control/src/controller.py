@@ -47,8 +47,8 @@ if __name__ == '__main__':
         out = controller_srv(np.array(xs), time) #np.array([0.05, 0.])
         # print 'object_pose: ', object_pose
         # print 'robot_pos: ', robot_pos
-        # print 'xs: ', xs
-        # print 'robot vel: ', out.us
+        print 'xs: ', xs
+        print 'robot vel: ', out.us
         # print rospy.get_time() - t0
         # us = np.array([0.05, 0.])
         # print out.us
