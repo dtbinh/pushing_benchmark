@@ -21,7 +21,7 @@ sys = Simulator(planar_system, 'MPPI_nonlinear_error');
 x0 = planar_system.coordinateTransformCS(x0_c);
 
 %Define controller object
-MPPI = MPPI(1.5, 0.05,1200, .4, diag([.015,.015]), @sys.get_next_state_b, @sys.q_cost, @sys.phi_cost, planner.t_star, planner.xs_star, planner.us_star);
+MPPI = MPPI(.5, 0.05, 300, 1, diag([.005,.005]), @sys.get_next_state_b, @sys.q_cost, @sys.phi_cost, planner.t_star, planner.xs_star, planner.us_star);
 x = zeros(N+1, length(x0));
 x(1,:) = x0';
 sys.initialize_plot(x0, planner.xs_star(1,:)');
@@ -35,7 +35,7 @@ for i=1:N
     %get action 
     u = MPPI.controller(x(i,:), t(i));
     
-    %get next state 
+    %get next stateï¿½
     x(i+1,:) = sys.get_next_state_b(x(i,:)', u, dt);
     t(i+1) = t(i) + dt;
     

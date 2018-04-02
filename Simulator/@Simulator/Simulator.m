@@ -19,6 +19,7 @@ classdef Simulator < dynamicprops
         Ani;
         x_length;
         a_length;
+        
         Pusher_c;
         Slider;
         MPC_traj;
@@ -164,11 +165,15 @@ classdef Simulator < dynamicprops
         end
 
         function q = q_cost(obj, x, u, xd)
-            q = 10000*(x - xd)'*diag([1,1,.1,0.,0.])*(x - xd) + 1*(u-[0.05;0])'*1*eye(2)*(u-[0.05;0]);
+            theta = x(3);
+            rbbi = Helper.C3_2d(theta)*x(1:2);
+            rbpi = Helper.C3_2d(theta)*x(4:5);
+            d = (.09'/2 + rbpi(1)-rbbi(1));
+            q = 10000*((x - xd)'*diag([1,1,.1,0.,0.])*(x - xd) +0*(u-[0.05;0])'*eye(2)*(u-[0.05;0]) + 100*d^2);
         end
         
         function phi = phi_cost(obj,x, u, xd)
-            phi = (x - xd)'*0*diag([1,1,.1,0.,0.])*(x - xd);
+            phi = 10000*(x - xd)'*5*diag([1,1,1,0.,0.])*(x - xd);
         end
         
         function q = q_cost_nonlinear_error(obj, x, u, xd)
