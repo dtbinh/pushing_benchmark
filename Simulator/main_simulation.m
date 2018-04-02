@@ -13,20 +13,20 @@ clc;
 
 %% Simulation data and video are stored in /home/Data/<simulation_name>
 simulation_name = 'test';
-
 %% Simulation time
 sim_time = 10;
+
+
 
 %% Initial conditions 
 % x0 = [x;y;theta;xp;yp]
 % x: x position of object, y: y position of object, theta: orientation of object
 % xp: x position of pusher, yp: y position of pusher
-x0 = [0;0;0;-0.1;0]; 
-
+x0_c = [0;0;pi/2;0];
 %%Initiaze system
 initialize_system();
 
-
+simulator.initialize_plot(x0);
 %% Perform Simulation
 for i1=1:simulator.N
         %display current time 
@@ -39,14 +39,17 @@ for i1=1:simulator.N
         %----------------------------
         us = [0.02;0.005];
         %--------------------------------
+        xs_next = simulator.get_next_state(xs, us, simulator.h);
+        %update plot
+        simulator.update_plot(xs_next);
         
         %Get velocities from current object state and robot velocity 
-        dxs = simulator.pointSimulator(xs,us);
-
-        %Perform Euler Integration
+%         dxs = simulator.pointSimulator(xs,us);
+% 
+%       %Perform Euler Integration
         if i1<simulator.N
             simulator.t(i1+1)  = simulator.t(i1) + simulator.h;
-            simulator.xs_state(i1+1, :) = simulator.xs_state(i1, :) + simulator.h*dxs';       
+            simulator.xs_state(i1+1, :) = xs_next;%simulator.xs_state(i1, :) + simulator.h*dxs';       
         end
         
         %Save data 
@@ -54,7 +57,7 @@ for i1=1:simulator.N
 end
 
 %% Graphics
-simulator.Animate1pt()
+% simulator.Animate1pt()
 
 %% Post-Processing
 save(simulator.FileName, 'simulator');

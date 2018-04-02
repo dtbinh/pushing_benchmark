@@ -1,6 +1,6 @@
 classdef Surface < dynamicprops
     properties (Constant)
-        nu = 0.35;
+        nu = 1.;
     end
     
     properties

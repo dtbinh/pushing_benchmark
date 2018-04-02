@@ -38,9 +38,11 @@ classdef PlanarSystem < dynamicprops
             %build limit surface
             obj.build_limit_surface();
             %symbolic manipulation
-%             obj.symbolicLinearize();
+            obj.symbolicLinearize();
 %             obj.symbolicLinearize_cpp();
         end
+        
+        
         %% Initialize variable dimensions
         function obj = initialize_variables(obj)
             obj.num_xcStates = 4;

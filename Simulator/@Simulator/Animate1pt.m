@@ -1,5 +1,5 @@
 %% Main Animation 
-function obj = Animate1pt(obj)
+function obj = Animate1pt(obj, xs_star, MPC_trajectories, MPC_best_traj, MPPI)
 
 %Initialize figure
 obj.Ani = figure('Color', 'w', 'OuterPosition', [0, 0, 960, 1080], 'PaperPosition', [0, 0, 6, (6/8)*6]);
@@ -15,12 +15,14 @@ box off
 axis equal
 xlabel('x(m)','fontsize',font_size,'Interpreter','latex', 'FontSize', font_size);
 ylabel('y(m)','fontsize',font_size,'Interpreter','latex', 'FontSize', font_size);
-xlim([-.25 .25]);
-ylim([-.35 .4]);
+% xlim([-.25 .25]);
+% ylim([-.35 .4]);
+xlim([-.1 .65]);
+ylim([-.2 .2]);
 view([90 90])
 % xticks([0 pi 2*pi])
 % yticks([-0.3, -0.2,-0.1,0,0.1,0.2,0.3])
-view([90 90])
+% view([90 90])
 
 % plot(xs_exp(:,1), xs_exp(:,2), 'b');
 
@@ -38,38 +40,42 @@ v.FrameRate = fps;
 open(v);
 %% initialize plots
 %nominal trajectory (red)
-% lv1=1;
-% Data{lv1} = obj.Data1pt(1,lv1);
-% Slider{lv1} = patch(Data{lv1}.x1b, Data{lv1}.y1b,'r', 'EdgeAlpha', 1,'FaceAlpha', 1,'EdgeColor', 'r','FaceColor','NONE','LineWidth',1.);
-% hold on 
-% Pusher_c{lv1} = patch(Data{lv1}.X_circle_p,Data{lv1}.Y_circle_p,'r', 'EdgeAlpha', 1,'FaceAlpha', 1, 'EdgeColor', [0,0,1]*0.3,'FaceColor',[1,0,0]*0.5,'LineWidth',1.);
-% hold on
+lv1=1;
+Data{lv1} = obj.Data1pt(xs_star(lv1,:));
+Slider{lv1} = patch(Data{lv1}.x1b, Data{lv1}.y1b,'r', 'EdgeAlpha', 1,'FaceAlpha', 1,'EdgeColor', 'r','FaceColor','NONE','LineWidth',1.);
+hold on 
+Pusher_c{lv1} = patch(Data{lv1}.X_circle_p,Data{lv1}.Y_circle_p,'r', 'EdgeAlpha', 1,'FaceAlpha', 1, 'EdgeColor', [0,0,1]*0.3,'FaceColor',[1,0,0]*0.5,'LineWidth',1.);
+hold on
 %actual trajectories (blue)
-for lv1=1:1
-    Data{lv1} = obj.Data1pt(1+accFactor,lv1); 
+for lv1=2:2
+    Data{lv1} = obj.Data1pt(obj.xs_state(lv1,:)); 
     hold on 
     Slider{lv1} = patch(Data{lv1}.x1b, Data{lv1}.y1b,'red', 'EdgeAlpha', 1,'FaceAlpha', 1,'EdgeColor', [0,0,1]*0.3,'FaceColor','NONE','LineWidth',2.);
     hold on 
     Pusher_c{lv1} = patch(Data{lv1}.X_circle_p,Data{lv1}.Y_circle_p,'r', 'EdgeAlpha', 1,'FaceAlpha', 1, 'EdgeColor', [0,0,1]*0.3,'FaceColor',[1,0,0]*0.5,'LineWidth',2.);
     hold on
 end
+for lv1=1:1200
+    MPC_traj{lv1} = plot([0,0],[0,0], 'b','LineWidth',1.);
+    hold on;
+end
+MPC_best = plot([0,0],[0,0], 'r','LineWidth',2.);
 %% update figures
 %nominal trajectory (red)
 counter=1;
 is_tick = [25, 48, 114];
-for i1=1+accFactor:accFactor:length(obj.t)
+for i1=1:accFactor:length(obj.t)
     lv1=1;
     %update data
-    Data{lv1} = obj.Data1pt(i1,lv1);
+    Data{lv1} = obj.Data1pt(xs_star(i1,:));
     %update figures
     Slider{lv1}.XData = Data{lv1}.x1b;
     Slider{lv1}.YData = Data{lv1}.y1b;
     Pusher_c{lv1}.XData = Data{lv1}.X_circle_p;
     Pusher_c{lv1}.YData = Data{lv1}.Y_circle_p;
     %actual trajectories (blue)
-    for lv1=1:1
-        
-        Data{lv1} = obj.Data1pt(i1,lv1);
+    for lv1=2:2
+        Data{lv1} = obj.Data1pt(obj.xs_state(i1,:));
         Slider{lv1}.XData = Data{lv1}.x1b;
         Slider{lv1}.YData = Data{lv1}.y1b;
         Pusher_c{lv1}.XData = Data{lv1}.X_circle_p;
@@ -78,12 +84,19 @@ for i1=1+accFactor:accFactor:length(obj.t)
         hold on 
         Pusher_thin_c{lv1} = patch(Data{lv1}.X_circle_p,Data{lv1}.Y_circle_p,'red', 'EdgeAlpha', .2,'FaceAlpha', .6, 'EdgeColor', [0,0,1]*0.3,'FaceColor',[1,0,0]*0.5,'LineWidth',0.3);
     end
+    MPC_best.XData = MPC_best_traj{i1}(1,:);
+    MPC_best.YData = MPC_best_traj{i1}(2,:);
+    for lv1=1:MPPI.K
+        MPC_traj{lv1}.XData = MPC_trajectories{i1}{lv1}(1,:);
+        MPC_traj{lv1}.YData = MPC_trajectories{i1}{lv1}(2,:);
+    end
+
     %update and save frame
     frame = getframe(obj.Ani);
     writeVideo(v,frame);
     counter=counter+1;
 end
-% saveas(obj.Ani, 'point_pusher_infinite','png')
+% saveas(obj.Ani, 'MPPI_nonlinear_straight_line','png')
 
 %%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -174,7 +187,7 @@ end
 %     writeVideo(v,frame);
 %     counter=counter+1;
 % end
-% % saveas(obj.Ani, 'point_pusher_infinite','png')
+saveas(obj.Ani, 'point_pusher_infinite','png')
 
 close(v);
 

@@ -1,16 +1,11 @@
 %% Animation Data
-function AniOutput = Data1pt(obj, ite, Dataset)  
-%         Dataset    
-    x_state = obj.xs_state;
-    u_state = obj.us_state;
+function AniOutput = Data1pt(obj, xs)  
     %Declare variables
-    x     = x_state(ite, 1);
-    y     = x_state(ite, 2);
-    theta = x_state(ite, 3);
-    xp = x_state(ite, 4);
-    yp = x_state(ite, 5);
-    u1 = u_state(ite, 1);
-    u2 = u_state(ite, 2);
+    x     = xs( 1);
+    y     = xs( 2);
+    theta = xs( 3);
+    xp = xs( 4);
+    yp = xs( 5);
     %Rotation matrix
     Rb = [cos(theta) -sin(theta); sin(theta) cos(theta)];
     %kinematics
