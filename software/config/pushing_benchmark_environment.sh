@@ -100,12 +100,6 @@ alias lcmlocal='sudo ifconfig lo multicast; sudo route add -net 224.0.0.0 netmas
 alias catmake='cd $PUSHING_BENCHMARK_BASE/catkin_ws; catkin_make; cd -;'
 alias simrun='cd $PUSHING_BENCHMARK_BASE;  rosrun  push_control push_control'
 alias realrun='cd $PUSHING_BENCHMARK_BASE/catkin_ws; catkin_make && rosrun  push_control push_control'
-alias pythonssh='f(){ FILEPATH_TMP="$1" ; CURRENTPATH="$PWD"; cd $PUSHING_BENCHMARK_BASE/../mcube_learning/helper/; FOLDER_NAME=$(python transfer_files.py server "string_as_arg"); cd $PUSHING_BENCHMARK_BASE/../mcube_learning/ ;./run_server.sh $CURRENTPATH $FILEPATH_TMP $FOLDER_NAME mcube@192.168.0.191; cd $CURRENTPATH; unset -f f; }; f'
-alias pythonssh2='f(){ FILEPATH_TMP="$1" ; CURRENTPATH="$PWD"; cd ../../helper/; FOLDER_NAME=$(python transfer_files.py main "string_as_arg"); cd $CODE_BASE ;./run_server.sh $CURRENTPATH $FILEPATH_TMP $FOLDER_NAME mcube@192.168.0.15; cd $CURRENTPATH; unset -f f; }; f'
-alias sshserver='sshpass -p "thecube" ssh mcube@192.168.0.191 -X'
-alias sshmain='sshpass -p "thecube" ssh mcube@192.168.0.15 -X'
-alias sshfrank='sshpass -p "thecube" ssh mcube@192.168.0.11 -X'
-alias sshmaria='sshpass -p "thecube" ssh mcube@192.168.0.223 -X'
 alias myip="python -c 'import socket; print([l for l in ([ip for ip in socket.gethostbyname_ex(socket.gethostname())[2] if not ip.startswith(\"127.\")][:1], [[(s.connect((\"8.8.8.8\", 53)), s.getsockname()[0], s.close()) for s in [socket.socket(socket.AF_INET, socket.SOCK_DGRAM)]][0][1]]) if l][0][0])'"
 
 alias s='rosrun push_control abort.py'
