@@ -164,11 +164,11 @@ classdef Simulator < dynamicprops
         end
 
         function q = q_cost(obj, x, u, xd)
-            q = 1*(x - xd)'*diag([1,3,.0001,0,0])*(x - xd) + 1*(u-[0.05;0])'*1*eye(2)*(u-[0.05;0]);
+            q = 10000*(x - xd)'*diag([1,1,.1,0.,0.])*(x - xd) + 1*(u-[0.05;0])'*1*eye(2)*(u-[0.05;0]);
         end
         
         function phi = phi_cost(obj,x, u, xd)
-            phi = (x - xd)'*5000*diag([1,1,.005,0.1,0.1])*(x - xd);
+            phi = (x - xd)'*0*diag([1,1,.1,0.,0.])*(x - xd);
         end
         
         function q = q_cost_nonlinear_error(obj, x, u, xd)

@@ -61,11 +61,13 @@ classdef MPPI < dynamicprops
                 t = t0;
                 for n=2:obj.N+1
                     [xd, ud] = obj.find_nominal_state(t);
-                    xn = obj.F(x(:, n-1), u(:,n-1) + E{k}(:,n-1), xd', ud', obj.dt);
+%                     xn = obj.F(x(:, n-1), u(:,n-1) + E{k}(:,n-1), xd', ud', obj.dt);
+                    xn = obj.F(x(:, n-1), u(:,n-1) + E{k}(:,n-1), obj.dt);
                     x(:, n) = xn';
                     S(k) = S(k) + obj.q_cost(x(:,n),u(:,n-1),xd') + 1*obj.lambda*u(:, n-1)'*inv(obj.Sigma)*E{k}(:,n-1);
                     t = t + obj.dt;
                 end
+                [xd, ud] = obj.find_nominal_state(t);
                 S(k) = S(k) + obj.phi_cost(x(:,obj.N+1),u(:,n-1),xd');
                 obj.U{k} = u + E{k};
                 obj.X{k} = x;
@@ -93,7 +95,8 @@ classdef MPPI < dynamicprops
             t = t0;
             for n=2:obj.N+1
                 [xd, ud] = obj.find_nominal_state(t);
-                xn = obj.F(x(:, n-1), u(:,n-1), xd', ud', obj.dt);
+%                 xn = obj.F(x(:, n-1), u(:,n-1), xd', ud', obj.dt);
+                xn = obj.F(x(:, n-1), u(:,n-1),  obj.dt);
                 x(:, n) = xn';
                 t = t + obj.dt;
             end
@@ -106,7 +109,7 @@ classdef MPPI < dynamicprops
             for n=2:obj.N
                 u(:, n-1) = u(:, n);
             end
-            u(:, n-1) = 0;
+            u(:, obj.N) = 0;
             obj.u = u;
         end
 
