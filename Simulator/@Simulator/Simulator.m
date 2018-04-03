@@ -110,21 +110,29 @@ classdef Simulator < dynamicprops
 
         function q = q_cost(obj, x, u, t)
             [xd, ud] = obj.find_nominal_state(t);
+            xd = xd';
+            ud = ud';
             q = 10000*((x - xd)'*diag([1,1,.01,0.,0.])*(x - xd) +0*(u-[0.05;0])'*eye(2)*(u-[0.05;0]));
         end
         
         function phi = phi_cost(obj,x, u, t)
             [xd, ud] = obj.find_nominal_state(t);
+            xd = xd';
+            ud = ud';
             phi = 10000*(x - xd)'*500*diag([1,3,1,0.,0.])*(x - xd);
         end
         
         function q = q_cost_nonlinear_error(obj, x, u, t)
             [xd, ud] = obj.find_nominal_state(t);
+            xd = xd';
+            ud = ud';
             q = 1*(x)'*diag([1,3,.0001,0,0])*(x) + 0*(u)'*1*eye(2)*(u);
         end
         
         function phi = phi_cost_nonlinear_error(obj,x, u, t)
             [xd, ud] = obj.find_nominal_state(t);
+            xd = xd';
+            ud = ud';
             phi = (x)'*5000*diag([1,1,.005,0.1,0.1])*(x);
         end
         
@@ -228,7 +236,7 @@ classdef Simulator < dynamicprops
         
         function obj = update_plot(obj, xs, MPPI, t)
             
-            [xd, ud] = MPPI.find_nominal_state(t);
+            [xd, ud] = obj.find_nominal_state(t);
             xd=xd';
             Data_xd = obj.Data1pt(xd);
             obj.Slider_des.XData = Data_xd.x1b;

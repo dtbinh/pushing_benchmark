@@ -42,7 +42,8 @@ classdef MPPI < dynamicprops
             S = zeros(obj.K,1);
             u = obj.u;
             u_clamped = obj.u*0;
-            x = zeros(size(obj.x_star,2), obj.N);
+            x_dummy = obj.F(x0', u_clamped(:,1), obj.dt);
+            x = zeros(length(x_dummy), obj.N);
             %Loop through sample trajectories
             for k=1:obj.K
                 x(:, 1) = x0';
@@ -86,7 +87,7 @@ classdef MPPI < dynamicprops
             %Generate trajectory rollout for computed action sequence
             t = t0;
             for n=2:obj.N+1
-                [xd, ud] = obj.find_nominal_state(t);
+%                 [xd, ud] = obj.find_nominal_state(t);
 %                 xn = obj.F(x(:, n-1), u(:,n-1), xd', ud', obj.dt);
                 u_clamped(:,n-1) = obj.u_constraints(x(:, n-1), u(:,n-1), t, false);
                 xn = obj.F(x(:, n-1), u(:,n-1),  obj.dt);
