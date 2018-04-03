@@ -19,10 +19,11 @@ classdef MPPI < dynamicprops
         lambda;
         q_cost;
         phi_cost;
+        u_constraints;
     end
 
     methods
-        function obj = MPPI(T, dt, K, lambda, Sigma, F, q_cost, phi_cost, t_star, x_star, u_star)
+        function obj = MPPI(T, dt, K, lambda, Sigma, F, q_cost, phi_cost, t_star, x_star, u_star, u_constraints)
             obj.K = K;
             obj.T = T;
             obj.dt = dt;
@@ -36,7 +37,7 @@ classdef MPPI < dynamicprops
             obj.t_star = t_star;
             obj.x_star = x_star;
             obj.u_star = u_star;
-
+            obj.u_constraints = u_constraints;
         end
         
         function [state, action] = find_nominal_state(obj, t)
@@ -46,11 +47,13 @@ classdef MPPI < dynamicprops
             action = obj.u_star(ind,:);
         end
         
+        
         function u_control = controller(obj, x0, t0)
             
             %1. Initialize variables
             S = zeros(obj.K,1);
             u = obj.u;
+            u_clamped = obj.u*0;
             x = zeros(size(obj.x_star,2), obj.N);
             %Loop through sample trajectories
             for k=1:obj.K
@@ -62,13 +65,14 @@ classdef MPPI < dynamicprops
                 for n=2:obj.N+1
                     [xd, ud] = obj.find_nominal_state(t);
 %                     xn = obj.F(x(:, n-1), u(:,n-1) + E{k}(:,n-1), xd', ud', obj.dt);
-                    xn = obj.F(x(:, n-1), u(:,n-1) + E{k}(:,n-1), obj.dt);
+                    u_clamped(:,n-1) = obj.u_constraints(x(:, n-1), u(:,n-1) + E{k}(:,n-1), false);
+                    xn = obj.F(x(:, n-1), u_clamped(:,n-1), obj.dt);
                     x(:, n) = xn';
-                    S(k) = S(k) + obj.q_cost(x(:,n),u(:,n-1),xd') + 1*obj.lambda*u(:, n-1)'*inv(obj.Sigma)*E{k}(:,n-1);
+                    S(k) = S(k) + obj.q_cost(x(:,n),u(:,n-1) + E{k}(:,n-1),xd') + 1*obj.lambda*u(:, n-1)'*inv(obj.Sigma)*E{k}(:,n-1);
                     t = t + obj.dt;
                 end
                 [xd, ud] = obj.find_nominal_state(t);
-                S(k) = S(k) + obj.phi_cost(x(:,obj.N+1),u(:,n-1),xd');
+                S(k) = S(k) + obj.phi_cost(x(:,obj.N+1),u_clamped(:,n-1),xd');
                 obj.U{k} = u + E{k};
                 obj.X{k} = x;
             end
@@ -96,6 +100,7 @@ classdef MPPI < dynamicprops
             for n=2:obj.N+1
                 [xd, ud] = obj.find_nominal_state(t);
 %                 xn = obj.F(x(:, n-1), u(:,n-1), xd', ud', obj.dt);
+                u_clamped(:,n-1) = obj.u_constraints(x(:, n-1), u(:,n-1), false);
                 xn = obj.F(x(:, n-1), u(:,n-1),  obj.dt);
                 x(:, n) = xn';
                 t = t + obj.dt;

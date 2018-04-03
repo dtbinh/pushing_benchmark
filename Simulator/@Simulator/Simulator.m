@@ -163,17 +163,46 @@ classdef Simulator < dynamicprops
 
             z2 = z1 + dt/6*(k1 + 2*k2 + 2*k3 + k4);
         end
-
-        function q = q_cost(obj, x, u, xd)
+        
+        function u_clamp = u_constraints(obj, x, u, is_print)
             theta = x(3);
             rbbi = Helper.C3_2d(theta)*x(1:2);
             rbpi = Helper.C3_2d(theta)*x(4:5);
-            d = (.09'/2 + rbpi(1)-rbbi(1));
-            q = 10000*((x - xd)'*diag([1,1,.1,0.,0.])*(x - xd) +0*(u-[0.05;0])'*eye(2)*(u-[0.05;0]) + 100*d^2);
+            rbpb = rbpi - rbbi;
+            rx = rbpb(1);
+            ry = rbpb(2);
+            u_clamp = u;
+            if is_print
+            ry
+            end
+            if ry>0.09/3
+                if is_print
+                    disp('ganer');
+                end
+                u(2) = min(u(2), 0);
+            elseif ry<0.09/3
+                u(2) = max(0, u(2));
+                if is_print
+                    u(2)
+                    disp('neg');
+                end
+            end
+            
+            
+            u_clamp(1) = max(0, u_clamp(1));
+            u_clamp(1) = min(0.2, u_clamp(1));
+            
+            u_clamp(1) = max(-0.2, u_clamp(1));
+            u_clamp(2) = min(0.2, u_clamp(2));
+        end
+
+        function q = q_cost(obj, x, u, xd)
+
+            q = 10000*((x - xd)'*diag([1,1,.01,0.,0.])*(x - xd) +0*(u-[0.05;0])'*eye(2)*(u-[0.05;0]));
         end
         
         function phi = phi_cost(obj,x, u, xd)
-            phi = 10000*(x - xd)'*5*diag([1,1,1,0.,0.])*(x - xd);
+            phi = 10000*(x - xd)'*500*diag([1,3,.01,0.,0.])*(x - xd);
         end
         
         function q = q_cost_nonlinear_error(obj, x, u, xd)
@@ -280,7 +309,7 @@ classdef Simulator < dynamicprops
             xlabel('x(m)','fontsize',font_size,'Interpreter','latex', 'FontSize', font_size);
             ylabel('y(m)','fontsize',font_size,'Interpreter','latex', 'FontSize', font_size);
             xlim([-.1 .6]);
-            ylim([-.1 .1]);
+            ylim([-.2 .2]);
             view([90 90])
             
             Data_xd = obj.Data1pt(xd); 

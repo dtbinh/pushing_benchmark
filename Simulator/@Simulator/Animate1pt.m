@@ -29,7 +29,7 @@ view([90 90])
 %Animation parameters
 tf = obj.t(end);
 N = length(obj.t);
-accFactor = 1;
+accFactor = 15;
 x_state = obj.xs_state;
 %create movie file
 videoname = strcat(obj.FilePath,'/',(obj.SimName),'.avi');
