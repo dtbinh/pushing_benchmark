@@ -1,11 +1,6 @@
 %% Main Animation 
 function obj = Animate1pt(obj, xs_star, MPC_trajectories, MPC_best_traj, MPPI, weights, des_traj)
 
-obj.Fig_weights= figure('Color', 'w', 'OuterPosition', [0, 0, 960, 1080], 'PaperPosition', [0, 0, 6, (6/8)*6]);
-bar_weights = bar([0 0]);
-xlim([0 1200]);
-ylim([0 1]);
-
 %Initialize figure
 obj.Ani = figure('Color', 'w', 'OuterPosition', [0, 0, 960, 1080], 'PaperPosition', [0, 0, 6, (6/8)*6]);
 %figure properties
@@ -25,9 +20,9 @@ ylabel('y(m)','fontsize',font_size,'Interpreter','latex', 'FontSize', font_size)
 xlim([-.1 .65]);
 ylim([-.2 .2]);
 view([90 90])
-xticks([0 pi 2*pi])
-yticks([-0.3, -0.2,-0.1,0,0.1,0.2,0.3])
-view([90 90])
+% xticks([0 pi 2*pi])
+% yticks([-0.3, -0.2,-0.1,0,0.1,0.2,0.3])
+% view([90 90])
 
 % plot(xs_exp(:,1), xs_exp(:,2), 'b');
 
@@ -43,12 +38,6 @@ fps = int64(N/(accFactor*tf));
 fps = double(fps);
 v.FrameRate = fps;
 open(v);
-%create movie file
-videoname = strcat(obj.FilePath,'/',(obj.SimName),'weights','.avi');
-v2 = VideoWriter(videoname);
-v2.FrameRate = fps;
-open(v2);
-
 %% initialize plots
 %nominal trajectory (red)
 lv1=1;
@@ -72,7 +61,6 @@ for lv1=1:1200
 end
 MPC_best = plot([0,0],[0,0], 'r','LineWidth',2.);
 Des_traj = plot([0,0],[0,0], 'k','LineWidth',2.);
-
 %% update figures
 %nominal trajectory (red)
 counter=1;
@@ -94,33 +82,22 @@ for i1=1:accFactor:length(obj.t)
         Pusher_c{lv1}.XData = Data{lv1}.X_circle_p;
         Pusher_c{lv1}.YData = Data{lv1}.Y_circle_p;
         Slider_thin{lv1} = patch(Data{lv1}.x1b, Data{lv1}.y1b,'red', 'FaceAlpha', .6,'EdgeAlpha', .2,'EdgeColor', [0,0,1]*0.3,'FaceColor','NONE','LineWidth',0.3);
+        hold on 
         Pusher_thin_c{lv1} = patch(Data{lv1}.X_circle_p,Data{lv1}.Y_circle_p,'red', 'EdgeAlpha', .2,'FaceAlpha', .6, 'EdgeColor', [0,0,1]*0.3,'FaceColor',[1,0,0]*0.5,'LineWidth',0.3);
     end
+    MPC_best.XData = MPC_best_traj{i1}(1,:);
+    MPC_best.YData = MPC_best_traj{i1}(2,:);
     Des_traj.XData = des_traj{i1}(:,1);
     Des_traj.YData = des_traj{i1}(:,2);
-    
-    t = obj.t(i1);
-	xd_vec = zeros(floor(MPPI.T/MPPI.dt)+1, 5);
-    for lv2 = 1:floor(MPPI.T/MPPI.dt)+1
-        [xd, ud] = obj.find_nominal_state(t);
-        xd_vec(lv2,:) = xd';
-        t = t+MPPI.dt;
-    end
-    
     for lv1=1:MPPI.K
-        MPC_traj{lv1}.XData = MPC_trajectories{i1}{lv1}(1,:)+ xd_vec(:,1)';
-        MPC_traj{lv1}.YData = MPC_trajectories{i1}{lv1}(2,:)+ xd_vec(:,2)';
+        MPC_traj{lv1}.XData = MPC_trajectories{i1}{lv1}(1,:);
+        MPC_traj{lv1}.YData = MPC_trajectories{i1}{lv1}(2,:);
         MPC_traj{lv1}.Color(4) = weights{i1}(lv1);
     end
-    MPC_best.XData = MPC_best_traj{i1}(1,:)+ xd_vec(:,1)';
-    MPC_best.YData = MPC_best_traj{i1}(2,:)+ xd_vec(:,2)';
-    bar_weights.YData = weights{i1};
 
     %update and save frame
     frame = getframe(obj.Ani);
-    frame2 = getframe(obj.Fig_weights);
     writeVideo(v,frame);
-    writeVideo(v2,frame2);
     counter=counter+1;
 end
 % saveas(obj.Ani, 'MPPI_nonlinear_straight_line','png')

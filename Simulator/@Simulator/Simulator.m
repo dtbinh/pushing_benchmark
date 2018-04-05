@@ -17,6 +17,7 @@ classdef Simulator < dynamicprops
         FilePath;
         NumSim;
         Ani;
+        Fig_weights;
         x_length;
         a_length;
         
@@ -24,10 +25,12 @@ classdef Simulator < dynamicprops
         Slider;
         MPC_traj;
         MPC_best;
+        Des_traj;
         Slider_des;
         x_star;
         u_star;
         t_star;
+        bar_weights;
     end
    
     methods
@@ -46,7 +49,7 @@ classdef Simulator < dynamicprops
             obj.a_length = 2;
         end
         
-        function z2 = get_next_state_i(obj, z1, T, dt)
+        function z2 = get_next_state_i(obj, z1, T, dt, t)
             k1 = obj.pointSimulatorAnalytical(z1,T);
             k2 = obj.pointSimulatorAnalytical(z1+dt/2*k1,T);
             k3 = obj.pointSimulatorAnalytical(z1+dt/2*k2,T);
@@ -55,7 +58,7 @@ classdef Simulator < dynamicprops
             z2 = z1 + dt/6*(k1 + 2*k2 + 2*k3 + k4);
         end
         
-        function z2 = get_next_state_b(obj, z1, u_b, dt)
+        function z2 = get_next_state_b(obj, z1, u_b, dt, t)
             theta = z1(3);
             T = Helper.C3_2d(theta)'*u_b;
             k1 = obj.pointSimulatorAnalytical(z1,T);
@@ -66,23 +69,27 @@ classdef Simulator < dynamicprops
             z2 = z1 + dt/6*(k1 + 2*k2 + 2*k3 + k4);
         end
         
-        function z2 = get_next_state_nonlinear_error_b(obj, xs, u_b, xs_star, us_star_b, dt)
+        function z2 = get_next_state_nonlinear_error_b(obj, xs_bar, u_b_bar, dt, t)
+            [xd, ud] = obj.find_nominal_state(t);
+            xs = xs_bar + xd;
+            
             theta = xs(3);
-            us = Helper.C3_2d(theta)'*u_b;
-            us_star = Helper.C3_2d(theta)'*us_star_b;
+            us_bar = Helper.C3_2d(theta)'*u_b_bar;
+            us_star = Helper.C3_2d(theta)'*ud;
+            us = us_star + us_bar;
             
             dz = obj.pointSimulatorAnalytical(xs, us);
-            dz_star = obj.pointSimulatorAnalytical(xs_star, us_star);
+            dz_star = obj.pointSimulatorAnalytical(xd, us_star);
             delta_dz = dz-dz_star;
-            delta_x = xs-xs_star;
-            z2 = delta_x + dt*delta_dz;
+
+            z2 = xs_bar + dt*delta_dz;
         end
         
         function [state, action] = find_nominal_state(obj, t)
             diff = abs(obj.t_star - t);
             [val ind] = min(diff);
-            state = obj.x_star(ind,:);
-            action = obj.u_star(ind,:);
+            state = obj.x_star(ind,:)';
+            action = obj.u_star(ind,:)';
         end
         
         function u_clamp = u_constraints(obj, x, u, t, is_print)
@@ -96,44 +103,65 @@ classdef Simulator < dynamicprops
             u_clamp = u;
 
             if ry>0.09/3
-                u(2) = min(u(2), 0);
-            elseif ry<0.09/3
-                u(2) = max(0, u(2));
+                u_clamp(2) = min(u(2), 0);
+            elseif ry<-0.09/3
+                u_clamp(2) = max(0, u(2));
             end
             
             u_clamp(1) = max(0, u_clamp(1));
             u_clamp(1) = min(0.2, u_clamp(1));
             
-            u_clamp(1) = max(-0.2, u_clamp(1));
+            u_clamp(2) = max(-0.2, u_clamp(2));
             u_clamp(2) = min(0.2, u_clamp(2));
         end
 
+        function u_clamp_bar = u_constraints_nonlinear_error(obj, x_bar, u_bar, t, is_print)
+            [xd, ud] = obj.find_nominal_state(t);
+            x = xd+x_bar;
+            u = ud+u_bar;
+            theta = x(3);
+            rbbi = Helper.C3_2d(theta)*x(1:2);
+            rbpi = Helper.C3_2d(theta)*x(4:5);
+            rbpb = rbpi - rbbi;
+            rx = rbpb(1);
+            ry = rbpb(2);
+            u_clamp = u;
+
+            if ry>0.09/3
+                u_clamp(2) = min(u(2), 0);
+            elseif ry<-0.09/3
+                u_clamp(2) = max(0, u(2));
+            end
+            
+            u_clamp(1) = max(0, u_clamp(1));
+            u_clamp(1) = min(0.2, u_clamp(1));
+            
+            u_clamp(2) = max(-0.2, u_clamp(2));
+            u_clamp(2) = min(0.2, u_clamp(2));
+
+            if is_print
+                ry
+                u_clamp
+            end
+            u_clamp_bar = u_clamp - ud;
+        end
+        
         function q = q_cost(obj, x, u, t)
             [xd, ud] = obj.find_nominal_state(t);
-            xd = xd';
-            ud = ud';
             q = 10000*((x - xd)'*diag([1,1,.01,0.,0.])*(x - xd) +0*(u-[0.05;0])'*eye(2)*(u-[0.05;0]));
         end
         
         function phi = phi_cost(obj,x, u, t)
             [xd, ud] = obj.find_nominal_state(t);
-            xd = xd';
-            ud = ud';
-            phi = 10000*(x - xd)'*500*diag([1,3,1,0.,0.])*(x - xd);
+            phi = 10000*(x - xd)'*500*diag([1,3,.01,0.,0.])*(x - xd);
         end
         
         function q = q_cost_nonlinear_error(obj, x, u, t)
-            [xd, ud] = obj.find_nominal_state(t);
-            xd = xd';
-            ud = ud';
-            q = 1*(x)'*diag([1,3,.0001,0,0])*(x) + 0*(u)'*1*eye(2)*(u);
+            q = 10000*((x)'*diag([1,1,.01,0.,0.])*(x) );
         end
         
         function phi = phi_cost_nonlinear_error(obj,x, u, t)
-            [xd, ud] = obj.find_nominal_state(t);
-            xd = xd';
-            ud = ud';
-            phi = (x)'*5000*diag([1,1,.005,0.1,0.1])*(x);
+            phi = 10000*(x)'*500*diag([1,3,.01,0.,0.])*(x);
         end
         
         
@@ -201,8 +229,9 @@ classdef Simulator < dynamicprops
             twist_i = [vibi;dtheta;us];
         end
         
-        function obj = initialize_plot(obj, xs, xd)
+        function obj = initialize_plot(obj, xs, xd, MPPI)
             obj.Ani = figure('Color', 'w', 'OuterPosition', [0, 0, 960, 1080], 'PaperPosition', [0, 0, 6, (6/8)*6]);
+            
             %figure properties
             font_size  = 25;
             line_size  = 15;
@@ -212,11 +241,12 @@ classdef Simulator < dynamicprops
             set(obj.Ani, 'PaperPositionMode', 'auto');
             box off
             % plot(xs_exp(:,1), xs_exp(:,2), 'b');
-            for lv1=1:1200
+            for lv1=1:MPPI.K
                 obj.MPC_traj{lv1} = plot([0,0],[0,0], 'b','LineWidth',1.);
                 hold on;
             end
             obj.MPC_best = plot([0,0],[0,0], 'r','LineWidth',2.);
+            obj.Des_traj = plot([0,0],[0,0], 'k','LineWidth',2.);
             hold on;
             axis equal
             xlabel('x(m)','fontsize',font_size,'Interpreter','latex', 'FontSize', font_size);
@@ -232,9 +262,12 @@ classdef Simulator < dynamicprops
             obj.Slider = patch(Data.x1b, Data.y1b,'red', 'EdgeAlpha', 1,'FaceAlpha', 1,'EdgeColor', [0,0,1]*0.3,'FaceColor','NONE','LineWidth',2.);
             obj.Pusher_c = patch(Data.X_circle_p,Data.Y_circle_p,'r', 'EdgeAlpha', 1,'FaceAlpha', 1, 'EdgeColor', [0,0,1]*0.3,'FaceColor',[1,0,0]*0.5,'LineWidth',2.);
             
+            obj.Fig_weights= figure('Color', 'w', 'OuterPosition', [0, 0, 960, 1080], 'PaperPosition', [0, 0, 6, (6/8)*6]);
+            obj.bar_weights = bar([0 0]);
+            
         end
         
-        function obj = update_plot(obj, xs, MPPI, t)
+        function obj = update_plot(obj, xs, MPPI, x_des, t)
             
             [xd, ud] = obj.find_nominal_state(t);
             xd=xd';
@@ -247,12 +280,49 @@ classdef Simulator < dynamicprops
             obj.Slider.YData = Data.y1b;
             obj.Pusher_c.XData = Data.X_circle_p;
             obj.Pusher_c.YData = Data.Y_circle_p;
-            obj.MPC_best.XData = MPPI.x(1,:);
-            obj.MPC_best.YData = MPPI.x(2,:);
+            obj.Des_traj.XData = x_des(:,1);
+            obj.Des_traj.YData = x_des(:,2);
             for lv1=1:MPPI.K
                 obj.MPC_traj{lv1}.XData = MPPI.X{lv1}(1,:);
                 obj.MPC_traj{lv1}.YData = MPPI.X{lv1}(2,:);
+                obj.MPC_traj{lv1}.Color(4) = MPPI.w(lv1);
             end
+            obj.MPC_best.XData = MPPI.x(1,:);
+            obj.MPC_best.YData = MPPI.x(2,:);
+            obj.bar_weights.YData = MPPI.w;
+            
+            drawnow;
+        end
+                
+        function obj = update_plot_nonlinear_error(obj, xs, MPPI, x_des, t)
+            
+            [xd, ud] = obj.find_nominal_state(t);
+            xd=xd';
+            Data_xd = obj.Data1pt(xd);
+            obj.Slider_des.XData = Data_xd.x1b;
+            obj.Slider_des.YData = Data_xd.y1b;
+            
+            Data = obj.Data1pt(xs); 
+            obj.Slider.XData = Data.x1b;
+            obj.Slider.YData = Data.y1b;
+            obj.Pusher_c.XData = Data.X_circle_p;
+            obj.Pusher_c.YData = Data.Y_circle_p;
+            obj.Des_traj.XData = x_des(:,1);
+            obj.Des_traj.YData = x_des(:,2);
+            xd_vec = zeros(floor(MPPI.T/MPPI.dt)+1, 5);
+            for lv2 = 1:floor(MPPI.T/MPPI.dt)+1
+                [xd, ud] = obj.find_nominal_state(t);
+                xd_vec(lv2,:) = xd';
+                t = t+MPPI.dt;
+            end
+            for lv1=1:MPPI.K
+                obj.MPC_traj{lv1}.XData = MPPI.X{lv1}(1,:) + xd_vec(:,1)';
+                obj.MPC_traj{lv1}.YData = MPPI.X{lv1}(2,:) + xd_vec(:,2)';
+                obj.MPC_traj{lv1}.Color(4) = MPPI.w(lv1);
+            end
+            obj.MPC_best.XData = MPPI.x(1,:)+ xd_vec(:,1)';
+            obj.MPC_best.YData = MPPI.x(2,:)+ xd_vec(:,2)';
+            obj.bar_weights.YData = MPPI.w;
             
             drawnow;
         end

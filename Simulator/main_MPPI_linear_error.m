@@ -3,9 +3,9 @@ close all
 clc
 
 %simulation parameters
-x0_c = [0.1;0.0;pi*4/4;0]*1;
-tspan = 10;
-dt = 0.01;
+x0_c = [-0.05;0.0;-pi*.5;0]*1;
+tspan = 5;
+dt = 0.05;
 N = tspan/dt;
 
 %Define Dynamical system
@@ -16,12 +16,14 @@ object = Square();
 surface = Surface();
 planar_system = PlanarSystem(pusher, object, surface);
 planner = Planner(planar_system, 'Straight', 0.05); 
-sys = Simulator(planar_system, 'Straight_line_MPPI5');
+sys = Simulator(planar_system, 'MPPI_linear_error_1');
+controller = Controller(planner, 'is_fom');
 
 x0 = planar_system.coordinateTransformCS(x0_c);
 
 %Define controller object
-MPPI = MPPI(1.5, 0.05, 1200, .1, diag([.0005,.005]), @sys.get_next_state_b, @sys.q_cost, @sys.phi_cost, @sys.u_constraints);
+MPPI = MPPI(.5, 0.05, 300, .1, diag([.0005,.005]), @sys.get_next_state_nonlinear_error_b, @sys.q_cost_nonlinear_error, @sys.phi_cost_nonlinear_error, @sys.u_constraints_nonlinear_error);
+
 x = zeros(N+1, length(x0));
 x(1,:) = x0';
 sys.x_star = planner.xs_star;
@@ -33,11 +35,18 @@ t = zeros(N+1,1);
 MPC_trajectories = {};
 
 for i=1:N
-    t(i)
+%     t(i)
     [x_star, u_star] = sys.find_nominal_state(t(i));
+    %
+    x_bar = x(i,:) - x_star';
     %get action 
-    u = MPPI.controller(x(i,:), t(i));
-    u = sys.u_constraints(x(i,:)', u, true);
+    u_bar = MPPI.controllerFOM(x_bar, t(i), @sys.find_nominal_state, @controller.solveFOM_delta, planar_system);
+    %
+    [xd, ud] = find_nominal_state(t(i));
+    u_tilde = solveFOM(coordinateTransformSC(x(i,:)), t(i)); 
+    u_bar = sys.u_constraints_nonlinear_error(x_bar', u_bar + u_tilde, t(i), true);
+    
+    u = u_star + u_bar;
     
     %get vector of nominal states
     x_des = zeros(floor(MPPI.T/MPPI.dt), length(x(i,:)));
@@ -55,9 +64,8 @@ for i=1:N
     MPC_best{i} = MPPI.x;
     weights{i} = MPPI.w;
     des_traj{i} = x_des;
-    
-    
-    sys.update_plot(x(i+1,:), MPPI, x_des, t(i));
+ 
+    sys.update_plot_nonlinear_error(x(i+1,:), MPPI, x_des, t(i));
 end
 
 sys.xs_state = x;
