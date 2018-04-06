@@ -1,0 +1,28 @@
+
+%% Building the dataset (wierd functions)
+x1 = (0:0.005:3)'; x2 = cos(0:0.005:3)';
+input_training = [x1, x2];
+x = input_training;
+real_y = (sum(input_training,2));
+y_training = (sum(input_training,2))+normrnd(0,1, length(input_training),1).*abs(cos((x(:,1).^2+x(:,2).^2)/2));
+input_test = input_training;
+y_test = y_training;
+[X1, X2] = meshgrid(x1, -1:0.05:1); 
+
+%% Learning and Predicting grid
+[~, ~, Ey_test, Vy_test] = vhgpr_ui(input_training, y_training, [X1(:), X2(:)], X1(:)*0);
+
+%% Use interpolation for new predictions
+vhgp_mean_eval = fit([X1(:), X2(:)], Ey_test,'linearinterp');
+vhgp_std_eval = fit([X1(:), X2(:)], sqrt(Vy_test),'linearinterp');
+%% Predict test
+predicted_mean = vhgp_mean_eval(input_test);
+predicted_std = vhgp_std_eval(input_test);
+
+%% Plotting results
+std_y_test = sqrt(Vy_test);
+figure; plot3(input_test(:,1), input_test(:,2),predicted_mean); hold on;  
+plot3(input_test(:,1), input_test(:,2),real_y); plot3(input_test(:,1), input_test(:,2),y_test, '.');  
+plot3(input_test(:,1), input_test(:,2),predicted_mean+predicted_std, 'k'); 
+plot3(input_test(:,1), input_test(:,2),predicted_mean-predicted_std, 'k');
+
