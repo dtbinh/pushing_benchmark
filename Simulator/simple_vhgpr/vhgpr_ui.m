@@ -1,4 +1,4 @@
-function [NMSE, NLPD, Ey, Vy, mutst, diagSigmatst, atst, diagCtst, ... 
+function [NMSE, NLPD, Ey, Vy, mutst, diagSigmatst, atst, diagCtst, alpha, covfunc1, theta1, X, lengthscales, ... 
     LambdaTheta, loghyperGP, convergence, HGP_obj] = vhgpr_ui(x_tr, y_tr, x_tst, y_tst, iter, loghyperGP, loghyper)
 % VHGPR_UI implements a convenient user interface for VHGPR
 %
@@ -91,7 +91,7 @@ end
 time_train = toc;
 
 if nargout > 1
-    [Ey, Vy, mutst, diagSigmatst, atst, diagCtst]= vhgpr(LambdaTheta, covfuncSignal, covfuncNoise, 0, x_tr, y_tr, x_tst);
+    [Ey, Vy, mutst, diagSigmatst, atst, diagCtst, alpha, covfunc1, theta1, X]= vhgpr(LambdaTheta, covfuncSignal, covfuncNoise, 0, x_tr, y_tr, x_tst);
 else
     [Ey, Vy, mutst, diagSigmatst]= vhgpr(LambdaTheta, covfuncSignal, covfuncNoise, 0, x_tr, y_tr, x_tst);
 end

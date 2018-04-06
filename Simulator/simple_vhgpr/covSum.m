@@ -10,10 +10,11 @@ function [A, B] = covSum(covfunc, logtheta, x, z);
 % (C) Copyright 2006 by Carl Edward Rasmussen, 2006-03-20.
 
 for i = 1:length(covfunc)                   % iterate over covariance functions
-  f = covfunc(i);
+    f = covfunc(i);
   if iscell(f{:}), f = f{:}; end          % dereference cell array if necessary
   j(i) = cellstr(feval(f{:}));
 end
+
 
 if nargin == 1,                                   % report number of parameters
   A = char(j(1)); for i=2:length(covfunc), A = [A, '+', char(j(i))]; end
@@ -43,7 +44,8 @@ case 4                      % compute derivative matrix or test set covariances
       [AA BB] = feval(f{:}, logtheta(v==i), x, z);   % compute test covariances
       A = A + AA; B = B + BB;                                  % and accumulate
     end
-  else                                            % compute derivative matrices
+  else
+    % compute derivative matrices
     i = v(z);                                       % which covariance function
     j = sum(v(1:z)==i);                    % which parameter in that covariance
     f = covfunc(i);

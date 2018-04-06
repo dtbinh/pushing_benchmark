@@ -1,4 +1,4 @@
-function [out1, out2, mutst, diagSigmatst, atst, diagCtst]= vhgpr(LambdaTheta, covfunc1, covfunc2, fixhyp, X, y, Xtst)
+function [out1, out2, mutst, diagSigmatst, atst, diagCtst, alpha, good_cov, theta1, X]= vhgpr(LambdaTheta, covfunc1, covfunc2, fixhyp, X, y, Xtst)
 % VHGPR - MV bound for heteroscedastic GP regression
 %
 % Input:    - LambdaTheta: Selected values for [Lambda hyperf hyperg mu0].
@@ -114,6 +114,7 @@ if nargin == 6 && nargout == 2
 
 % --- Predictions
 elseif nargin == 7
+    good_cov = covfunc1;
     [K1ss, K1star] = feval(covfunc1{:}, theta1, X, Xtst);     % test covariance f
     [K2ss, K2star] = feval(covfunc2{:}, theta2, X, Xtst);     % test covariance g
     atst  = K1star' * alpha;                                  % predicted mean  f 
