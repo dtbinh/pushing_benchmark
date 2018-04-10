@@ -1,0 +1,11 @@
+clear 
+clc
+close all;
+
+theta = sym('theta', [3,1]);
+x_input = sym('u_input', [3,1]);
+x_data = sym('u_data', [3,1]);
+P = sym('P', [3,3]);
+
+k_sym = covFunc(theta, x_data, x_input./exp(data.lengthscales{lv1}(:)));
+% 

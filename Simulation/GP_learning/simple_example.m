@@ -59,7 +59,7 @@ end
 figure; 
 %plot3(input_test(:,1), input_test(:,2),predicted_mean); hold on;  
 plot3(input_test(:,1), input_test(:,2),output, 'm'); hold on;
-%plot3(input_test(:,1), input_test(:,2),real_y); hold on;
-%plot3(input_test(:,1), input_test(:,2),y_test, '.');  hold on;
+plot3(input_test(:,1), input_test(:,2),real_y); hold on;
+plot3(input_test(:,1), input_test(:,2),y_test, '.');  hold on;
 %plot3(input_test(:,1), input_test(:,2),predicted_mean+predicted_std, 'k'); hold on;
 %plot3(input_test(:,1), input_test(:,2),predicted_mean-predicted_std, 'k');

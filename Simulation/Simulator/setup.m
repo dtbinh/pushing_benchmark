@@ -2,4 +2,4 @@
 
 % PATH
 addpath(genpath('../software/externals/jsonlab-1.0'));
-addpath(genpath('System'))
+addpath(genpath('../System'))

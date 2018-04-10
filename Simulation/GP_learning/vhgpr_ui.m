@@ -48,6 +48,8 @@ meanp=mean(y_tr);
 % Covariance functions
 covfuncSignal = {'covSum',{'covSEisoj','covConst'}};
 covfuncNoise  = {'covSum',{'covSEisoj','covNoise'}};
+covfuncSignal = {'covSum',{'covSEardj','covConst'}};
+covfuncNoise  = {'covSum',{'covSEardj','covNoise'}};
 
 if nargin < 5
     iter = 40;
@@ -74,8 +76,10 @@ if nargin < 7 % Learn hyperparameters
     
     sn2 = 1;
     mu0 = log(NoisePower)-sn2/2-2;
-    loghyperSignal = [0; 0.5*log(SignalPower);-0.5*log(ConstPower)];
-    loghyperNoise =  [0; 0.5*log(sn2); 0.5*log(sn2*0.25)];
+    %loghyperSignal = [0; 0.5*log(SignalPower);-0.5*log(ConstPower)];
+    %loghyperNoise =  [0; 0.5*log(sn2); 0.5*log(sn2*0.25)];
+    loghyperSignal = [lengthscales*0; 0.5*log(SignalPower);-0.5*log(ConstPower)];
+    loghyperNoise =  [lengthscales*0; 0.5*log(sn2); 0.5*log(sn2*0.25)];
     
     display('Initializing VHGPR (keeping hyperparameters fixed)...')
     LambdaTheta = [log(0.5)*ones(n,1);loghyperSignal;loghyperNoise;mu0];

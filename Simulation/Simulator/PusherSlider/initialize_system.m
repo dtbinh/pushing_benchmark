@@ -1,4 +1,4 @@
-run('setup.m');
+run('../setup.m');
 
 %Define objects
 pusher = PointPusher();
