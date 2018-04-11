@@ -10,7 +10,9 @@ clear
 clc
 close all
 
-setup;
+symbolic_linearize;
+
+run(strcat(getenv('HOME'),'/pushing_benchmark/Simulation/Simulator/setup.m'));
 
 %% Simulation data and video are stored in /home/Data/<simulation_name>
 simulation_name = 'gp_lqr_6_gp_model';
@@ -25,21 +27,20 @@ x0_c = [0.0;0.03;-5*pi/180;-0.02];
 %%Initiaze system
 is_gp = true;
 
-symbolic_linearize;
 initialize_system();
 
 
 planner = Planner(planar_system, 'Straight', 0.05); 
 planner.ps.num_ucStates = 2;
-mpc = MPC(planner, A, B);
+mpc = MPC(planner, Linear, data, object);
 simulator.x_star = planner.xs_star;
 simulator.u_star = planner.us_star;
 simulator.t_star = planner.t_star;
 
 %Set up lqr controller parameters
 Q = diag([1,1,.01,.01]);
-R = .01*eye(size(B,2));
-[K, S, e] = lqr(A,B,Q, R);
+R = .01*eye(2);
+% [K, S, e] = lqr(A,B,Q, R);
 Ain = [1 0;0 1;-1 0;0 -1];
 bin = [.15;.15; 0; .15];
 

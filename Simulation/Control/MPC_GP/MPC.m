@@ -10,23 +10,25 @@ classdef MPC < dynamicprops
         Q;
         Qf;
         R;
-        A;
-        B;
+        Linear;
+        data;
+        object;
     end
    
     methods
         %% Constructor
-        function obj = MPC(planner, A, B)  
+        function obj = MPC(planner, Linear, data, object)  
             obj.planner = planner;
-            obj.A = A;
-            obj.B = B;
+            obj.Linear=Linear;
+            obj.data=data;
+            obj.object=object;
 %Simulation
 %                 obj.Q  = 10*diag([5,3,.1,0.1]);
 %                 obj.Qf = 2000*diag([5,3,1,0.1]);
 %                 obj.R  = .01*diag([1,10,0.5]);
 %Experiments
             obj.Q = 1*diag([1,1,.01,0.01]);
-            obj.Qf=     1*1000*diag([1,1,.01,1]);
+            obj.Qf=  1*1000*diag([1,1,.01,1]);
             obj.R = .01*diag([1,1]);
 
             %use MIQP or FOM formulation
@@ -47,8 +49,7 @@ classdef MPC < dynamicprops
             %Build error state vector
             delta_xc = [xc - xcStar];
 
-            A_nom = obj.A;
-            B_nom = obj.B;
+            [A_nom, B_nom] = GP_linearization(xcStar, ucStar(1:2), obj.Linear, obj.data, obj.object);
             A_bar = eye(4)+obj.h_opt*A_nom;
             B_bar = obj.h_opt*B_nom;
  
@@ -127,9 +128,9 @@ classdef MPC < dynamicprops
         
         %% Build dynamic constraints
         function Opt = addMotionConstraints(obj, Opt, lv1, xcStar, ucStar)
-            
-            A_nom = obj.A;
-            B_nom = obj.B;
+            tic
+            [A_nom, B_nom] = GP_linearization(xcStar, ucStar(1:2), obj.Linear, obj.data, obj.object);
+            toc
             A_bar = eye(obj.planner.ps.num_xcStates)+obj.h_opt*A_nom;
             B_bar = obj.h_opt*B_nom;
 
