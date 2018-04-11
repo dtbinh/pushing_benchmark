@@ -7,8 +7,8 @@ addpath('../../GP_learning')
 load('../../Simulator/PusherSlider/data_03_06_2018.mat');
 
 %% Load data
-x = data.input;
-y = data.output;
+x = data.input(1:200,:);
+y = data.output(1:200,:);
 frac_train = 1;
 
 %% Split data into training/testing
@@ -77,10 +77,11 @@ data.theta1=theta1;
 data.X=X;
 data.lengthscales=lengthscales;
 
-save('learning_output', 'data');
-% twist_b1 = matlabFunction(fun{1}, 'Vars', {u}, 'File', 'twist_b_gp1');
-% twist_b2 = matlabFunction(fun{2}, 'Vars', {u}, 'File', 'twist_b_gp2');
-% twist_b3 = matlabFunction(fun{3}, 'Vars', {u}, 'File', 'twist_b_gp3');
+save('learning_output_debug', 'data');
+twist_b1 = matlabFunction(fun{1}, 'Vars', {u}, 'File', 'twist_b_gp1');
+twist_b2 = matlabFunction(fun{2}, 'Vars', {u}, 'File', 'twist_b_gp2');
+twist_b3 = matlabFunction(fun{3}, 'Vars', {u}, 'File', 'twist_b_gp3');
+
 % f = k_star*alpha;
 % 
 % 

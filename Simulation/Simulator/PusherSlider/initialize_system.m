@@ -1,11 +1,14 @@
-run('../setup.m');
+try
+    run('../setup.m');
+catch
+end
 
 %Define objects
 pusher = PointPusher();
 object = Square();
 surface = Surface();
 planar_system = PlanarSystem(pusher, object, surface);
-simulator = Simulator(planar_system, simulation_name);
+simulator = Simulator(planar_system, simulation_name, is_gp);
 
 x0 = planar_system.coordinateTransformCS(x0_c);
 

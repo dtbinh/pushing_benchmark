@@ -31,11 +31,13 @@ classdef Simulator < dynamicprops
         u_star;
         t_star;
         bar_weights;
+        data;
+        v;
     end
    
     methods
         %% Constructor
-        function obj = Simulator(ps, SimName)  
+        function obj = Simulator(ps, SimName, is_gp)  
             obj.ps = ps;
             
                 %% Save data in new folder
@@ -47,6 +49,10 @@ classdef Simulator < dynamicprops
             obj.FileName = strcat(obj.FilePath,'/',obj.SimName);
             obj.x_length = 5;
             obj.a_length = 2;
+            if is_gp
+                load('learning_output.mat');
+                obj.data=data;
+            end
         end
         
         function z2 = get_next_state_i(obj, z1, T, dt, t)
@@ -54,6 +60,15 @@ classdef Simulator < dynamicprops
             k2 = obj.pointSimulatorAnalytical(z1+dt/2*k1,T);
             k3 = obj.pointSimulatorAnalytical(z1+dt/2*k2,T);
             k4 = obj.pointSimulatorAnalytical(z1+dt*k3,T);
+
+            z2 = z1 + dt/6*(k1 + 2*k2 + 2*k3 + k4);
+        end
+        
+        function z2 = get_next_state_gp_i(obj, z1, T, dt, t)
+            k1 = obj.pointSimulatorGP(z1,T);
+            k2 = obj.pointSimulatorGP(z1+dt/2*k1,T);
+            k3 = obj.pointSimulatorGP(z1+dt/2*k2,T);
+            k4 = obj.pointSimulatorGP(z1+dt*k3,T);
 
             z2 = z1 + dt/6*(k1 + 2*k2 + 2*k3 + k4);
         end
@@ -191,6 +206,36 @@ classdef Simulator < dynamicprops
             twist_i = [vibi;dtheta;us];
         end
         
+        function twist_i = pointSimulatorGP(obj, xs, us)
+            %
+            ribi = xs(1:2);
+            theta  = xs(3);
+            ripi = xs(4:5);
+            vipi = us;
+            %
+            Cbi = Helper.C3_2d(theta);
+            rbbi = Cbi*ribi;
+            rbpi = Cbi*ripi;
+            vbpi = Cbi*vipi;
+            %Find rx, ry: In body frame
+            rbpb = rbpi - rbbi;
+            rx = rbpb(1);
+            ry = rbpb(2);
+
+            %Build output vector
+%                twist_b =obj.pointSimulatorAnalytical_b(vbpi,ry);
+            twist_b = [];
+            for lv1=1:3
+                [~, K1star] = feval(obj.data.covfunc1{lv1}{:}, obj.data.theta1{lv1}, obj.data.X{lv1}, [vbpi' ry]./exp(obj.data.lengthscales{lv1}(:)'));
+                twist_b = [twist_b;K1star'*obj.data.alpha{lv1}];
+            end
+            
+            vbbi = twist_b(1:2);
+            dtheta = twist_b(3);
+            vibi = Cbi'*vbbi;
+            twist_i = [vibi;dtheta;us];
+        end
+        
         function twist_b = pointSimulatorAnalytical_b(obj, vbpi, ry)
             
             %Find rx, ry: In body frame
@@ -242,6 +287,18 @@ classdef Simulator < dynamicprops
         end
         
         function obj = initialize_plot(obj, xs, xd, MPPI)
+            %Animation parameters
+            tf = 10;%obj.t(end);
+            N = length(obj.t);
+            accFactor = 15;
+            x_state = obj.xs_state;
+            videoname = strcat(obj.FilePath,'/',(obj.SimName),'.avi');
+            obj.v = VideoWriter(videoname);
+            fps = int64(N/(accFactor*tf));
+            fps = double(fps);
+            obj.v.FrameRate = fps;
+            open(obj.v);
+
             obj.Ani = figure('Color', 'w', 'OuterPosition', [0, 0, 960, 1080], 'PaperPosition', [0, 0, 6, (6/8)*6]);
             
             %figure properties
@@ -263,18 +320,18 @@ classdef Simulator < dynamicprops
             axis equal
             xlabel('x(m)','fontsize',font_size,'Interpreter','latex', 'FontSize', font_size);
             ylabel('y(m)','fontsize',font_size,'Interpreter','latex', 'FontSize', font_size);
-            xlim([-.1 1.6]);
+            xlim([-.1 .6]);
             ylim([-.2 .2]);
             view([90 90])
             Data = obj.Data1pt(xs); 
             obj.Slider = patch(Data.x1b, Data.y1b,'red', 'EdgeAlpha', 1,'FaceAlpha', 1,'EdgeColor', [0,0,1]*0.3,'FaceColor','NONE','LineWidth',2.);
             obj.Pusher_c = patch(Data.X_circle_p,Data.Y_circle_p,'r', 'EdgeAlpha', 1,'FaceAlpha', 1, 'EdgeColor', [0,0,1]*0.3,'FaceColor',[1,0,0]*0.5,'LineWidth',2.);
 
-            switch nargin
-                case 3
+%             switch nargin
+%                 case 3
             Data_xd = obj.Data1pt(xd); 
             obj.Slider_des = patch(Data_xd.x1b, Data_xd.y1b,'r', 'EdgeAlpha', 1,'FaceAlpha', 1,'EdgeColor', 'r','FaceColor','NONE','LineWidth',1.);
-            end
+%             end
 %             switch nargin
 %                 case 3
 %                     
@@ -313,7 +370,9 @@ classdef Simulator < dynamicprops
                      obj.bar_weights.YData = MPPI.w;
             end
             
-            drawnow;
+%             drawnow;
+            frame = getframe(obj.Ani);
+            writeVideo(obj.v,frame);
         end
                 
         function obj = update_plot_nonlinear_error(obj, xs, MPPI, x_des, t)

@@ -62,6 +62,7 @@ switch nargin
     case 6
 Data{lv1} = obj.Data1pt(xs_star(lv1,:));
 end
+Data{lv1} = obj.Data1pt(xs_star(lv1,:));
 Slider{lv1} = patch(Data{lv1}.x1b, Data{lv1}.y1b,'r', 'EdgeAlpha', 1,'FaceAlpha', 1,'EdgeColor', 'r','FaceColor','NONE','LineWidth',1.);
 hold on 
 Pusher_c{lv1} = patch(Data{lv1}.X_circle_p,Data{lv1}.Y_circle_p,'r', 'EdgeAlpha', 1,'FaceAlpha', 1, 'EdgeColor', [0,0,1]*0.3,'FaceColor',[1,0,0]*0.5,'LineWidth',1.);
