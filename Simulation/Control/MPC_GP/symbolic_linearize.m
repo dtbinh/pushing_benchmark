@@ -37,6 +37,8 @@ R_fun = matlabFunction(R,  'Vars', {x}, 'File', 'R_fun');
 dR_dtheta = diff(R, x(3));
 Linear.dR_dtheta_fun = matlabFunction(dR_dtheta,  'Vars', {x}, 'File', 'dR_fun');
 
+[A,B] = GP_linearization([0;0;0;0], [0.05;0], Linear, data, object);
+return
 % [A,B] = GP_linearization([0;0;0;0], [0.05;0], Linear, data, object);
 %Build A and B matrices
 x_star = [0;0;0;0];

@@ -21,7 +21,8 @@ for lv1=1:3
     dK1_du_star_sym{lv1}=[];
     tic
     k_star{lv1} = Linear.k_fun{lv1}(x_star,u_star,data.X{lv1}(:,:)');
-    dK_dx{lv1} = Linear.dk_dx_fun{lv1}(x_star,u_star,data.X{lv1}(:,:)');
+    dK_dry{lv1} = Linear.dk_dry_fun{lv1}(x_star,u_star,data.X{lv1}(:,:)');
+    dK_dx{lv1} = [zeros(3, length(dK_dry{lv1}));dK_dry{lv1}];
     dK_du{lv1} = Linear.dk_du_fun{lv1}(x_star,u_star,data.X{lv1}(:,:)');
 %     for n=1:N
 %         n;
