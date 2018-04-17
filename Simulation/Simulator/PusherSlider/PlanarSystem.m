@@ -12,6 +12,7 @@ classdef PlanarSystem < dynamicprops
         A_ls;
         A_fun;
         B_fun;
+        Gc_fun;
         twist_object_i_fun;
         f_non_fun;
         A_linear;
@@ -151,6 +152,39 @@ classdef PlanarSystem < dynamicprops
             twist_object_i_fun = matlabFunction(f_non1, 'File', 'twist_object_i_fun_cpp', 'Vars', {xc,uc, rbpb, d, A_limit});
             f_non_fun = matlabFunction(f_non, 'File', 'f_non_fun_cpp', 'Vars', {xc,uc, rbpb, d, A_limit});
         end
+        %%convert velocity to force
+        function us = force2velocity2(obj, xc, uc)
+            theta=xc(3);
+            ry = xc(4);
+            rx=-obj.o.a/2;
+            rbpb =[rx;ry];
+            %% DCM Matrices
+            Cbi = Helper.C3_2d(theta);
+            %% Kinematics
+            sign_vec = [1 -1]*1;
+            N_tot=[];
+            T_tot=[];
+            for lv1=1:obj.p.num_contacts %lv1 represents contact point 1 and 2
+                rb{lv1} = [rx*1;ry*1]+sign_vec(lv1)*[0;obj.p.d]; %position of contact point lv1
+                Jb{lv1} = [1 0 -rb{lv1}(2);... 
+                             0 1 rb{lv1}(1)];
+                for lv2=1:2 %lv2 represents left of right border (FC/MC)
+                    n{lv1} = [1;0];
+                    t{lv1} = [0;1];
+                    N{lv1} = transpose(Jb{lv1})*n{lv1};
+                    T{lv1} = transpose(Jb{lv1})*t{lv1};
+                end
+                N_tot = [N_tot N{lv1}];
+                T_tot = [T_tot T{lv1}];
+            end
+            R=Cbi';
+            R_big = [R [0;0];0 0 1];
+            J_vel = [eye(2) Helper.S2(R*rbpb)];
+            L = obj.A_ls;
+            B=[N_tot T_tot];
+            Gc = [J_vel*R_big*L*B R*[0;1]];
+            us=Gc*uc;
+        end
         %% Symbolic linearize
         function obj = symbolicLinearize(obj)
             %% Symbolic variables
@@ -180,21 +214,27 @@ classdef PlanarSystem < dynamicprops
                 N_tot = [N_tot;N{lv1}];
                 T_tot = [T_tot;T{lv1}];
             end
+            rbpb = rb{1};
             %Motion equations (nonlinear)
             Vb = obj.A_ls*(transpose(N_tot)*fn + transpose(T_tot)*ft);
             C_tilde = [transpose(Cbi) [0; 0];0 0 1];
+            J_vel = [eye(2) Helper.S2(transpose(Cbi)*rbpb)];
+            B_tot = [transpose(N_tot) transpose(T_tot)];
+            %Defin important quantities
+            Gc = [J_vel*C_tilde*obj.A_ls*B_tot transpose(Cbi)*[0;1]];
             f_non1 = C_tilde*Vb;
-            
             f_non2 = obj.p.dry;
             f_non = [f_non1;f_non2];
             %Linearization
             A = jacobian(f_non,xc);
             B = jacobian(f_non,uc);
+            
             % Substitute equilibrium states
 %             A_fun = matlabFunction(A, 'FILE', 'A_fun', 'Vars', {xc,uc});
 %             B_fun = matlabFunction(B, 'FILE', 'B                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          _fun', 'Vars', {xc,uc});
             obj.A_fun = matlabFunction(A, 'Vars', {xc,uc});
             obj.B_fun = matlabFunction(B, 'Vars', {xc,uc});
+            obj.Gc_fun = matlabFunction(Gc, 'Vars', {xc});
             obj.twist_object_i_fun = matlabFunction(f_non1, 'Vars', {xc,uc});
             obj.f_non_fun = matlabFunction(f_non, 'Vars', {xc,uc});
         end

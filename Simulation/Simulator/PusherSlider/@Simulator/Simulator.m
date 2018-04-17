@@ -221,7 +221,6 @@ classdef Simulator < dynamicprops
             rbpb = rbpi - rbbi;
             rx = rbpb(1);
             ry = rbpb(2);
-
             %Build output vector
 %                twist_b =obj.pointSimulatorAnalytical_b(vbpi,ry);
             twist_b = [];
@@ -320,8 +319,8 @@ classdef Simulator < dynamicprops
             axis equal
             xlabel('x(m)','fontsize',font_size,'Interpreter','latex', 'FontSize', font_size);
             ylabel('y(m)','fontsize',font_size,'Interpreter','latex', 'FontSize', font_size);
-            xlim([-.1 .6]);
-            ylim([-.2 .2]);
+            xlim([-.4 .4]);
+            ylim([-.4 .4]);
             view([90 90])
             Data = obj.Data1pt(xs); 
             obj.Slider = patch(Data.x1b, Data.y1b,'red', 'EdgeAlpha', 1,'FaceAlpha', 1,'EdgeColor', [0,0,1]*0.3,'FaceColor','NONE','LineWidth',2.);

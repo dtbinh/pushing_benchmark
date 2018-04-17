@@ -38,6 +38,10 @@ classdef Helper < dynamicprops
             w3 = r_cross*v;
             w = w3(1:2);
         end
+        
+        function out=S2(r)
+            out = [-r(2); r(1)];
+        end
        
         %% Rotation Matrices
         function C1 = C1(x)
@@ -54,6 +58,13 @@ classdef Helper < dynamicprops
         
         function C3 = C3_2d(x)
             C3 = [ cos(x) sin(x); -sin(x) cos(x)];
+        end
+        
+        function dM = jacobian_higher(Matrix, x)
+            dM = {};
+            for i=1:length(x)
+                dM{i} = jacobian(Matrix, x(i));
+            end    
         end
         %% Numerical Integration
         function integral = gaussQuad(fun,a,b)

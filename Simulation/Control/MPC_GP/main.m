@@ -10,36 +10,37 @@ clear
 clc
 close all
 
-symbolic_linearize;
 
 run(strcat(getenv('HOME'),'/pushing_benchmark/Simulation/Simulator/setup.m'));
+
+symbolic_linearize;
 
 %% Simulation data and video are stored in /home/Data/<simulation_name>
 simulation_name = 'gp_lqr_6_gp_model';
 %% Simulation time
-sim_time = 10;
+sim_time = 5;
 
 %% Initial conditions 
 % x0 = [x;y;theta;xp;yp]
 % x: x position of object, y: y position of object, theta: orientation of object
 % xp: x position of pusher, yp: y position of pusher
-x0_c = [0.0;0.03;-5*pi/180;-0.02];
+x0_c = [0.0;0.03*0;0*pi/180*1;-.009];
 %%Initiaze system
 is_gp = true;
 
 initialize_system();
 
-
-planner = Planner(planar_system, 'Straight', 0.05); 
+planner = Planner(planar_system, simulator, Linear, data, object, 'inf_circle', 0.05); %8track
 planner.ps.num_ucStates = 2;
 mpc = MPC(planner, Linear, data, object);
+% mpc = MPC(planner, [], [], [], A, B);
 simulator.x_star = planner.xs_star;
 simulator.u_star = planner.us_star;
 simulator.t_star = planner.t_star;
 
 %Set up lqr controller parameters
 Q = diag([1,1,.01,.01]);
-R = .01*eye(2);
+R = 1*eye(2);
 % [K, S, e] = lqr(A,B,Q, R);
 Ain = [1 0;0 1;-1 0;0 -1];
 bin = [.15;.15; 0; .15];
@@ -63,12 +64,12 @@ for i1=1:simulator.N
         [xs_d,us_d] = simulator.find_nominal_state(simulator.t(i1));
         xc_d =  planar_system.coordinateTransformSC(xs_d);
         x_bar = xc - xc_d;
-        x_bar
 %         u_bar_b = -K*x_bar;
 %         F = x_bar'*S*B;
 %         u_bar_b = quadprog(H,F, [], []);
         Cbi = Helper.C3_2d(xc(3));
         u_bar_b = mpc.solveMPC(xc, simulator.t(i1));
+
         u_bar = Cbi'*u_bar_b;
         %% edit velocity (us = [vx, vy] -> velocity of pusher in world frame in m/s)
 %         %----------------------------

@@ -13,6 +13,8 @@ classdef MPC < dynamicprops
         Linear;
         data;
         object;
+        A;
+        B;
     end
    
     methods
@@ -22,13 +24,15 @@ classdef MPC < dynamicprops
             obj.Linear=Linear;
             obj.data=data;
             obj.object=object;
+%             obj.A=A;
+%             obj.B=B;
 %Simulation
 %                 obj.Q  = 10*diag([5,3,.1,0.1]);
 %                 obj.Qf = 2000*diag([5,3,1,0.1]);
 %                 obj.R  = .01*diag([1,10,0.5]);
 %Experiments
-            obj.Q = 1*diag([1,1,.01,0.01]);
-            obj.Qf=  1*1000*diag([1,1,.01,1]);
+            obj.Q = 1*diag([1,1,.01,0.0000]);
+            obj.Qf=  1*2000*diag([1,1,.1,.0000]);
             obj.R = .01*diag([1,1]);
 
             %use MIQP or FOM formulation
@@ -44,12 +48,13 @@ classdef MPC < dynamicprops
             theta = xc(3);
             ry = xc(4);
             %Nominal coordinates
-            [xcStar, ucStar, usStar, usStar] = obj.getStateNominal(t);
+            [xcStar, ucStar, xsStar, usStar, A_nom, B_nom] = obj.getStateNominal(t);
             obj.buildProgram(t,xc);
             %Build error state vector
             delta_xc = [xc - xcStar];
-
-            [A_nom, B_nom] = GP_linearization(xcStar, ucStar(1:2), obj.Linear, obj.data, obj.object);
+%             A_nom = obj.A;
+%             B_nom = obj.B;
+%             [A_nom, B_nom] = GP_linearization(xcStar, usStar(1:2), obj.Linear, obj.data, obj.object);
             A_bar = eye(4)+obj.h_opt*A_nom;
             B_bar = obj.h_opt*B_nom;
  
@@ -67,19 +72,24 @@ classdef MPC < dynamicprops
             out_delta_x = obj.Opt.vars.x.value';
 
             %Return first element of control sequence
-           delta_u = out_delta_u(1,1:obj.planner.ps.num_ucStates)';
+            delta_u = out_delta_u(1,1:obj.planner.ps.num_ucStates)';
             %Add feedforward and feedback controls together
-            uc = delta_u + usStar;
+             uc = delta_u*1 + ucStar(1:2);
+%              delta_u
+%              uc
+%              A_bar
         end
       
         %% Get nominal trajectory values at time T
-        function [xcStar, ucStar, xsStar, usStar] = getStateNominal(obj, t)
+        function [xcStar, ucStar, xsStar, usStar, A, B] = getStateNominal(obj, t)
             vecDif = t - obj.planner.t_star;
             [valDif, indexDif] = min(abs(vecDif));
             xcStar = obj.planner.xc_star(indexDif,:)';
             ucStar = obj.planner.uc_star(indexDif,:)'; 
             xsStar = obj.planner.xs_star(indexDif,:)';
-            usStar = obj.planner.us_star(indexDif,:)'; 
+            usStar = obj.planner.us_star(indexDif,:)';
+            A = reshape(obj.planner.A_star(indexDif,:,:), 4,4);
+            B = reshape(obj.planner.B_star(indexDif,:,:), 4,2); 
         end
         %Get nominal trajectory values at time T
         function [tStar] = getxStateNominal(obj, x)
@@ -96,13 +106,13 @@ classdef MPC < dynamicprops
             Opt = Opt.addVariable('x', 'C', [obj.planner.ps.num_xcStates, obj.steps], -1000*ones(obj.planner.ps.num_xcStates,obj.steps), 1000*ones(obj.planner.ps.num_xcStates,obj.steps));
             %Loop through steps of MPC
             for lv3=1:obj.steps 
-                [xcStar, ucStar, usStar, usStar] = obj.getStateNominal(t_init);                    
+                [xcStar, ucStar, usStar, usStar, A, B] = obj.getStateNominal(t_init);                    
                 %Add cost
                 Opt = obj.buildCost(Opt, lv3);
                 %Add dynamic constraints
-                Opt = obj.addMotionConstraints(Opt, lv3, xcStar, ucStar);
+                Opt = obj.addMotionConstraints(Opt, lv3, xcStar, ucStar, A, B);
                 Opt = obj.addVelocityConstraints(Opt, lv3, xcStar, ucStar);
-                Opt = obj.addStateConstraints(Opt, lv3, xcStar, ucStar);
+%                 Opt = obj.addStateConstraints(Opt, lv3, xcStar, ucStar);
 
                 t_init = t_init + obj.h_opt;
             end
@@ -127,10 +137,8 @@ classdef MPC < dynamicprops
         end
         
         %% Build dynamic constraints
-        function Opt = addMotionConstraints(obj, Opt, lv1, xcStar, ucStar)
-            tic
-            [A_nom, B_nom] = GP_linearization(xcStar, ucStar(1:2), obj.Linear, obj.data, obj.object);
-            toc
+        function Opt = addMotionConstraints(obj, Opt, lv1, xcStar, ucStar, A_nom, B_nom)
+
             A_bar = eye(obj.planner.ps.num_xcStates)+obj.h_opt*A_nom;
             B_bar = obj.h_opt*B_nom;
 
@@ -202,7 +210,7 @@ classdef MPC < dynamicprops
             num_constraints = 2;
             index = [4];
             Ain_tmp = [1;-1];
-            bin_tmp = [.045;.045];
+            bin_tmp = [.03-xn(4);.03+xn(4)];
             Ain = [Ain;zeros(num_constraints, length(xn))];
             bin = [bin;zeros(num_constraints, 1)];
             Ain(end-num_constraints+1:end,index) = Ain_tmp;
@@ -221,7 +229,7 @@ classdef MPC < dynamicprops
             %% tangential velocity bounds
             num_constraints = 4;
             Ain_tmp = [1 0;0 1;-1 0;0 -1];
-            bin_tmp = [.15;.15; 0; .15];
+            bin_tmp = [.15;.15; 0.03; .15];
             Ain = [Ain;zeros(num_constraints, 2)];
             bin = [bin;zeros(num_constraints, 1)];
             Ain(end-num_constraints+1:end,:) = Ain_tmp;
