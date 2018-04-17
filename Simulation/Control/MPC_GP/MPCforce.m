@@ -92,6 +92,52 @@ classdef MPCforce < dynamicprops
             %Add feedforward and feedback controls together
             uc = delta_u + ucStar;
         end
+                %% solve MPC function using FOM
+        function [uc] = solveMPC_gp(obj, xc, t)
+            %Define variables
+            x = xc(1);
+            y = xc(2);
+            theta = xc(3);
+            ry = xc(4);
+            %Nominal coordinates
+            [xcStar, ucStar, xsStar, usStar,A,B] = obj.getStateNominal(t);
+            obj.buildProgram(t,xc);
+            %Build error state vector
+%             xc(4) = unwrap_custom(xc(4));
+%             xcStar(4) = unwrap_custom(xcStar(4));
+
+            delta_xc = [xc - xcStar];
+
+            A_nom = A;%obj.planner.ps.A_fun(xcStar, ucStar);
+            B_nom = B;%obj.planner.ps.B_fun(xcStar, ucStar);
+            A_bar = eye(4)+obj.h_opt*A_nom;
+            B_bar = obj.h_opt*B_nom;
+ 
+            %Loop through family of modes
+            fVal = [];
+            for lv2=1:3
+            %Build optimization program
+                %Update initial conditions
+                obj.Opt_fom{lv2}.beq(1:4) = zeros(4,1);
+                obj.Opt_fom{lv2}.beq(1:4) = [A_bar*delta_xc];
+                % Solve Opt Program   
+                options = optimoptions('quadprog','Display','none');
+                tic
+                [obj.Opt_fom{lv2}, solvertime{lv2}, fval{lv2}] = obj.Opt_fom{lv2}.solve;
+                toc
+                
+                out_delta_u{lv2} = obj.Opt_fom{lv2}.vars.u.value';
+                out_delta_x{lv2} = obj.Opt_fom{lv2}.vars.x.value';
+                fVal = [fVal; fval{lv2}];
+            end
+            %Find mode schedule with lowest cost
+            [minFOM indexFOM] = min(fVal);
+            
+            %Return first element of control sequence
+           delta_u = out_delta_u{indexFOM}(1,1:obj.planner.ps.num_ucStates)';
+            %Add feedforward and feedback controls together
+            uc = delta_u + ucStar;
+        end
         %% solve MPC function using FOM
         function delta_uc = solveFOM_delta(obj, xc, t)
             %Define variables
@@ -100,16 +146,13 @@ classdef MPCforce < dynamicprops
             theta = xc(3);
             ry = xc(4);
             %Nominal coordinates
-            [xcStar, ucStar, usStar, usStar] = obj.getStateNominal(t);
+            [xcStar, ucStar, usStar, usStar, A_gp, B_gp] = obj.getStateNominal(t);
             obj.buildProgram(t,xc);
             %Build error state vector
-%             xc(4) = unwrap_custom(xc(4));
-%             xcStar(4) = unwrap_custom(xcStar(4));
-
             delta_xc = [xc - xcStar];
 
-            A_nom = obj.planner.ps.A_fun(xcStar, ucStar);
-            B_nom = obj.planner.ps.B_fun(xcStar, ucStar);
+            A_nom = A_gp;%obj.planner.ps.A_fun(xcStar, ucStar);
+            B_nom = B_gp;%obj.planner.ps.B_fun(xcStar, ucStar);
             A_bar = eye(4)+obj.h_opt*A_nom;
             B_bar = obj.h*B_nom;
  
@@ -208,13 +251,15 @@ classdef MPCforce < dynamicprops
             modes = obj.Opt.vars.region.value';
         end
         %% Get nominal trajectory values at time T
-        function [xcStar, ucStar, xsStar, usStar] = getStateNominal(obj, t)
+        function [xcStar, ucStar, xsStar, usStar, A, B] = getStateNominal(obj, t)
             vecDif = t - obj.planner.t_star;
             [valDif, indexDif] = min(abs(vecDif));
             xcStar = obj.planner.xc_star(indexDif,:)';
             ucStar = obj.planner.uc_star(indexDif,:)'; 
             xsStar = obj.planner.xs_star(indexDif,:)';
             usStar = obj.planner.us_star(indexDif,:)'; 
+            A = reshape(obj.planner.A_star(indexDif,:,:), 4,4);
+            B = reshape(obj.planner.B_star(indexDif,:,:), 4,3); 
         end
         %Get nominal trajectory values at time T
         function [tStar] = getxStateNominal(obj, x)
@@ -232,11 +277,11 @@ classdef MPCforce < dynamicprops
                 Opt = Opt.addVariable('x', 'C', [obj.planner.ps.num_xcStates, obj.steps], -1000*ones(obj.planner.ps.num_xcStates,obj.steps), 1000*ones(obj.planner.ps.num_xcStates,obj.steps));
                 %Loop through steps of MPC
                 for lv3=1:obj.steps 
-                    [xcStar, ucStar, usStar, usStar] = obj.getStateNominal(t_init);                    
+                    [xcStar, ucStar, usStar, usStar, A, B] = obj.getStateNominal(t_init);                    
                     %Add cost
                     Opt = obj.buildCost(Opt, lv3);
                     %Add dynamic constraints
-                    Opt = obj.addMotionConstraints(Opt, lv3, xcStar, ucStar);
+                    Opt = obj.addMotionConstraints(Opt, lv3, xcStar, ucStar, A, B);
                     Opt = obj.addForceIndConstraints(Opt, lv3, xcStar, ucStar);
 %                     if lv3 ==1
 %                         Opt = obj.addVelocityConstraints(Opt, lv3, xcStar, ucStar,xc);
@@ -337,7 +382,7 @@ end
             Opt = Opt.addCost(H, [], []);
         end
                 %% Build dynamic constraints
-        function Opt = addMotionConstraints(obj, Opt, lv1, xcStar, ucStar)
+        function Opt = addMotionConstraints(obj, Opt, lv1, xcStar, ucStar, A, B)
             
             A_nom = obj.planner.ps.A_fun(xcStar, ucStar);
             B_nom = obj.planner.ps.B_fun(xcStar, ucStar);
@@ -492,6 +537,7 @@ end
             A = planner.ps.A_fun(xn, un);
             B = planner.ps.B_fun(xn, un);
         end
+
         %% Force (mode dependant) constraints
         function [Aeq, beq, Ain, bin] = forceDepConstraintMatrices(obj, xn, un, mode)
             %Initialize matrices

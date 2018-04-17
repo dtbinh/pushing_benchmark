@@ -17,21 +17,21 @@ symbolic_linearize;
 %% Simulation data and video are stored in /home/Data/<simulation_name>
 simulation_name = 'mpc_force1';
 %% Simulation time
-sim_time = 25;
+sim_time = 15;
 
 %% Initial conditions 
 % x0 = [x;y;theta;xp;yp]
 % x: x position of object, y: y position of object, theta: orientation of object
 % xp: x position of pusher, yp: y position of pusher
-x0_c = [0.0;0.03*0;0*pi/180*1;-.009];
+x0_c = [0.0;0.03*1;15*pi/180*1;-.009];
 %%Initiaze system
 is_gp=true;
 initialize_system();
 planner = Planner(planar_system, simulator, Linear, data, object, 'inf_circle', 0.05); %8track
 %Controller setup
-Q = 10*diag([3,3,.1,0.0000]);
+Q = 10*diag([3,3,.1,0.1]);
 Qf=  1*2000*diag([3,3,1,.1]);
-R = 1*diag([1,1,.01]);
+R = 1*diag([1,1,.1]);
 mpc = MPCforce(planner, 'is_fom', Q, Qf, R, Linear, data, object);
 %send planned trajectory to simulator for plotting
 simulator.x_star = planner.xs_star;
@@ -48,15 +48,18 @@ for i1=1:simulator.N
         %Define loop variables
         xs = simulator.xs_state(i1,:)';
         
+        %get error
+        [xcStar, ucStar, xsStar, usStar,A,B] = mpc.getStateNominal(simulator.t(i1));
+        
         %apply lqr controller
         xc = planar_system.coordinateTransformSC(xs);
-        uc = mpc.solveMPC(xc, simulator.t(i1));
+        uc = mpc.solveMPC_gp(xc, simulator.t(i1));
         us = planar_system.force2Velocity(xc, uc);
         %simulate forward
         %1. analytical model
-        xs_next = simulator.get_next_state_i(xs, us, simulator.h);
+%         xs_next = simulator.get_next_state_i(xs, us, simulator.h);
         %2. gp model
-%         xs_next = simulator.get_next_state_gp_i(xs, us, simulator.h);
+        xs_next = simulator.get_next_state_gp_i(xs, us, simulator.h);
         %update plot
         simulator.update_plot(xs_next, simulator.t(i1));
 %       %Perform Euler Integration
