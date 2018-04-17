@@ -279,11 +279,13 @@ classdef Planner < dynamicprops
             %initial state
             xsStarTemp = obj.ps.coordinateTransformCS(xc);
             usStarTemp = obj.ps.force2Velocity(xc, uc);
+            Cbi = Helper.C3_2d(xc(3));
+            usStarTemp = Cbi*usStarTemp;
             obj.xs_star(1,:) = xsStarTemp';
             obj.us_star(1,:) = usStarTemp';
             obj.xc_star(1,:) = xc';
-            obj.uc_star(1,:) = uc';
-            [obj.A_star(1,:,:), obj.B_star(1,:,:)] = GP_linearization_u(obj.xc_star(1,:)', obj.uc_star(1,:)', obj.Linear, obj.data, obj.object);
+            obj.uc_star(1,:) = usStarTemp';
+            [obj.A_star(1,:,:), obj.B_star(1,:,:)] = GP_linearization(obj.xc_star(1,:)', obj.us_star(1,1:2)', obj.Linear, obj.data, obj.object);
             
             for lv1=1:N_star
                 lv1
@@ -297,17 +299,20 @@ classdef Planner < dynamicprops
                 ucStarTemp = uc;
                 xsStarTemp = obj.ps.coordinateTransformCS(xcStarTemp);
                 usStarTemp = obj.ps.force2Velocity(xcStarTemp, ucStarTemp);
+                Cbi = Helper.C3_2d(xc(3));
+                usStarTemp = Cbi*usStarTemp;
                 %Build control matrices A and B (symbolic linearization of motion
                 %equations)
                 obj.xs_star(lv1+1,:) = xsStarTemp';
                 obj.us_star(lv1+1,:) = usStarTemp';
                 obj.xc_star(lv1+1,:) = xcStarTemp';
-                obj.uc_star(lv1+1,:) = ucStarTemp';
-                [obj.A_star(lv1+1,:,:), obj.B_star(lv1+1,:,:)] = GP_linearization_u(obj.xc_star(lv1+1,:)', obj.uc_star(lv1+1,:)', obj.Linear, obj.data, obj.object);
+                obj.uc_star(lv1+1,:) = usStarTemp';
+                [obj.A_star(lv1+1,:,:), obj.B_star(lv1+1,:,:)] = GP_linearization(obj.xc_star(lv1+1,:)', obj.us_star(lv1+1,1:2)', obj.Linear, obj.data, obj.object);
                 if lv1<N_star
                     obj.t_star(lv1+1)  = obj.t_star(lv1) + h_star;
                 end
             end
+            obj.uc_star(lv1+1,:) = obj.us_star(lv1+1,:);
         end
         
         %% Build nominal trajectory

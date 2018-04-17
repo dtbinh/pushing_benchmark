@@ -58,7 +58,8 @@ for lv1=1:size(y, 2)
     k_star{lv1} = [];
     for i=1:length(input_training)
         u_tmp{lv1} = u./exp(lengthscales{lv1}(:));
-        k_star{lv1} = [k_star{lv1}, covFunc(theta1{lv1}, X{lv1}(i,:)', u_tmp{lv1})];
+        [k, dk] = covFunc(theta1{lv1}, X{lv1}(i,:)', u_tmp{lv1}, lengthscales{lv1});
+        k_star{lv1} = [k_star{lv1}, k];
     end
     fun{lv1} = k_star{lv1}*alpha{lv1};
     fun_total = [fun_total;fun{lv1}];

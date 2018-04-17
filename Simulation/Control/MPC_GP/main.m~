@@ -10,6 +10,7 @@ clear
 clc
 close all
 
+
 run(strcat(getenv('HOME'),'/pushing_benchmark/Simulation/Simulator/setup.m'));
 
 symbolic_linearize;
@@ -23,9 +24,8 @@ sim_time = 5;
 % x0 = [x;y;theta;xp;yp]
 % x: x position of object, y: y position of object, theta: orientation of object
 % xp: x position of pusher, yp: y position of pusher
-x0_c = [0.0;0.03*0;0*pi/180*1;.009*1];
+x0_c = [0.0;0.03*0;0*pi/180*1;-.009];
 %%Initiaze system
-is_gp=true;
 initialize_system();
 planner = Planner(planar_system, simulator, Linear, data, object, 'inf_circle', 0.05); %8track
 planner.ps.num_ucStates = 2;
@@ -51,20 +51,26 @@ for i1=1:simulator.N
         
         %apply lqr controller
         xc = planar_system.coordinateTransformSC(xs);
+        [xs_d,us_d] = simulator.find_nominal_state(simulator.t(i1));
+        xc_d =  planar_system.coordinateTransformSC(xs_d);
+        x_bar = xc - xc_d;
+%         u_bar_b = -K*x_bar;
+%         F = x_bar'*S*B;
+%         u_bar_b = quadprog(H,F, [], []);
         uc = mpc.solveMPC(xc, simulator.t(i1));
         us = mpc.get_robot_vel(xc, uc);
-        %simulate forward
-        %1. analytical model
+        %--------------------------------
 %         xs_next = simulator.get_next_state_i(xs, us, simulator.h);
-        %2. gp model
         xs_next = simulator.get_next_state_gp_i(xs, us, simulator.h);
         %update plot
         simulator.update_plot(xs_next, simulator.t(i1));
+
 %       %Perform Euler Integration
         if i1<simulator.N
             simulator.t(i1+1)  = simulator.t(i1) + simulator.h;
             simulator.xs_state(i1+1, :) = xs_next;%simulator.xs_state(i1, :) + simulator.h*dxs';       
         end
+        
         %Save data 
         simulator.us_state(i1,:) = us;
 %          pause(.1);

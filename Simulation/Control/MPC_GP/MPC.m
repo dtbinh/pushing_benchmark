@@ -19,7 +19,7 @@ classdef MPC < dynamicprops
    
     methods
         %% Constructor
-        function obj = MPC(planner, Linear, data, object)  
+        function obj = MPC(planner, Q, Qf, R, Linear, data, object)  
             obj.planner = planner;
             obj.Linear=Linear;
             obj.data=data;
@@ -31,9 +31,9 @@ classdef MPC < dynamicprops
 %                 obj.Qf = 2000*diag([5,3,1,0.1]);
 %                 obj.R  = .01*diag([1,10,0.5]);
 %Experiments
-            obj.Q = 1*diag([1,1,.01,0.0000]);
-            obj.Qf=  1*2000*diag([1,1,.1,.0000]);
-            obj.R = .01*diag([1,1]);
+            obj.Q = Q;
+            obj.Qf=  Qf;
+            obj.R = R;
 
             %use MIQP or FOM formulation
             t_init = 0;
@@ -78,6 +78,12 @@ classdef MPC < dynamicprops
 %              delta_u
 %              uc
 %              A_bar
+        end
+        
+        function vel = get_robot_vel(obj, xc, uc)
+            theta = xc(3);
+            Cbi = Helper.C3_2d(theta);
+            vel = Cbi'*uc;
         end
       
         %% Get nominal trajectory values at time T

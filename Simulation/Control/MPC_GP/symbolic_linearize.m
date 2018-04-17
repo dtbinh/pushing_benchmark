@@ -6,7 +6,7 @@ pusher = PointPusher();
 object = Square();
 surface = Surface();
 planar_system = PlanarSystem(pusher, object, surface);
-load('learning_output.mat');
+load('learning_output_debug.mat');
 
 %build variables
 xo = sym('xo', [3,1]);
@@ -49,8 +49,9 @@ dv_du = jacobian(v_var, u);
 Linear.dv_dx_fun = matlabFunction(dv_dx,'Vars', {x,u});
 Linear.dv_du_fun = matlabFunction(dv_du,'Vars', {x});
 Linear.Gc_fun = planar_system.Gc_fun;
-% [A,B] = GP_linearization([0;0;0;0], [0.05;0], Linear, data, object);
 
+[A,B] = GP_linearization_u([0;0;0;0], [.32;0;0], Linear, data, object);
+return
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 rx = -object.a/2;
 %Build A and B matrices
@@ -59,7 +60,7 @@ u_star = [.32;0;0];
 v_star = Linear.Gc_fun(x_star)*u_star;
 
 %build large derivative matrices and gp function output
-N = 200;
+N = length(data.X{1});
 D = 4;
 g = [];
 dg_dx = [];
@@ -109,14 +110,17 @@ dry_dv = [0-dg_dv(2,1)-rx*dg_dv(3,1), 1-dg_dv(2,2)-rx*dg_dv(3,2)];
 
 dR_dx = [zeros(size(Linear.dR_dtheta_fun(x_star)))*g zeros(size(Linear.dR_dtheta_fun(x_star)))*g Linear.dR_dtheta_fun(x_star)*g zeros(size(Linear.dR_dtheta_fun(x_star)))*0*g];
 
-A = [dR_dx + R_fun(x_star)*(dg_dx+dg_dv*Linear.dv_dx_fun(x_star, u_star)); dry_dx];
+A = [dR_dx + R_fun(x_star)*(dg_dx+dg_dv*Linear.dv_dx_fun(x_star, u_star)); dry_dx + dry_dv*Linear.dv_dx_fun(x_star, u_star)];
 B = [R_fun(x_star)*dg_dv*Linear.Gc_fun(x_star); dry_dv*Linear.Gc_fun(x_star)];
 % clear xo rx ry x u x_data gp_input Cbi
-
+return
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 v_new = Linear.Gc_fun(x)*u;
 gp_input = [v_new;ry];
 
 fb = twist_b_gp(gp_input);
+fb_fun = matlabFunction(fb, 'Vars', {x,u});
+
 dfb_dx = jacobian(fb, x);
 dfb_du = jacobian(fb, u);
 dfb_dx_fun = matlabFunction(dfb_dx, 'Vars', {x,u});
@@ -129,7 +133,7 @@ dfi_du = jacobian(fi, u);
 dfi_dx_fun = matlabFunction(dfi_dx, 'Vars', {x,u});
 dfi_du_fun = matlabFunction(dfi_du, 'Vars', {x,u});
 3
-vbpi_test = v;
+vbpi_test = v_new;
 vbbi_test = fb(1:2);
 vbpb_test = vbpi_test-vbbi_test-Helper.cross3d(fi(3), [rx;ry]);
 dry_test = vbpb_test(2);
@@ -142,7 +146,7 @@ dry_du_fun_test = matlabFunction(dry_du_test, 'Vars', {x,u});
 5
 f_non = [fi;dry_test];
 A_fun = jacobian(f_non, x);
-B_fun = jacobian(f_non, v);
+B_fun = jacobian(f_non, u);
 6
 A_fun = matlabFunction(A_fun, 'Vars', {x,u});
 B_fun = matlabFunction(B_fun, 'Vars', {x,u});

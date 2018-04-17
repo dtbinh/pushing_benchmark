@@ -15,7 +15,7 @@ run(strcat(getenv('HOME'),'/pushing_benchmark/Simulation/Simulator/setup.m'));
 symbolic_linearize;
 
 %% Simulation data and video are stored in /home/Data/<simulation_name>
-simulation_name = 'gp_lqr_6_gp_model';
+simulation_name = 'mpc_force1';
 %% Simulation time
 sim_time = 5;
 
@@ -23,17 +23,16 @@ sim_time = 5;
 % x0 = [x;y;theta;xp;yp]
 % x: x position of object, y: y position of object, theta: orientation of object
 % xp: x position of pusher, yp: y position of pusher
-x0_c = [0.0;0.03*0;0*pi/180*1;.009*1];
+x0_c = [0.0;0.03*0;0*pi/180*1;-.009];
 %%Initiaze system
 is_gp=true;
 initialize_system();
 planner = Planner(planar_system, simulator, Linear, data, object, 'inf_circle', 0.05); %8track
-planner.ps.num_ucStates = 2;
 %Controller setup
 Q = 1*diag([1,1,.01,0.0000]);
 Qf=  1*2000*diag([1,1,.1,.0000]);
-R = .01*diag([1,1]);
-mpc = MPC(planner, Q, Qf, R, Linear, data, object);
+R = .01*diag([1,1,.1]);
+mpc = MPCforce(planner, Q, Qf, R, Linear, data, object);
 %send planned trajectory to simulator for plotting
 simulator.x_star = planner.xs_star;
 simulator.u_star = planner.us_star;
