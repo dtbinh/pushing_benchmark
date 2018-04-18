@@ -1,13 +1,15 @@
 classdef Surface < dynamicprops
     properties (Constant)
-        nu = .35;
     end
     
     properties
+        nu;
     end
     
     methods
-
+        function obj = Surface(nu)  
+            obj.nu = nu;
+        end
     end
     
 end

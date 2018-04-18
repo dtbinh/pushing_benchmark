@@ -1,4 +1,4 @@
-function [A, B] = GP_linearization(x_star, u_star, Linear, data, object)
+function [A, B] = GP_linearization_u(x_star, u_star, Linear, data, object)
 
 rx = -object.a/2;
 %Build A and B matrices

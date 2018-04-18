@@ -4,9 +4,9 @@ catch
 end
 
 %Define objects
-pusher = PointPusher();
+pusher = PointPusher(0.3);
 object = Square();
-surface = Surface();
+surface = Surface(0.35);
 planar_system = PlanarSystem(pusher, object, surface);
 simulator = Simulator(planar_system, simulation_name, is_gp);
 

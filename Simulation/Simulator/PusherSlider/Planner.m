@@ -290,11 +290,10 @@ classdef Planner < dynamicprops
                 %get object velocity
                 xs = obj.ps.coordinateTransformCS(xc);
                 us = obj.ps.force2Velocity(xc, uc);
-                dxs = obj.simulator.pointSimulatorGP(xs,us);
-%                 dxs = obj.ps.forceSimulator(xc, uc);
-%                 dxs = obj.pointSimulatorGP(xs,us);
+%                 dxs = obj.simulator.pointSimulatorGP(xs,us);
+                dxs = obj.ps.forceSimulator(xc, uc);
                  dxc= [dxs(1:3); 0];
-                 xs = xs + h_star*dxs;
+%                  xs = xs + h_star*dxs;
                 xc = xc + h_star*dxc;
                 
                 %convert to state coordinates

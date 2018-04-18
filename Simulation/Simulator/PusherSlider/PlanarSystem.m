@@ -221,7 +221,7 @@ classdef PlanarSystem < dynamicprops
             J_vel = [eye(2) Helper.S2(transpose(Cbi)*rbpb)];
             B_tot = [transpose(N_tot) transpose(T_tot)];
             %Defin important quantities
-            Gc = [J_vel*C_tilde*obj.A_ls*B_tot transpose(Cbi)*[0;1]];
+            Gc = [J_vel*obj.A_ls*B_tot [0;1]];
             f_non1 = C_tilde*Vb;
             f_non2 = obj.p.dry;
             f_non = [f_non1;f_non2];

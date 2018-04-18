@@ -1,16 +1,16 @@
 clear
-clc
+%clc
 close all
 
-pusher = PointPusher();
-object = Square();
-surface = Surface();
-planar_system = PlanarSystem(pusher, object, surface);
+pusher_gp = PointPusher(.3);
+object_gp = Square();
+surface_gp = Surface(.35);
+planar_system_gp = PlanarSystem(pusher_gp, object_gp, surface_gp);
 load('learning_output_debug.mat');
 
 %build variables
 xo = sym('xo', [3,1]);
-rx = -object.a/2;
+rx = -object_gp.a/2;
 ry = sym('ry', [1,1]);
 x = [xo;ry];
 v = sym('v', [2,1]);
@@ -43,14 +43,14 @@ R = [transpose(Cbi) [0; 0];0 0 1];
 R_fun = matlabFunction(R,  'Vars', {x}, 'File', 'R_fun');
 dR_dtheta = diff(R, x(3));
 Linear.dR_dtheta_fun = matlabFunction(dR_dtheta,  'Vars', {x}, 'File', 'dR_fun');
-v_var = planar_system.Gc_fun(x)*u;
+v_var = planar_system_gp.Gc_fun(x)*u;
 dv_dx = jacobian(v_var, x);
 dv_du = jacobian(v_var, u);
 Linear.dv_dx_fun = matlabFunction(dv_dx,'Vars', {x,u});
 Linear.dv_du_fun = matlabFunction(dv_du,'Vars', {x});
-Linear.Gc_fun = planar_system.Gc_fun;
+Linear.Gc_fun = planar_system_gp.Gc_fun;
 
-[A,B] = GP_linearization_u([0;0;0;0], [.32;0;0], Linear, data, object);
+% [A,B] = GP_linearization_u([0;0;3.1416;0], [.32;0;0], Linear, data, object);
 return
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 rx = -object.a/2;
