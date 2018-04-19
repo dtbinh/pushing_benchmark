@@ -32,6 +32,7 @@ classdef Simulator < dynamicprops
         t_star;
         bar_weights;
         data;
+        Linear;
         v;
     end
    
@@ -50,7 +51,7 @@ classdef Simulator < dynamicprops
             obj.x_length = 5;
             obj.a_length = 2;
             if is_gp
-                load('learning_output.mat');
+                load('learning_output_03_18_2018_v2.mat');
                 obj.data=data;
             end
         end
@@ -227,6 +228,38 @@ classdef Simulator < dynamicprops
             for lv1=1:3
                 [~, K1star] = feval(obj.data.covfunc1{lv1}{:}, obj.data.theta1{lv1}, obj.data.X{lv1}, [vbpi' ry]./exp(obj.data.lengthscales{lv1}(:)'));
                 twist_b = [twist_b;K1star'*obj.data.alpha{lv1}];
+            end
+            
+            vbbi = twist_b(1:2);
+            dtheta = twist_b(3);
+            vibi = Cbi'*vbbi;
+            twist_i = [vibi;dtheta;us];
+        end
+        
+        function twist_i = pointSimulatorGP_vel(obj, xs, us)
+            %
+            ribi = xs(1:2);
+            theta  = xs(3);
+            ripi = xs(4:5);
+            vipi = us;
+            %
+            Cbi = Helper.C3_2d(theta);
+            rbbi = Cbi*ribi;
+            rbpi = Cbi*ripi;
+            vbpi = Cbi*vipi;
+            %Find rx, ry: In body frame
+            rbpb = rbpi - rbbi;
+            rx = rbpb(1);
+            ry = rbpb(2);
+            xc = obj.ps.coordinateTransformSC(xs);
+           
+            %Build output vector
+%                twist_b =obj.pointSimulatorAnalytical_b(vbpi,ry);
+            twist_b = [];
+            N=length(obj.data.X{1});
+            for lv1=1:3
+                k_star{lv1}=obj.Linear.k_fun{lv1}(xc,vbpi,obj.data.X{lv1}(1:N,:)');
+                twist_b = [twist_b; k_star{lv1}*obj.data.alpha{lv1}];
             end
             
             vbbi = twist_b(1:2);

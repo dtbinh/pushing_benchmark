@@ -182,13 +182,16 @@ classdef Planner < dynamicprops
             
         end
           function obj = build_inf_circle(obj, radius, velocity, x0)
-            obj.buildCircleTrajectory(radius, velocity, x0);
+            obj.buildCircleTrajectory_gp(radius, velocity, x0);
             xs_star = obj.xs_star;
             us_star = obj.us_star;
             xc_star = obj.xc_star;
             uc_star = obj.uc_star;
             t_star = obj.t_star;
+            A_star = obj.A_star;
+            B_star = obj.B_star;
             x0 = xc_star(end,:)';
+
 %             obj.buildCircleTrajectory(radius, velocity, x0);
 %             %repeat same operation
 %             xs_star = [xs_star; obj.xs_star ];
@@ -381,24 +384,24 @@ classdef Planner < dynamicprops
             obj.t_star = zeros(floor(N_star), 1);
             %Perform inverse dynamics
             nominal_states = obj.inverseDynamics_gp(radius, velocity);
-            us = nominal_states(1:2);
-            uc=us;
             xc(4) = nominal_states(3);
+            uc = [nominal_states(1:2);0];
+            usStarTemp=obj.ps.force2Velocity(xc,uc);
             %initial state
             xsStarTemp = obj.ps.coordinateTransformCS(xc);
             xs = xsStarTemp;
             Cbi = Helper.C3_2d(xc(3));
-            usStarTemp = us;
             obj.xs_star(1,:) = xsStarTemp';
             obj.us_star(1,:) = usStarTemp';
             obj.xc_star(1,:) = xc';
             obj.uc_star(1,:) = uc';
-            [obj.A_star{1}, obj.B_star{1}] = GP_linearization(obj.xc_star(1,:)', obj.us_star(1,1:2)', obj.Linear, obj.data, obj.object);
-            
+            %
             for lv1=1:N_star
-                lv1
+%                 lv1
+                [obj.A_star(lv1,:,:), obj.B_star(lv1,:,:)] = GP_linearization_u(obj.xc_star(lv1,:)', obj.uc_star(lv1,:)', obj.Linear, obj.data, obj.object);
                 %get object velocity
-                dxs = obj.simulator.pointSimulatorGP(obj.xs_star(lv1,:)', Cbi'*us);
+                us=obj.ps.force2Velocity(obj.xc_star(lv1,:)',uc);
+                dxs = obj.simulator.ps.forceSimulator(obj.xc_star(lv1,:)', uc);%+obj.simulator.pointSimulatorGP_vel(obj.xs_star(lv1,:)', us);%obj.simulator.pointSimulatorGP(obj.xs_star(lv1,:)', Cbi'*us);
 %                 xs = xs+h_star*dxs;
 %                 xc = obj.ps.coordinateTransformSC(xs);
                 dxc= [dxs(1:3); 0];
@@ -418,7 +421,6 @@ classdef Planner < dynamicprops
                 obj.xc_star(lv1+1,:) = xcStarTemp';
                 obj.uc_star(lv1+1,:) = ucStarTemp';
 %                 obj.uc_star(lv1+1,4)=0.009;
-                [obj.A_star{lv1+1}, obj.B_star{lv1+1}] = GP_linearization(obj.xc_star(lv1+1,:)', obj.us_star(lv1+1,1:2)', obj.Linear, obj.data, obj.object);
                 if lv1<N_star
                     obj.t_star(lv1+1)  = obj.t_star(lv1) + h_star;
                 end
@@ -452,7 +454,7 @@ classdef Planner < dynamicprops
         end
         %% Inverse dynamics 
         function x = inverseDynamics_gp(obj, radius, velocity)
-            x0 = zeros(3,1);
+            x0 = [.32;0;.009];
            [x_object, dx_object] = obj.circularVelocities(radius, velocity);
             x = fmincon(@(x)obj.cost_gp(x, x_object, dx_object),x0,[],[],[],[],[],[],@(x)obj.nonlcon_gp(x, x_object, dx_object));
             
@@ -460,16 +462,17 @@ classdef Planner < dynamicprops
         %% Inverse dynamics 
         function [cost] = cost_gp(obj,x, x_object, dx_object)
                         %extract variables
-            vn = x(1);
-            vt = x(2);
+            fn = x(1);
+            ft = x(2);
             ry = x(3);
             %controller state
             xc = [x_object;ry];
             xs = obj.ps.coordinateTransformCS(xc);
-            us = [vn;vt];
+            uc = [fn;ft;0];
+            us = obj.simulator.ps.force2Velocity(xc,uc);
             %motion equations
 %             f_non = obj.ps.twist_object_i_fun(xc,uc);
-            f_non = obj.simulator.pointSimulatorGP(xs, us);
+            f_non = obj.simulator.ps.forceSimulator(xc, uc)+obj.simulator.pointSimulatorGP_vel(xs, us);
 %             c = [-fn; ft-obj.ps.p.nu_p*fn];
             cost = norm([dx_object - f_non(1:3)]);
         end

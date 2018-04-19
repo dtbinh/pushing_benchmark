@@ -108,8 +108,8 @@ classdef MPCforce < dynamicprops
 
             delta_xc = [xc - xcStar];
 
-            A_nom = A;%obj.planner.ps.A_fun(xcStar, ucStar);
-            B_nom = B;%obj.planner.ps.B_fun(xcStar, ucStar);
+            A_nom = A*0 + 1*obj.planner.ps.A_fun(xcStar, ucStar);
+            B_nom = B*0 + 1*obj.planner.ps.B_fun(xcStar, ucStar);
             A_bar = eye(4)+obj.h_opt*A_nom;
             B_bar = obj.h_opt*B_nom;
  
@@ -136,7 +136,7 @@ classdef MPCforce < dynamicprops
             %Return first element of control sequence
            delta_u = out_delta_u{indexFOM}(1,1:obj.planner.ps.num_ucStates)';
             %Add feedforward and feedback controls together
-            uc = delta_u + ucStar;
+            uc = delta_u*0 + ucStar;
         end
         %% solve MPC function using FOM
         function delta_uc = solveFOM_delta(obj, xc, t)
@@ -151,8 +151,8 @@ classdef MPCforce < dynamicprops
             %Build error state vector
             delta_xc = [xc - xcStar];
 
-            A_nom = A_gp;%obj.planner.ps.A_fun(xcStar, ucStar);
-            B_nom = B_gp;%obj.planner.ps.B_fun(xcStar, ucStar);
+            A_nom = obj.planner.ps.A_fun(xcStar, ucStar);
+            B_nom = obj.planner.ps.B_fun(xcStar, ucStar);
             A_bar = eye(4)+obj.h_opt*A_nom;
             B_bar = obj.h*B_nom;
  
@@ -384,8 +384,8 @@ end
                 %% Build dynamic constraints
         function Opt = addMotionConstraints(obj, Opt, lv1, xcStar, ucStar, A, B)
             
-            A_nom = obj.planner.ps.A_fun(xcStar, ucStar);
-            B_nom = obj.planner.ps.B_fun(xcStar, ucStar);
+            A_nom = A*0+1*obj.planner.ps.A_fun(xcStar, ucStar);
+            B_nom = B*0+1*obj.planner.ps.B_fun(xcStar, ucStar);
             A_bar = eye(obj.planner.ps.num_xcStates)+obj.h_opt*A_nom;
             B_bar = obj.h_opt*B_nom;
 

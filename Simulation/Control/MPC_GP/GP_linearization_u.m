@@ -54,6 +54,6 @@ dry_dv = [0-dg_dv(2,1)-rx*dg_dv(3,1), 1-dg_dv(2,2)-rx*dg_dv(3,2)];
 
 dR_dx = [zeros(size(Linear.dR_dtheta_fun(x_star)))*g zeros(size(Linear.dR_dtheta_fun(x_star)))*g Linear.dR_dtheta_fun(x_star)*g zeros(size(Linear.dR_dtheta_fun(x_star)))*0*g];
 
-A = [dR_dx + R_fun(x_star)*(dg_dx+dg_dv*Linear.dv_dx_fun(x_star, u_star)); dry_dx + dry_dv*Linear.dv_dx_fun(x_star, u_star)];
-B = [R_fun(x_star)*dg_dv*Linear.Gc_fun(x_star); dry_dv*Linear.Gc_fun(x_star)];
+A = [dR_dx + R_fun(x_star)*(dg_dx+dg_dv*Linear.dv_dx_fun(x_star, u_star)); dry_dx*0 + 0*dry_dv*Linear.dv_dx_fun(x_star, u_star)];
+B = [R_fun(x_star)*dg_dv*Linear.Gc_fun(x_star); 0 0 0];%dry_dv*Linear.Gc_fun(x_star)];
 end

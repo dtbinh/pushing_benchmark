@@ -6,7 +6,7 @@ pusher_gp = PointPusher(.3);
 object_gp = Square();
 surface_gp = Surface(.35);
 planar_system_gp = PlanarSystem(pusher_gp, object_gp, surface_gp);
-load('learning_output.mat');
+load('learning_output_03_18_2018_v2.mat');
 
 %build variables
 xo = sym('xo', [3,1]);
@@ -51,9 +51,9 @@ Linear.dv_du_fun = matlabFunction(dv_du,'Vars', {x});
 Linear.Gc_fun = planar_system_gp.Gc_fun;
 
 % [A,B] = GP_linearization_u([0;0;3.1416;0], [.32;0;0], Linear, data, object);
-return
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-rx = -object.a/2;
+rx = -object_gp .a/2;
 %Build A and B matrices
 x_star = [0;0;0;0];
 u_star = [.32;0;0];
@@ -98,7 +98,7 @@ for lv1=1:3
 end
 
 %build expression for dry=dx(4) (note: dry = vt-)
-
+return
 %% Need to account for missing expression
 vbpi=v;
 % vbbi=g();
@@ -112,7 +112,6 @@ dR_dx = [zeros(size(Linear.dR_dtheta_fun(x_star)))*g zeros(size(Linear.dR_dtheta
 
 A = [dR_dx + R_fun(x_star)*(dg_dx+dg_dv*Linear.dv_dx_fun(x_star, u_star)); dry_dx + dry_dv*Linear.dv_dx_fun(x_star, u_star)];
 B = [R_fun(x_star)*dg_dv*Linear.Gc_fun(x_star); dry_dv*Linear.Gc_fun(x_star)];
-
 % clear xo rx ry x u x_data gp_input Cbi
 return
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

@@ -12,7 +12,7 @@ close all
 
 run(strcat(getenv('HOME'),'/pushing_benchmark/Simulation/Simulator/setup.m'));
 
-symbolic_linearize;
+symbolic_linearize_residual;
 
 %% Simulation data and video are stored in /home/Data/<simulation_name>
 simulation_name = 'mpc_force1';

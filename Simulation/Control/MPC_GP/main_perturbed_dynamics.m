@@ -12,7 +12,7 @@ close all
 
 run(strcat(getenv('HOME'),'/pushing_benchmark/Simulation/Simulator/setup.m'));
 
-symbolic_linearize;
+symbolic_linearize_residual;
 
 %% Simulation data and video are stored in /home/Data/<simulation_name>
 simulation_name = 'mpc_perturbed_dynamics1';
@@ -23,7 +23,7 @@ sim_time = 15;
 % x0 = [x;y;theta;xp;yp]
 % x: x position of object, y: y position of object, theta: orientation of object
 % xp: x position of pusher, yp: y position of pusher
-x0_c = [0.0;0.03*1;15*pi/180*1;-.009];
+x0_c = [0.0;0.03*0;15*pi/180*0;.009];
 %%Initiaze system
 is_gp=true;
 %Define objects
@@ -32,20 +32,25 @@ object_controller = Square();
 surface_controller = Surface(.35);
 planar_system_controller = PlanarSystem(pusher_controller, object_controller, surface_controller);
 simulator_controller = Simulator(planar_system_controller, simulation_name, is_gp);
+simulator_controller.Linear = Linear;
 
-pusher_sim = PointPusher(.7);
+pusher_sim = PointPusher(.3);
 object_sim = Square();
 surface_sim = Surface(.35);
 planar_system_sim = PlanarSystem(pusher_sim, object_sim, surface_sim);
+planar_system_sim.f_max = planar_system_sim.f_max+.5;
+planar_system_sim.m_max = planar_system_sim.m_max-.05;
+planar_system_sim.c = planar_system_sim.m_max/planar_system_sim.f_max; 
+planar_system_sim.symbolicLinearize();
 simulator_sim = Simulator(planar_system_sim, strcat(simulation_name,'_sim'), is_gp);
+simulator_sim.Linear = Linear;
 
 x0 = planar_system_sim.coordinateTransformCS(x0_c);
 
 %Build variables
 t0 = 0;
 tf = sim_time;
-h_step = 0.01;
-
+h_step = 0.05;
 
 planner = Planner(planar_system_controller, simulator_controller, Linear, data, object_gp, 'inf_circle', 0.05); %8track
 %Controller setup
@@ -79,14 +84,14 @@ for i1=1:simulator_sim.N
         
         %apply lqr controller
         xc = planar_system_controller.coordinateTransformSC(xs);
-        uc = mpc.solveMPC(xc, simulator_sim.t(i1));
-%         uc = mpc.solveMPC_gp(xc, simulator_sim.t(i1));
+%         uc = mpc.solveMPC(xc, simulator_sim.t(i1));
+        uc = mpc.solveMPC_gp(xc, simulator_sim.t(i1));
         us = planar_system_controller.force2Velocity(xc, uc);
         %simulate forward
         %1. analytical model
-        xs_next = simulator_sim.get_next_state_i(xs, us, simulator_sim.h);
+         xs_next = simulator_sim.get_next_state_i(xs, us, simulator_sim.h);
         %2. gp model
-%         xs_next = simulator.get_next_state_gp_i(xs, us, simulator.h);
+%         xs_next = simulator_sim.get_next_state_gp_i(xs, us, simulator_sim.h);
         %update plot
         simulator_sim.update_plot(xs_next, simulator_sim.t(i1));
 %       %Perform Euler Integration
