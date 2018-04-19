@@ -4,7 +4,7 @@ close all
 
 % addpath('../../GP_learning')
 
-load('data_03_18_2018_v2.mat');
+load('data_03_19_2018.mat');
 
 %% Load data
 x = data.input(:,:);
@@ -78,7 +78,7 @@ data.theta1=theta1;
 data.X=X;
 data.lengthscales=lengthscales;
 
-save('learning_output_03_18_2018_v2', 'data');
+save('learning_output_03_19_2018', 'data');
 % twist_b1 = matlabFunction(fun{1}, 'Vars', {u}, 'File', 'twist_b_gp1');
 % twist_b2 = matlabFunction(fun{2}, 'Vars', {u}, 'File', 'twist_b_gp2');
 % twist_b3 = matlabFunction(fun{3}, 'Vars', {u}, 'File', 'twist_b_gp3');

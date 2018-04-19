@@ -51,7 +51,7 @@ classdef Simulator < dynamicprops
             obj.x_length = 5;
             obj.a_length = 2;
             if is_gp
-                load('learning_output_03_18_2018_v2.mat');
+                load('learning_output_03_19_2018.mat');
                 obj.data=data;
             end
         end

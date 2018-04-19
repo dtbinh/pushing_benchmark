@@ -15,7 +15,7 @@ run(strcat(getenv('HOME'),'/pushing_benchmark/Simulation/Simulator/setup.m'));
 symbolic_linearize_residual;
 
 %% Simulation data and video are stored in /home/Data/<simulation_name>
-simulation_name = 'mpc_perturbed_dynamics1';
+simulation_name = 'mpc_perturbed_dynamics3_gp';
 %% Simulation time
 sim_time = 15;
 
@@ -23,7 +23,7 @@ sim_time = 15;
 % x0 = [x;y;theta;xp;yp]
 % x: x position of object, y: y position of object, theta: orientation of object
 % xp: x position of pusher, yp: y position of pusher
-x0_c = [0.0;0.03*0;15*pi/180*0;.009];
+x0_c = [0.0;0.03*1;15*pi/180*1;-.0055];
 %%Initiaze system
 is_gp=true;
 %Define objects
@@ -108,4 +108,4 @@ end
 % simulator.Animate1pt(simulator.x_star)
 close(simulator_sim.v);
 %% Post-Processing
-save(simulator_sim.FileName, 'simulator');
+save(simulator_sim.FileName, 'simulator_sim');

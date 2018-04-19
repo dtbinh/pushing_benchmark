@@ -6,7 +6,7 @@ pusher_gp = PointPusher(.3);
 object_gp = Square();
 surface_gp = Surface(.35);
 planar_system_gp = PlanarSystem(pusher_gp, object_gp, surface_gp);
-load('learning_output_03_18_2018_v2.mat');
+load('learning_output_03_19_2018.mat');
 
 %build variables
 xo = sym('xo', [3,1]);
