@@ -10,9 +10,9 @@ import json
 import helper
 
 object_pose = []
-buffer_len = 2500
-x_path_buffer = [0]*2500
-y_path_buffer = [0]*2500
+# buffer_len = 2500
+x_path_buffer = []
+y_path_buffer = []
 
 def callback(data):
     global object_pose, object_pose_buffer
@@ -31,7 +31,7 @@ if __name__ == '__main__':
         y_path = np.array(y_path_buffer)
         z_path = y_path*0
         # import pdb;pdb.set_trace()
-        print x_path[-buffer_len:-1]
-        line_strip = helper.trajectory_viz(x_path[-buffer_len:-1], y_path_buffer[-buffer_len:-1], z_path[-buffer_len:-1] + 0.015, color = (0., 0, 1., 1.))
+        print x_path
+        line_strip = helper.trajectory_viz(x_path, y_path, z_path + 0.015, color = (0., 0, 1., 1.))
         marker_pub.publish(line_strip)
         rospy.Rate(rate).sleep()
