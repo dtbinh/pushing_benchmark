@@ -481,7 +481,7 @@ classdef Planner < dynamicprops
             us = obj.simulator.ps.force2Velocity(xc,uc);
             %motion equations
 %             f_non = obj.ps.twist_object_i_fun(xc,uc);
-            f_non = obj.ps.forceSimulator(xc, uc)+1*obj.simulator.pointSimulatorGP_vel(xs, us);
+            f_non = obj.ps.forceSimulator(xc, uc)+0*obj.simulator.pointSimulatorGP_vel(xs, us);
 %             c = [-fn; ft-obj.ps.p.nu_p*fn];
             cost = dry^2+transpose([dx_object - f_non(1:3)])*diag([1,1,1])*[dx_object - f_non(1:3)];
         end

@@ -108,8 +108,8 @@ classdef MPCforce < dynamicprops
 
             delta_xc = [xc - xcStar];
 
-            A_nom = A*1 + 1*obj.planner.ps.A_fun(xcStar, ucStar);
-            B_nom = B*1 + 1*obj.planner.ps.B_fun(xcStar, ucStar);
+            A_nom = A*0 + 1*obj.planner.ps.A_fun(xcStar, ucStar);
+            B_nom = B*0 + 1*obj.planner.ps.B_fun(xcStar, ucStar);
             A_bar = eye(4)+obj.h_opt*A_nom;
             B_bar = obj.h_opt*B_nom;
  
@@ -384,8 +384,8 @@ end
                 %% Build dynamic constraints
         function Opt = addMotionConstraints(obj, Opt, lv1, xcStar, ucStar, A, B)
             
-            A_nom = A*1+1*obj.planner.ps.A_fun(xcStar, ucStar);
-            B_nom = B*1+1*obj.planner.ps.B_fun(xcStar, ucStar);
+            A_nom = A*0+1*obj.planner.ps.A_fun(xcStar, ucStar);
+            B_nom = B*0+1*obj.planner.ps.B_fun(xcStar, ucStar);
             A_bar = eye(obj.planner.ps.num_xcStates)+obj.h_opt*A_nom;
             B_bar = obj.h_opt*B_nom;
 
