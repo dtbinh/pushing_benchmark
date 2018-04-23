@@ -11,8 +11,8 @@ close all
 % frac_train = 1;
 %% Load data
 load('model_from_train_size=4000_proportion=0_kkk=3_lll=6.mat')
-x = input_training(:,:);
-y = output_training(:,:);
+x = input_training(1:200,:);
+y = output_training(1:200,:);
 frac_train = 1;
 
 %% Split data into training/testing
@@ -58,15 +58,15 @@ for lv1=1:size(y, 2)
     % [~, K1star] = feval(covfunc1{:}, theta1, X, x_grid);
     % new_Ey_test = K1star'*alpha;
 
-%     u = sym('u', [size(input_training,2),1]);
-%     k_star{lv1} = [];
-%     for i=1:length(input_training)
-%         u_tmp{lv1} = u./exp(lengthscales{lv1}(:));
-%         [k, dk] = covFunc(theta1{lv1}, X{lv1}(i,:)', u_tmp{lv1}, lengthscales{lv1});
-%         k_star{lv1} = [k_star{lv1}, k];
-%     end
-%     fun{lv1} = k_star{lv1}*alpha{lv1};
-%     fun_total = [fun_total;fun{lv1}];
+    u = sym('u', [size(input_training,2),1]);
+    k_star{lv1} = [];
+    for i=1:length(input_training)
+        u_tmp{lv1} = u./exp(lengthscales{lv1}(:));
+        [k, dk] = covFunc_data(theta1{lv1}, X{lv1}(i,:)', u_tmp{lv1}, lengthscales{lv1});
+        k_star{lv1} = [k_star{lv1}, k];
+    end
+    fun{lv1} = k_star{lv1}*alpha{lv1};
+    fun_total = [fun_total;fun{lv1}];
 %     f_gp = matlabFunction(k_star{lv1}*alpha{lv1}, 'Vars', {xp}, 'File', 'twist_b_gp');
 end
 
@@ -83,11 +83,11 @@ data.X=X;
 data.lengthscales=lengthscales;
 
 
-save('learning_output_model_from_train_size_4000', 'data');
+save('learning_output_model_from_train_size_4000_debug', 'data');
 % save('learning_output_03_19_2018', 'data');
-% twist_b1 = matlabFunction(fun{1}, 'Vars', {u}, 'File', 'twist_b_gp1');
-% twist_b2 = matlabFunction(fun{2}, 'Vars', {u}, 'File', 'twist_b_gp2');
-% twist_b3 = matlabFunction(fun{3}, 'Vars', {u}, 'File', 'twist_b_gp3');
+twist_b1 = matlabFunction(fun{1}, 'Vars', {u}, 'File', 'twist_b_gp1_data');
+twist_b2 = matlabFunction(fun{2}, 'Vars', {u}, 'File', 'twist_b_gp2_data');
+twist_b3 = matlabFunction(fun{3}, 'Vars', {u}, 'File', 'twist_b_gp3_data');
 
 % f = k_star*alpha;
 % 

@@ -171,37 +171,34 @@ fc = (V_new/V_nom)*twist_b_gp_data(gp_input_new);
 fb = Rbc*fc;
 fi = Rib*fb;
 fc_fun = matlabFunction(fc, 'Vars', {x,v});
-fb_fun = matlabFunction(fb, 'Vars', {x,v});
-fi_fun = matlabFunction(fi, 'Vars', {x,v});
 
 
-% dfb_dx = jacobian(fb, x);
-% dfb_du = jacobian(fb, u);
-% dfb_dx_fun = matlabFunction(dfb_dx, 'Vars', {x,u});
-% dfb_du_fun = matlabFunction(dfb_du, 'Vars', {x,u});
+dfb_dx = jacobian(fb, x);
+dfb_du = jacobian(fb, u);
+dfb_dx_fun = matlabFunction(dfb_dx, 'Vars', {x,u});
+dfb_du_fun = matlabFunction(dfb_du, 'Vars', {x,u});
 
 2
+fi = R*fb;
 dfi_dx = jacobian(fi, x);
-dfi_dv = jacobian(fi, v);
-dfi_dx_fun = matlabFunction(dfi_dx, 'Vars', {x,v});
-dfi_dv_fun = matlabFunction(dfi_dv, 'Vars', {x,v});
+dfi_du = jacobian(fi, u);
+dfi_dx_fun = matlabFunction(dfi_dx, 'Vars', {x,u});
+dfi_du_fun = matlabFunction(dfi_du, 'Vars', {x,u});
 3
-vbpi_test = v;
+vbpi_test = v_new;
 vbbi_test = fb(1:2);
 vbpb_test = vbpi_test-vbbi_test-Helper.cross3d(fi(3), [rx;ry]);
 dry_test = vbpb_test(2);
 dry_dx_test = jacobian(dry_test,x);
-dry_dv_test = jacobian(dry_test,v);
-dry_dx_fun_test = matlabFunction(dry_dx_test, 'Vars', {x,v});
-dry_dv_fun_test = matlabFunction(dry_dv_test, 'Vars', {x,v});
+dry_du_test = jacobian(dry_test,u);
+dry_dx_fun_test = matlabFunction(dry_dx_test, 'Vars', {x,u});
+dry_du_fun_test = matlabFunction(dry_du_test, 'Vars', {x,u});
 4
 % dry_fun = matlabFunction(dry, 'Vars', {x,v});
 5
 f_non = [fi;dry_test];
 A_fun = jacobian(f_non, x);
-B_fun = jacobian(f_non, v);
+B_fun = jacobian(f_non, u);
 6
-f_non_fun = matlabFunction(f_non, 'Vars', {x,v});
-
-A_fun = matlabFunction(A_fun, 'Vars', {x,v});
-B_fun = matlabFunction(B_fun, 'Vars', {x,v});
+A_fun = matlabFunction(A_fun, 'Vars', {x,u});
+B_fun = matlabFunction(B_fun, 'Vars', {x,u});

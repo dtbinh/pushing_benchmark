@@ -5,11 +5,11 @@ function [A, B] = GP_linearization(x, v, Linear, data, object)
     x_star = x;
     v_star = v;
     
-    V_star = 0.05;
+    V_star = 0.05/(.2*.02);
     phi_star = 0;
-    c_star = -rx;
+    c_star = .5;
 %     I_star = [V_star, phi_star, c_star]';
-    gp_input_star = [phi_star;c_star];
+    gp_input_star = [c_star; phi_star];
 
     %build large derivative matrices and gp function output
     N = length(data.X{1});
@@ -31,8 +31,9 @@ function [A, B] = GP_linearization(x, v, Linear, data, object)
         tic
 
         k_star{lv1}=Linear.k_fun{lv1}(x_star,gp_input_star,data.X{lv1}');
-        dK_dphi{lv1}=Linear.dk_dphi_fun{lv1}(x_star,gp_input_star,data.X{lv1}');
         dK_dc{lv1}=Linear.dk_dc_fun{lv1}(x_star,gp_input_star,data.X{lv1}');
+        dK_dphi{lv1}=Linear.dk_dphi_fun{lv1}(x_star,gp_input_star,data.X{lv1}');
+        
 %         dK_dx{lv1}=[zeros(3,length(dK_ry{lv1}));dK_ry{lv1}];
 %         dK_dv{lv1}=Linear.dk_dv_fun{lv1}(x_star,v_star,data.X{lv1}');
     %     for n=1:N
@@ -51,7 +52,7 @@ function [A, B] = GP_linearization(x, v, Linear, data, object)
         dg_dc_tmp = dK_dc{lv1}*data.alpha{lv1};
         dg_dphi = [dg_dphi;dg_dphi_tmp];
         dg_dc = [dg_dc;dg_dc_tmp];
-        dg_dI = [dg_dI;0 dg_dphi_tmp dg_dc_tmp];
+        dg_dI = [dg_dI;0 dg_dc_tmp dg_dphi_tmp];
 
         %concat gp derivatives together
 %         dg_dx_tmp = dg_dI
@@ -59,7 +60,7 @@ function [A, B] = GP_linearization(x, v, Linear, data, object)
 %         dg_dv = [dg_dv;transpose(dK_dv{lv1}*data.alpha{lv1})];
 
     end
-    
+    twist_b = V_star*g;
     dg_dx = double(dg_dI*Linear.dI_dx);
     dg_dv = double(dg_dI*Linear.dI_dv_fun(v_star));
 
