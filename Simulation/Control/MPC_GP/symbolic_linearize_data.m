@@ -6,7 +6,7 @@ pusher_gp = PointPusher(.3);
 object_gp = Square();
 surface_gp = Surface(.35);
 planar_system_gp = PlanarSystem(pusher_gp, object_gp, surface_gp);
-load('learning_output_model_from_train_size_4000_debug.mat');
+load('learning_output_model_from_train_size_4000.mat');
 
 %build variables
 xo = sym('xo', [3,1]);
@@ -24,8 +24,9 @@ for lv1=1:3
     %build symbolic derivatives of kernel
     [k_sym{lv1} dk_sym{lv1}] = covFunc_data(data.theta1{lv1}, x_data, gp_input./exp(data.lengthscales{lv1}(:)), exp(data.lengthscales{lv1}(:)));
 %     [k_sym{lv1} dk_sym{lv1}] = covFunc(theta, x_data, gp_input);
-    dk_dphi_sym{lv1} = dk_sym{lv1}(1,:);
-    dk_dc_sym{lv1} = dk_sym{lv1}(2,:);
+dk_dc_sym{lv1} = dk_sym{lv1}(1,:);
+    dk_dphi_sym{lv1} = dk_sym{lv1}(2,:);
+    
 %     dk_dx_sym_test{lv1} = jacobian(k_sym{lv1}, x);
 %     dk_dv_sym_test{lv1} = jacobian(k_sym{lv1}, v);
     %convert to matlab function
@@ -44,9 +45,9 @@ Rib_fun = matlabFunction(Rib,  'Vars', {x});
 dR_dtheta = diff(Rib, x(3));
 Linear.dRib_dtheta_fun = matlabFunction(dR_dtheta,  'Vars', {x});
 %diff dxb relative to I
-Ccb = Helper.C3_2d(I(2));
+Ccb = Helper.C3_2d(I(3));
 Rbc = [transpose(Ccb) [0; 0];0 0 1];
-dRbc_dphi = diff(Rbc, I(2));
+dRbc_dphi = diff(Rbc, I(3));
 Linear.Rbc_fun = matlabFunction(Rbc,  'Vars', {gp_input});
 Linear.dRbc_dphi_fun = matlabFunction(dRbc_dphi,  'Vars', {gp_input});
 %convert I to v
@@ -75,7 +76,7 @@ Linear.dI_dx = dI_dx;
     V_star = 0.05;
     phi_star = 0;
     c_star = .5;
-%     I_star = [V_star, phi_star, c_star]';
+    I_star = [V_star, c_star, phi_star];
     gp_input_star = [c_star; phi_star];
 
     %build large derivative matrices and gp function output
@@ -127,15 +128,18 @@ Linear.dI_dx = dI_dx;
 %         dg_dv = [dg_dv;transpose(dK_dv{lv1}*data.alpha{lv1})];
 
     end
-    twist_c = (V_star/V_nom)*g;
-    dg_dx = double(dg_dI*Linear.dI_dx);
-    dg_dv = double(dg_dI*Linear.dI_dv_fun(v_star));
+    
+%     dg_dx = double(dg_dI*Linear.dI_dx);
+%     dg_dv = double(dg_dI*Linear.dI_dv_fun(v_star));
 
     %compute partial derivatives
-    dxb_dV = Linear.Rbc_fun(x_star)*g;
-    dxb_dphi = V_star*(Linear.dRbc_dphi_fun(x_star)*g+Linear.Rbc_fun(x_star)*dg_dphi);
-    dxb_dc = V_star*(Linear.Rbc_fun(x_star)*dg_dc);
-    dxb_dI = [dxb_dV dxb_dphi dxb_dc];
+    dxb_dV = (1/V_nom)*Linear.Rbc_fun(x_star)*g;
+    dxb_dphi = (V_star/V_nom)*(Linear.dRbc_dphi_fun(x_star)*g+Linear.Rbc_fun(x_star)*dg_dphi);
+    dxb_dc = (V_star/V_nom)*(Linear.Rbc_fun(x_star)*dg_dc);
+    dxb_dI = [dxb_dV dxb_dc dxb_dphi];
+    dg_dx = double(dxb_dI*Linear.dI_dx);
+    dg_dv = double(dxb_dI*Linear.dI_dv_fun(v_star));
+    g = (V_star/V_nom)*g;
 
     %build expression for dry=dx(4) (note: dry = vt-)
 
@@ -156,24 +160,35 @@ Linear.dI_dx = dI_dx;
     
 % return
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-V_new = sqrt(v(1)^2+v(2)^2);
+V_new =sqrt(v(1)^2+v(2)^2);%sqrt(v(1)^2+v(2)^2);%I(1);%
 c_new = 1/2-ry/object_gp.a;
-phi_new = atan(v(2)/v(1));
-V_nom = .2*.02;
+phi_new = atan(v(2)/v(1));;%atan(v(2)/v(1));%I(3);%
 
-gp_input_new = [c_new;phi_new];
+gp_input_new = [c_new;phi_new];%gp_input;%
 
 Ccb = Helper.C3_2d(phi_new);
 Cbi = Helper.C3_2d(x(3));
 Rbc = [transpose(Ccb) [0; 0];0 0 1];
 Rib = [transpose(Cbi) [0; 0];0 0 1];
-fc = (V_new/V_nom)*twist_b_gp_data(gp_input_new);
+fc = twist_b_gp_data(gp_input_new)*(V_new/V_nom);
 fb = Rbc*fc;
 fi = Rib*fb;
-fc_fun = matlabFunction(fc, 'Vars', {x,v});
+
+% dfc_dI = jacobian(fc, v);
+% dfc_dI_fun = matlabFunction(dfc_dI, 'Vars', {x,v});
+% fc_fun = matlabFunction(fc, 'Vars', {x,I});
+
 fb_fun = matlabFunction(fb, 'Vars', {x,v});
 fi_fun = matlabFunction(fi, 'Vars', {x,v});
+dfc_dI = jacobian(fc, I);
+dfb_dx = jacobian(fb, x);
+% dfb_dI = jacobian(fb, I);
+dfb_dv = jacobian(fb, v);
 
+% dfc_dI_fun = matlabFunction(dfc_dI, 'Vars', {I});
+% dfb_dI_fun = matlabFunction(dfb_dI, 'Vars', {I});
+dfb_dx_fun = matlabFunction(dfb_dx, 'Vars', {x,v});
+dfb_dv_fun = matlabFunction(dfb_dv, 'Vars', {x,v});
 
 % dfb_dx = jacobian(fb, x);
 % dfb_du = jacobian(fb, u);

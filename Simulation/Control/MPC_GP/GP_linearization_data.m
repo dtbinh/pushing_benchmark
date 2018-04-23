@@ -1,15 +1,16 @@
-function [A, B] = GP_linearization(x, v, Linear, data, object)
+function [A, B] = GP_linearization_data(x, v, Linear, data, object)
 
     rx = -object.a/2;
     %Build A and B matrices
     x_star = x;
     v_star = v;
     
-    V_star = 0.05/(.2*.02);
-    phi_star = 0;
-    c_star = .5;
+    V_star =sqrt(v(1)^2+v(2)^2);%sqrt(v(1)^2+v(2)^2);%I(1);%
+    c_star = 1/2-x(4)/object.a;
+    phi_star = atan(v(2)/v(1));;%atan(v(2)/v(1));%I(3);%
 %     I_star = [V_star, phi_star, c_star]';
     gp_input_star = [c_star; phi_star];
+    V_nom = .2*.02;
 
     %build large derivative matrices and gp function output
     N = length(data.X{1});
@@ -60,15 +61,18 @@ function [A, B] = GP_linearization(x, v, Linear, data, object)
 %         dg_dv = [dg_dv;transpose(dK_dv{lv1}*data.alpha{lv1})];
 
     end
-    twist_b = V_star*g;
-    dg_dx = double(dg_dI*Linear.dI_dx);
-    dg_dv = double(dg_dI*Linear.dI_dv_fun(v_star));
+    
+%     dg_dx = double(dg_dI*Linear.dI_dx);
+%     dg_dv = double(dg_dI*Linear.dI_dv_fun(v_star));
 
     %compute partial derivatives
-    dxb_dV = Linear.Rbc_fun(x_star)*g;
-    dxb_dphi = V_star*(Linear.dRbc_dphi_fun(x_star)*g+Linear.Rbc_fun(x_star)*dg_dphi);
-    dxb_dc = V_star*(Linear.Rbc_fun(x_star)*dg_dc);
-    dxb_dI = [dxb_dV dxb_dphi dxb_dc];
+    dxb_dV = (1/V_nom)*Linear.Rbc_fun(x_star)*g;
+    dxb_dphi = (V_star/V_nom)*(Linear.dRbc_dphi_fun(x_star)*g+Linear.Rbc_fun(x_star)*dg_dphi);
+    dxb_dc = (V_star/V_nom)*(Linear.Rbc_fun(x_star)*dg_dc);
+    dxb_dI = [dxb_dV dxb_dc dxb_dphi];
+    dg_dx = double(dxb_dI*Linear.dI_dx);
+    dg_dv = double(dxb_dI*Linear.dI_dv_fun(v_star));
+    g = (V_star/V_nom)*g;
 
     %build expression for dry=dx(4) (note: dry = vt-)
 
