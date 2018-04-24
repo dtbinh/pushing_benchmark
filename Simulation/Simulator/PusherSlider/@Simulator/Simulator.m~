@@ -264,25 +264,18 @@ classdef Simulator < dynamicprops
             c=1/2-ry/obj.ps.o.a;
             phi = atan(vt/vn);
             gp_input = [c phi];
-            V_nom = .02*.2;
-            Ccb = Helper.C3_2d(phi);
-            Rbc = [transpose(Ccb) [0; 0];0 0 1];
             %Build output vector
 %                twist_b =obj.pointSimulatorAnalytical_b(vbpi,ry);
             twist_c = [];
             for lv1=1:3
-                [~, K1star] = feval(obj.data.covfunc1{lv1}{:}, obj.data.theta1{lv1}, obj.data.X{lv1}, gp_input./exp(obj.data.lengthscales{lv1}(:)'));
-                twist_c = [twist_c;K1star'*obj.data.alpha{lv1}];
+                [~, K1star] = feval(obj.data.covfunc1{lv1}{:}, obj.data.theta1{lv1}, obj.data.X{lv1}, [vbpi' ry]./exp(obj.data.lengthscales{lv1}(:)'));
+                twist_b = [twist_b;K1star'*obj.data.alpha{lv1}];
             end
-            
-            twist_c = (V/V_nom)*twist_c;
-            twist_b = Rbc'*twist_c;
             
             vbbi = twist_b(1:2);
             dtheta = twist_b(3);
             vibi = Cbi'*vbbi;
             twist_i = [vibi;dtheta;us];
-%             twist_i(2) = -twist_i(2);
         end
         
         function twist_i = pointSimulatorGP_vel(obj, xs, us)

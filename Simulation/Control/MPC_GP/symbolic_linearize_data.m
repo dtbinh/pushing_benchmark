@@ -47,6 +47,7 @@ Linear.dRib_dtheta_fun = matlabFunction(dR_dtheta,  'Vars', {x});
 %diff dxb relative to I
 Ccb = Helper.C3_2d(I(3));
 Rbc = [transpose(Ccb) [0; 0];0 0 1];
+Rbc=transpose(Rbc);%temporary hack as delta_y is not defined properly
 dRbc_dphi = diff(Rbc, I(3));
 Linear.Rbc_fun = matlabFunction(Rbc,  'Vars', {gp_input});
 Linear.dRbc_dphi_fun = matlabFunction(dRbc_dphi,  'Vars', {gp_input});
@@ -65,7 +66,7 @@ Linear.dI_dx = dI_dx;
 % Linear.Gc_fun = planar_system_gp.Gc_fun;
 
 % [A,B] = GP_linearization_data([0;0;0;0], [.05;0], Linear, data, object_gp);
-
+return
 
     rx = -object_gp.a/2;
     %Build A and B matrices

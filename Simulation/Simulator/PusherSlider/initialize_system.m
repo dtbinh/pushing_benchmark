@@ -8,7 +8,7 @@ pusher = PointPusher(0.3);
 object = Square();
 surface = Surface(0.35);
 planar_system = PlanarSystem(pusher, object, surface);
-simulator = Simulator(planar_system, simulation_name, is_gp);
+simulator = Simulator(planar_system, simulation_name);
 
 x0 = planar_system.coordinateTransformCS(x0_c);
 

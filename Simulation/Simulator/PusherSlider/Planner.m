@@ -32,7 +32,8 @@ classdef Planner < dynamicprops
             elseif strcmp(name, '8Track')
                 obj.build8track(-0.15, vel, [0;0;0*pi/180;0]);
             elseif strcmp(name, 'inf_circle')
-                obj.build_inf_circle(-0.15, vel, [0;0;0*pi/180;0]);
+                
+                obj.build_inf_circle_vel_space(-0.15, vel, [0;0;0*pi/180;0]);
             end
 %              obj.buildStraightTrajectory();
 %              obj.buildCircleTrajectory(-0.15, 0.05, [0;0;90*pi/180;0]);
@@ -343,7 +344,7 @@ classdef Planner < dynamicprops
             obj.us_star(1,:) = usStarTemp';
             obj.xc_star(1,:) = xc';
             obj.uc_star(1,:) = usStarTemp';
-            [obj.A_star(1,:,:), obj.B_star(1,:,:)] = GP_linearization(obj.xc_star(1,:)', obj.us_star(1,1:2)', obj.Linear, obj.data, obj.object);
+            [obj.A_star(1,:,:), obj.B_star(1,:,:)] = GP_linearization_data(obj.xc_star(1,:)', obj.us_star(1,1:2)', obj.Linear, obj.data, obj.object);
             
             for lv1=1:N_star
                 lv1
@@ -365,7 +366,7 @@ classdef Planner < dynamicprops
                 obj.us_star(lv1+1,:) = usStarTemp';
                 obj.xc_star(lv1+1,:) = xcStarTemp';
                 obj.uc_star(lv1+1,:) = usStarTemp';
-                [obj.A_star(lv1+1,:,:), obj.B_star(lv1+1,:,:)] = GP_linearization(obj.xc_star(lv1+1,:)', obj.us_star(lv1+1,1:2)', obj.Linear, obj.data, obj.object);
+                [obj.A_star(lv1+1,:,:), obj.B_star(lv1+1,:,:)] = GP_linearization_data(obj.xc_star(lv1+1,:)', obj.us_star(lv1+1,1:2)', obj.Linear, obj.data, obj.object);
                 if lv1<N_star
                     obj.t_star(lv1+1)  = obj.t_star(lv1) + h_star;
                 end
