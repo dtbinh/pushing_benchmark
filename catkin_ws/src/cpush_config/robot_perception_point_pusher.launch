@@ -1,0 +1,37 @@
+<?xml version="1.0" ?>
+<launch>
+  <arg name="gui" default="false" />
+  <arg name="have_robot" default="true" />
+  
+  <arg name="irb_120" default="true" />
+  
+  <param name="use_gui" value="$(arg gui)"/>
+  <param name="robot_description" command="$(find xacro)/xacro.py $(find cpush_config)/models/IRB120/irb_120_twofinger.xacro" />
+    
+  <node if="$(arg irb_120)" pkg="tf" type="static_transform_publisher" name="baselink_broadcaster" args="0 0 0.60 0 1.57079632679 0 map base_link 100" />
+  
+
+<!--
+  <node unless="$(arg have_robot)" name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" >
+    <rosparam unless="$(arg have_robot)" command="load" file="$(find cpush_config)/source_list_param.yaml" />
+  </node>
+-->
+    
+  <include file="$(find cpush_config)/realsense.launch" />
+  
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" respawn="true" />
+
+  <node name="viewer_cam_tf" pkg="tf" type="static_transform_publisher" args="9.29097116e-01 9.09346776e-03 5.51691199e-01 6.41001532e-01 6.34452019e-01 -3.08489733e-01 -3.02360307e-01 /map /viewer_rgb_optical_frame 100" />
+  
+  <node pkg="tf" type="static_transform_publisher" name="viconworldlink_broadcaster" 
+  args=" 8.15669536e-02 7.06243787e-02 7.35411744e-03 1.50023761e-03 -1.47272372e-03 -7.11213323e-01 7.02973107e-01 /map /viconworld 100" />
+    <node pkg="tf" type="static_transform_publisher" name="cross_tip_broadcaster" args="0 0 0.156 0 0 0 /link_6 /cross_tip 100" /> <!-- for transferring calib tip to link6-->
+
+  <node pkg="tf" type="static_transform_publisher" name="origin_broadcaster"  args="0. 0. 0.  0.          0.         -0.70710678  0.70710678 /map /origin 100" />
+
+  <node pkg="tf" type="static_transform_publisher" name="vicontip_broadcaster" args="0 0 0.193 0 0 0 /link_6 /vicon_tip 100" /> <!-- for transferring calib tip to link6-->
+  
+    <node pkg="tf" type="static_transform_publisher" name="start_broadcaster" args="0.35 0 0. 0 0 0 /map /track_start 100" /> <!-- for transferring calib tip to link6-->
+
+
+</launch>
