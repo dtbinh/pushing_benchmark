@@ -1,0 +1,20 @@
+image_width: 1920
+image_height: 1080
+camera_name: observer
+camera_matrix:
+  rows: 3
+  cols: 3             
+  data: [617.605, 0.0, 305.776, 0.0, 617.605, 238.914, 0.0, 0.0, 1.0]
+distortion_model: plumb_bob
+distortion_coefficients:
+  rows: 1
+  cols: 5
+  data: [0.0, 0.0, -0.0, 0.0, 0.000000]
+rectification_matrix:
+  rows: 3
+  cols: 3
+  data: [1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000]
+projection_matrix:
+  rows: 3
+  cols: 4
+  data: [617.605, 0.0, 305.776, 0.0, 0.0, 617.605, 238.914, 0.0, 0.0, 0.0, 1.0, 0.0]

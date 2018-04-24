@@ -1,0 +1,20 @@
+image_width: 1920
+image_height: 1080
+camera_name: viewer
+camera_matrix:
+  rows: 3
+  cols: 3 
+  data: [592.87826621599436, 0.0, 318.91741382996298, 0.0, 595.94914845944493, 244.77901140275691, 0.0, 0.0, 1.0]
+distortion_model: plumb_bob
+distortion_coefficients:
+  rows: 1
+  cols: 5
+  data: [0.0, 0.0, -0.0, 0.0, 0.000000]
+rectification_matrix:
+  rows: 3
+  cols: 3
+  data: [1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000]
+projection_matrix:
+  rows: 3
+  cols: 4
+  data: [592.87826621599436, 0.0, 318.91741382996298, 0.0, 0.0, 595.94914845944493, 244.77901140275691, 0.0, 0.0, 0.0, 1.0, 0.0]

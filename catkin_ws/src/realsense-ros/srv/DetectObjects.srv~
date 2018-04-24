@@ -1,0 +1,12 @@
+# List of candidate objects
+string[] names
+
+---
+
+# Point cloud data
+float32[] cloudXYZ # 480x640x3 (row-major order) XYZ camera coordinates
+uint8 cloudRGB # 480x640x3 (row-major order) corresponding RGB values
+
+# Detection information for all objects
+ObjectHypothesis[] objects 
+

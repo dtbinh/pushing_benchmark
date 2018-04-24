@@ -1,0 +1,17 @@
+observer:
+    serial_number: "614204002137"
+    camera_info_url: "/home/mcube/pushing_benchmark/catkin_ws/src/realsense-ros/calibrations/614204002137.yaml"
+    width: 1920
+    height: 1080
+    read_depth: false
+    framerate: 30
+    rgb_frame_id: observer_rgb_frame
+    
+viewer: 
+    serial_number: "613201000779"
+    camera_info_url: "/home/mcube/pushing_benchmark/catkin_ws/src/realsense-ros/calibrations/613201000779.yaml"
+    width: 1920
+    height: 1080
+    read_depth: false
+    framerate: 30
+    rgb_frame_id: viewer_rgb_frame
