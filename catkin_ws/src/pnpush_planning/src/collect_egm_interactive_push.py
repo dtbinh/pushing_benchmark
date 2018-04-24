@@ -1,0 +1,149 @@
+#!/usr/bin/env python
+import egm_pb2
+import socket
+from time import sleep
+import rospy
+import math
+from Xlib import display
+import Xlib
+import numpy as np
+from sensor_msgs.msg import JointState
+from std_msgs.msg import Header
+import time
+from ik.helper import quat_from_yaw, transformBack, qwxyz_from_qxyzw, transform_back, qxyzw_from_qwxyz
+import threading
+import tf
+from ik.roshelper import pubFrame
+
+from Xlib import X, XK, display
+from Xlib.ext import record
+from Xlib.protocol import rq
+
+
+record_dpy = display.Display()
+local_dpy = display.Display()
+
+ispause = False
+theta = 0.0
+flag = True
+
+def lookup_keysym(keysym):
+    for name in dir(XK):
+        if name[:3] == "XK_" and getattr(XK, name) == keysym:
+            return name[3:]
+    return "[%d]" % keysym
+
+def smooth_it(src, dst):
+    global ispause
+    diff = np.array(dst) - np.array(src)
+    dist = np.linalg.norm(diff)
+    if ispause:
+        return src
+    if dist > 5:
+        newdst = tuple(src + diff / dist * 5)
+        return newdst
+    return dst
+    
+def capit(dst):
+    dst = list(dst)
+    #if dst[0] <= 0.15: dst[0] = 0.15
+    #if dst[0] >= 0.35: dst[0] = 0.35
+    #if dst[1] <= -0.15: dst[1] = -0.15
+    #if dst[1] >= 0.15: dst[1] = 0.15
+    return tuple(dst)
+
+def GetTickCount():
+    return int((time.time() + 0.5) * 1000)
+
+starttick = GetTickCount()
+
+def record_callback(reply):
+    global ispause, theta, flag 
+    if reply.category != record.FromServer:
+        return
+    if reply.client_swapped:
+        print "* received swapped protocol data, cowardly ignored"
+        return
+    if not len(reply.data) or ord(reply.data[0]) < 2:
+        # not an event
+        return
+
+    data = reply.data
+    while len(data):
+        event, data = rq.EventField(None).parse_binary_value(data, record_dpy.display, None, None)
+
+        if event.type in [X.KeyPress, X.KeyRelease]:
+            pr = event.type == X.KeyPress and "Press" or "Release"
+
+            keysym = local_dpy.keycode_to_keysym(event.detail, 0)
+            if not keysym:
+                print "KeyCode%s" % pr, event.detail
+            else:
+                print "KeyStr%s" % pr, lookup_keysym(keysym)
+                
+                if lookup_keysym(keysym) == 'space' and event.type == X.KeyPress:
+                    ispause = not ispause
+
+            if event.type == X.KeyPress and keysym == XK.XK_Escape:
+                local_dpy.record_disable_context(ctx)
+                local_dpy.flush()
+                flag = False
+                return
+        elif event.type == X.ButtonPress:
+            print "ButtonPress", event.detail
+            if event.detail == 4:
+                theta += 0.05
+            if event.detail == 5:
+                theta -= 0.05
+
+if __name__=='__main__':
+    rospy.init_node('collect_egm_interactive_push')
+    joint_pub = rospy.Publisher("/joint_states", JointState, queue_size = 2)
+    br = tf.TransformBroadcaster()
+
+    
+    rospy.sleep(1)
+    
+    UDP_PORT=6510
+    sequenceNumber = 0
+
+    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    sock.bind(("", UDP_PORT))
+    
+    screen = display.Display().screen()
+    root_screen = display.Display().screen().root
+    
+    
+    rate = rospy.Rate(250) # 250hz
+    while flag:
+        rate.sleep()
+        # 1. get robot pose
+        egm_robot = egm_pb2.EgmRobot()
+        data, addr = sock.recvfrom(1024)
+        
+        if len(data) == 0:
+            print("No message\n");
+            continue;
+            
+        egm_robot.ParseFromString(data)
+        pos_read = egm_robot.feedBack.cartesian.pos
+        orient_read = egm_robot.feedBack.cartesian.orient
+        pos_read = pos_read.x,  pos_read.y,  pos_read.z
+        #print 'read', pos_read
+        print 'orient_read', (orient_read.u0,orient_read.u1,orient_read.u2,orient_read.u3)
+        #pos_read = 0.32, 0.03, 0.3
+
+        # 2. if robot connected, do the following
+    
+        # 3. publish joint position and cartesian position
+        js = JointState()
+        js.header = Header()
+        js.header.stamp = rospy.Time.now()
+        js.name = ['joint1', 'joint2', 'joint3', 'joint4', 'joint5', 'joint6']
+        js.position = [j for j in egm_robot.feedBack.joints.joints]
+        js.velocity = [0.0 for i in xrange(6)]
+        js.effort = [0.0 for i in xrange(6)]
+        joint_pub.publish(js)
+        
+    sock.close()
+    print 'End of program'
