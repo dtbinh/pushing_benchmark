@@ -92,7 +92,7 @@ outMatrices FOM::readMatrices(int flag){
     //~ Read Matrices
     Json::Value root;
     Json::Reader reader;
-    char const* tmp = getenv( "FPUSH_BASE" );
+    char const* tmp = getenv( "PUSHING_BENCHMARK_BASE" );
     string envStr( tmp );
     string fileName;
     if (flag==0){fileName = envStr + "/Simulation/Data/MatricesMode0_" + line_pusher->pusher_type + ".json"; }

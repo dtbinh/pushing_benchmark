@@ -90,8 +90,8 @@ void *loopControl(void *thread_arg)
 //  _q_offset_pusher << 0.198955, 0, 0.;//line pusher
 
   //8Track
-    _q_offset_slider << 0.347502, 0, 0; //point pusher
-    _q_offset_pusher << 0.347502, 0, 0.0;//point pusher
+    _q_offset_slider << 0.3484033942222595, 0, 0; //point pusher
+    _q_offset_pusher << 0.3484033942222595, 0, 0.0;//point pusher
 //  _q_offset_slider << 0.111927, 0, 0; //line pusher
 //  _q_offset_pusher << 0.111927, 0, -3.1416;//line pusher
 

@@ -5,7 +5,7 @@ Panels:
     Property Tree Widget:
       Expanded:
         - /TF1/Frames1
-        - /Camera1
+        - /Marker2
       Splitter Ratio: 0.316298008
     Tree Height: 312
   - Class: rviz/Selection
@@ -27,7 +27,7 @@ Panels:
     Experimental: false
     Name: Time
     SyncMode: 0
-    SyncSource: Observer
+    SyncSource: Camera
 Visualization Manager:
   Class: ""
   Displays:
@@ -163,6 +163,10 @@ Visualization Manager:
           Value: false
         origin:
           Value: true
+        track_start:
+          Value: true
+        vicon/StainlessSteel/StainlessSteel_rect:
+          Value: true
         vicon_tip:
           Value: false
         viconworld:
@@ -180,8 +184,11 @@ Visualization Manager:
             {}
           origin:
             {}
-          viconworld:
+          track_start:
             {}
+          viconworld:
+            vicon/StainlessSteel/StainlessSteel_rect:
+              {}
           viewer_rgb_optical_frame:
             {}
       Update Interval: 0
@@ -229,6 +236,14 @@ Visualization Manager:
         Value: true
         Viewer: true
       Zoom Factor: 1
+    - Class: rviz/Marker
+      Enabled: true
+      Marker Topic: /visualization_marker_desired_trajectory2
+      Name: Marker
+      Namespaces:
+        "": true
+      Queue Size: 100
+      Value: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48

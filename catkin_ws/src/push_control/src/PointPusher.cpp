@@ -121,7 +121,7 @@ outStarStruct PointPusher::buildStraightLineTrajectory(string v_eq){
 
     Json::Value root;
     Json::Reader reader;
-    char const* tmp = getenv( "FPUSH_BASE" );
+    char const* tmp = getenv( "PUSHING_BENCHMARK_BASE" );
     string envStr( tmp );
     string fileName;
     fileName = envStr + "/Simulation/Data/Straight_point_pusher_vel_" + v_eq + ".json";
@@ -158,7 +158,7 @@ outStarStruct PointPusher::build8TrackTrajectory(string v_eq){
 
     Json::Value root;
     Json::Reader reader;
-    char const* tmp = getenv( "FPUSH_BASE" );
+    char const* tmp = getenv( "PUSHING_BENCHMARK_BASE" );
     string envStr( tmp );
     string fileName;
     fileName = envStr + "/Simulation/Data/8Track_point_pusher_vel_" + v_eq + ".json";
@@ -195,7 +195,7 @@ outStarStruct PointPusher::buildTrajectory(string file_name){
     Json::Value root;
     Json::Reader reader;
 
-    char const* tmp = getenv( "FPUSH_BASE" );
+    char const* tmp = getenv( "PUSHING_BENCHMARK_BASE" );
     string envStr( tmp );
     string fileName;
     fileName = envStr + file_name;

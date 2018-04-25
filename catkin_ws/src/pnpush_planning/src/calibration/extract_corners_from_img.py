@@ -12,9 +12,9 @@ if len(sys.argv) > 1:
     save_dir = os.environ["PUSHING_BENCHMARK_BASE"] + "/" +sys.argv[1] +"/"
 else:
     save_dir = os.environ["PUSHING_BENCHMARK_BASE"] + "/camera_calib/"
-with open(save_dir+'data.json') as data_file:    
+with open(save_dir+'data.json') as data_file:
     data = json.load(data_file)
-  
+
 image = []
 image_viz = []
 refPt = (0,0)
@@ -24,7 +24,7 @@ def click(event, x, y, flags, param):
     global refPt
     global image
     global image_viz
-    
+
     if event == cv2.EVENT_LBUTTONUP:
     # record the ending (x, y) coordinates and indicate that
     # the cropping operation is finished
@@ -58,7 +58,13 @@ for d in data:
         key = cv2.waitKey(3) & 0xFF
         if key == ord("n"):
             break
-            
+
+        if key == ord("c"):  # skip it
+            break
+
+    if key == ord("c"):  # skip it (maybe pattern not in view)
+        continue
+
     corners = np.float32([refPt])
     print 'clicked' , refPt
     #import pdb;

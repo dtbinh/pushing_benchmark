@@ -59,6 +59,16 @@ cmd "8-controller" {
     host = "localhost";
 }
 
+cmd "9-nominal-traj" {
+    exec = "rosrun control desired_trajectory_publisher.py";
+    host = "localhost";
+}
+
+cmd "9-object-traj" {
+    exec = "rosrun control visualize_trajectory.py";
+    host = "localhost";
+}
+
 
 
 script "run_real" {
@@ -73,6 +83,18 @@ script "run_real" {
     wait ms 2000;
     start cmd "8-controller";
     start group "visualization";
+}
+
+script "run_FOM" {
+    start cmd "0-roscore";
+    wait ms 1000;
+    start cmd "1-perception-real";
+    start cmd "4-vicon";
+    start cmd "5-rviz";
+    wait ms 2000;
+    start group "visualization";
+    start cmd "9-nominal-traj";
+    start cmd "9-object-traj";
 }
 
 script "run_virtual" {

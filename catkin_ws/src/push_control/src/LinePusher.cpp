@@ -34,7 +34,9 @@ struct outStarStruct outStar;
 //outStar = buildNominalTrajectory(0.001);
 //outStar = buildStraightLineTrajectory("0_05");
 //outStar = build8TrackTrajectory("0_05");
+    cout<<"before"<<endl;
 outStar = buildTrajectory("/Simulation/Data/8Track_line_pusher_radius_0_15_vel_0_05_infinity.json");
+    cout<<"AFTER"<<endl;
 xc_star = outStar.xcStar;
 uc_star = outStar.ucStar;
 xs_star = outStar.xsStar;
@@ -71,7 +73,7 @@ outStarStruct LinePusher::buildTrajectory(string file_name){
     Json::Value root;
     Json::Reader reader;
 
-    char const* tmp = getenv( "FPUSH_BASE" );
+    char const* tmp = getenv( "PUSHING_BENCHMARK_BASE" );
     string envStr( tmp );
     string fileName;
     fileName = envStr + file_name;
@@ -143,7 +145,7 @@ outStarStruct LinePusher::buildStraightLineTrajectory(string v_eq){
 
     Json::Value root;
     Json::Reader reader;
-    char const* tmp = getenv( "FPUSH_BASE" );
+    char const* tmp = getenv( "PUSHING_BENCHMARK_BASE" );
     string envStr( tmp );
     string fileName;
     fileName = envStr + "/Simulation/Data/Straight_line_pusher_vel_" + v_eq + ".json";
@@ -180,7 +182,7 @@ outStarStruct LinePusher::build8TrackTrajectory(string v_eq){
 
     Json::Value root;
     Json::Reader reader;
-    char const* tmp = getenv( "FPUSH_BASE" );
+    char const* tmp = getenv( "PUSHING_BENCHMARK_BASE" );
     string envStr( tmp );
     string fileName;
     fileName = envStr + "/Simulation/Data/8Track_line_pusher_vel_" + v_eq + ".json";

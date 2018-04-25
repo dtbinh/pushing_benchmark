@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Get an array of 
+# Get an array of
 # [3D apriltag pose from vicon in world frame, apriltag 3D position from detector in webcam frame]
 
 # want to find the mapping between webcam frame wrt world.
@@ -25,14 +25,14 @@ listener = tf.TransformListener()
 
 #limits = [0.32, 0.54, -0.17, +0.06, 0.265, 0.30]  #[xmin, xmax, ymin, ymax, zmin, zmax] # observer
 #limits = [0.25, 0.54, -0.17, +0.06, 0.265, 0.30]  #[xmin, xmax, ymin, ymax, zmin, zmax] # viewer
-limits = [0.218, 0.50, -0.28 , -0.10, 0.218, 0.31]  #[xmin, xmax, ymin, ymax, zmin, zmax] # observer suction
+limits = [0.1, 0.50, -0.3 , 0.30, 0.218, 0.31]  #[xmin, xmax, ymin, ymax, zmin, zmax] # observer suction
 nseg = [3, 3, 3]
 nrotate = 1
 ori = [0, 0, 1, 0] # observer
 cam_id = sys.argv[1]
 label = sys.argv[2]
 #ori = [0, -0.7071, -0.7071, 0] # viewer
-#cam_id = 'viewer'  
+#cam_id = 'viewer'
 globalacc = 2             # some big number means no limit, in m/s^2
 
 setCartRos = rospy.ServiceProxy('/robot2_SetCartesian', robot_SetCartesian)
@@ -46,7 +46,7 @@ def setCart(pos, ori):
     print 'setCart', param
     #pause()
     setCartRos(*param)
-    
+
 setZone(0)
 setSpeed(50, 60)
 setAcc(acc=globalacc, deacc=globalacc)
@@ -71,19 +71,19 @@ for x in np.linspace(limits[1],limits[0], nseg[0]):
         for z in np.linspace(limits[4],limits[5], nseg[2]):
             setCart([x,y,z], ori)
             # get robot 3d point
-            
+
             rospy.sleep(0.2)
             cross_poselist = lookupTransformList('/map','/cross_tip', listener)
-            
+
             # take picture of camera
             msg = rospy.wait_for_message("/%s/image_raw" % cam_id, Image)
             timestr = "%.6f" % msg.header.stamp.to_sec()
             image_name = str(save_dir)+timestr+".pgm"
             cv_image = bridge.imgmsg_to_cv2(msg, "bgr8")
             cv2.imwrite(image_name, cv_image)
-            
+
             data.append({"cross3d": cross_poselist, "pic_path": timestr+".pgm"})
-    
+
 import json
 with open(save_dir+'data.json', 'w') as outfile:
     json.dump(data, outfile)

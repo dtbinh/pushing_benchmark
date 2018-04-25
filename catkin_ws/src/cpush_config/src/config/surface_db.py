@@ -4,7 +4,7 @@ class SurfaceDB:
         'plywood' : {
             "thickness" : 0.01158,
             "color" : (0.976,0.912,0.788, 1),
-            "width" : 0.6096
+            "width" : (0.6096, 0.91)
         },
         'abs' : {
             "thickness" : 0.00988,
@@ -22,5 +22,3 @@ class SurfaceDB:
             "width" : 0.6096
         }
     }
-    
-

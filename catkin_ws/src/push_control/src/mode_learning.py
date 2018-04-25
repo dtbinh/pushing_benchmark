@@ -10,7 +10,7 @@ import json
 import numpy as np
 import json
 import rospy
-sys.path.append(os.environ['FPUSH_BASE'] + '/Simulation/learning')
+sys.path.append(os.environ['PUSHING_BENCHMARK_BASE'] + '/Simulation/learning')
 from main import modeSelector
 # from load_data import load_data
 sys.path.append('../helper')

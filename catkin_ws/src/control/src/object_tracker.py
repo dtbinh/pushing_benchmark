@@ -25,33 +25,33 @@ if __name__ == '__main__':
     #Define rosservices
     controller_srv = rospy.ServiceProxy('/push_control/srv_get_nominal', Nominal_SRV)
     #publish time
-    time_msg = Float32()
-    time_msg.data = 0;
-    time_pub.publish(time_msg)
-    #get nominal state
-    out = controller_srv(0)
-    xs = np.array(out.xs)
-    object_pose = xs[0:3]
-    pusher_pos = xs[3:5]
-    us = np.array(out.us)
-    #publish robot cart
-    robot_cart_msg = Float32MultiArray()
-    robot_cart_msg.data = pusher_pos
-    cart_command_pub.publish(robot_cart_msg)
-    cart_sensed_pub.publish(robot_cart_msg)
-    #publish robot joint states
-    joints = [0,0,0,0,0,0]
-    js = JointState()
-    js.header = Header()
-    js.header.stamp = rospy.Time.now()
-    js.name = ['joint1', 'joint2', 'joint3', 'joint4', 'joint5', 'joint6']
-    js.position = [j for j in joints]
-    js.velocity = [0.0 for i in xrange(6)]
-    js.effort = [0.0 for i in xrange(6)]
-    joint_states_pub.publish(js)
-    # #publish robot velocity
-    vel_msg = Float32MultiArray()
-    vel_msg.data = us
-    robot_velocity_pub.publish(vel_msg)
+    # time_msg = Float32()
+    # time_msg.data = 0;
+    # time_pub.publish(time_msg)
+    # #get nominal state
+    # out = controller_srv(0)
+    # xs = np.array(out.xs)
+    # object_pose = xs[0:3]
+    # pusher_pos = xs[3:5]
+    # us = np.array(out.us)
+    # #publish robot cart
+    # robot_cart_msg = Float32MultiArray()
+    # robot_cart_msg.data = pusher_pos
+    # cart_command_pub.publish(robot_cart_msg)
+    # cart_sensed_pub.publish(robot_cart_msg)
+    # #publish robot joint states
+    # joints = [0,0,0,0,0,0]
+    # js = JointState()
+    # js.header = Header()
+    # js.header.stamp = rospy.Time.now()
+    # js.name = ['joint1', 'joint2', 'joint3', 'joint4', 'joint5', 'joint6']
+    # js.position = [j for j in joints]
+    # js.velocity = [0.0 for i in xrange(6)]
+    # js.effort = [0.0 for i in xrange(6)]
+    # joint_states_pub.publish(js)
+    # # #publish robot velocity
+    # vel_msg = Float32MultiArray()
+    # vel_msg.data = us
+    # robot_velocity_pub.publish(vel_msg)
     #start tracking the object_poserospy.sleep(1)
     vicon_publisher.publish_object_pose(listener)

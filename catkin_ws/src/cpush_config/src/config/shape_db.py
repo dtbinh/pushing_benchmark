@@ -9,13 +9,13 @@ def makeShapePolyRect(longSide, shortSide):
     a = longSide / 2.0
     b = shortSide / 2.0
     return [[a,b], [-a,b], [-a,-b], [a,-b]]
-    
+
 def makeShapePolyTri(shortSide1, shortSide2, longSide):
     a = shortSide1
     b = shortSide2
     c = longSide
     d = 0.090 / 2.0  # from the rectangle coordinate system
-    
+
     return [[d, d], [d-b,d], [d,d-a]]
 
 def makeShapeEllip(a, b):
@@ -33,25 +33,25 @@ def processButtShape(shape):
     ss = shape[0]
     ss = ss[:len(ss)/2]
     total = np.array([0,0])
-    
+
     for i in range(len(ss)):
         total = total + np.array(ss[i])
-        
+
     center = total / len(ss)
     tmp = copy.deepcopy(ss)
     for i in range(len(ss)):
         ss[i] = ((np.array(tmp[len(tmp)-i-1]) - np.array(center)) / 1000.0).tolist()
-    
+
     ydel = ss[0][1]
     xdel = (ss[0][0] + ss[-1][0]) / 2
     for i in range(len(ss)):
         ss[i][1] -= ydel
         ss[i][0] -= xdel
-    
+
     nss = len(ss)
     for i in range(nss):
        ss.append([-ss[i][0], -ss[i][1]])
-    
+
     newss = []
     # remove redundant
     for s in ss:
@@ -71,35 +71,35 @@ class ShapeDB:
         self.shape_db["rect1"]["shape"] = makeShapePolyRect(0.090, 0.090)
         self.shape_db["rect2"]["shape"] = makeShapePolyRect(0.08991, 0.11258)
         self.shape_db["rect3"]["shape"] = makeShapePolyRect(0.13501, 0.08994)
-        
+
         self.shape_db["tri1"]["shape"] = makeShapePolyTri(0.12587, 0.12590, 0.178)
         self.shape_db["tri2"]["shape"] = makeShapePolyTri(0.12587, 0.15100, 0.1962)
         self.shape_db["tri3"]["shape"] = makeShapePolyTri(0.12561, 0.1765, 0.2152)
-        
+
         self.shape_db["ellip1"]["shape"] = makeShapeEllip(0.105/2, 0.105/2)
         self.shape_db["ellip2"]["shape"] = makeShapeEllip(0.105/2, 0.13089/2)
         self.shape_db["ellip3"]["shape"] = makeShapeEllip(0.105/2, 0.157/2)
-        
+
         self.shape_db["hex"]["shape"] = makeShapePolyNGon(0.06050, 6)
-        
+
         self.shape_db["butter"]["shape"] = processButtShape(self.shape_db["butter"]["shape"])
-        
+
         # all have same thickness
         for key in self.shape_db:
             self.shape_db[key]["thickness"] = 0.013
-            
+
         for key in self.shape_db:
-            self.shape_db[key]["frame_id"] = '/vicon/StainlessSteel/StainlessSteel'
-            
+            self.shape_db[key]["frame_id"] = '/vicon/StainlessSteel/StainlessSteel_rect'
+
         for key in self.shape_db:
             self.shape_db[key]["mesh"] = 'package://cpush_config/models/object_meshes/StainlessSteel_%s.stl' % key
-            
+
         for key in self.shape_db:
             #self.shape_db[key]["slot_pos"] = [-0.03, -0.03]
             a = 1/np.sqrt(2) *  (0.03/2)
             self.shape_db[key]["slot_pos"] = [-a, a]
 
-        
+
     shape_db = {
         "rect1" : {
             "slot_pos" : [],

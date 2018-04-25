@@ -37,6 +37,7 @@ pthread_mutex_t nonBlockMutex;
 int main(int argc,  char *argv[]){
   cout<< "[main] Start Program" <<endl;
 
+
   //~Ros parameters
   ros::init(argc, argv, "push_control");
   ros::NodeHandle n1;
@@ -52,12 +53,12 @@ int main(int argc,  char *argv[]){
   double h=1.0f/1000;
   double joint6 = 1.51;
 
+
   //Depends on pusher type
   PusherSlider pusher_slider;
   Friction friction(&pusher_slider);
   PointPusher point_pusher(&pusher_slider, &friction);    //Variable to pass to thread
   LinePusher line_pusher(&pusher_slider, &friction);    //Variable to pass to thread
-
   //Specify type of pusher (point or line)
   Pusher * ppusher = &point_pusher;
 //   Pusher * ppusher = &line_pusher;
@@ -104,6 +105,7 @@ int main(int argc,  char *argv[]){
   bool isRobot = true;
   bool is_success;
   bool isExecute = true;
+
 
   //initialize values
   joint_states << 0,0,0,0,0,0;
@@ -210,6 +212,7 @@ int main(int argc,  char *argv[]){
 //            _twist_pusher << 0.05,0.01,0;
               _twist_pusher(2) = 0;
       if (isRobot) {
+//        cout<<"twist_pusher"<<endl;
           velocityControlABB(robot_struct, _q_pusher, _twist_pusher, h);
           publish_joints(joint_states, exec_joint_pub);
       }
@@ -238,7 +241,7 @@ int main(int argc,  char *argv[]){
   JsonOutput["us"] = us_JSON;
 
   ofstream myOutput;
-  string src_path = getenv("FPUSH_BASE");
+  string src_path = getenv("PUSHING_BENCHMARK_BASE");
 //  string fileName  = src_path + "/catkin_ws/src/push_control/src/Data/8Track_line_pusher_radius_0_15_vel_0_05_exp_fom_perturb_2.json";
   string fileName  = src_path + "/catkin_ws/src/push_control/src/Data/8Track_point_pusher_radius_0_15_vel_0_05_exp_fom_perturb_infinity.json";
   myOutput.open (fileName);
