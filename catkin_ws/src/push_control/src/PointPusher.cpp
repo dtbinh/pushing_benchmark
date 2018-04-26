@@ -43,7 +43,7 @@ PointPusher::PointPusher(PusherSlider* _pusher_slider, Friction* _friction): Pus
 //    outStar = buildTrajectory("/Simulation/Data/8Track_point_pusher_vel_0_05.json");
 //    outStar = buildTrajectory("/Simulation/Data/inf_circle_point_pusher_vel_0_05.json");
 //    outStar = buildTrajectory("/Simulation/Data/inf_circle_point_pusher_vel_0_05_radius_neg_0_015.json");
-    outStar = buildTrajectory("/Simulation/Data/8Track_point_pusher_radius_0_15_vel_0_05_infinity.json");
+    outStar = buildTrajectory("/Simulation/Data/8Track_point_pusher_radius_0_15_vel_0_05_3_laps.json");
     xc_star = outStar.xcStar;
     uc_star = outStar.ucStar;
     xs_star = outStar.xsStar;
@@ -198,8 +198,9 @@ outStarStruct PointPusher::buildTrajectory(string file_name){
     char const* tmp = getenv( "PUSHING_BENCHMARK_BASE" );
     string envStr( tmp );
     string fileName;
+  cout<<"*****************"<<endl;
     fileName = envStr + file_name;
-//    cout<<fileName<<endl;
+    cout<<fileName<<endl;
     ifstream file(fileName);
 
     file >> root;

@@ -17,7 +17,7 @@ using namespace std;
 using namespace Eigen;
 using namespace Eigen;
 
-MPC::MPC(outMatrices _out_matrices, PusherSlider *_pusher_slider, Pusher *_line_pusher, Friction *_friction)
+MPC::MPC(PusherSlider *_pusher_slider, Pusher *_line_pusher, Friction *_friction)
 {
     pusher_slider = _pusher_slider;
     friction = _friction;
@@ -70,7 +70,7 @@ void MPC::buildWeightMatrices(){
     Qf.diagonal() << 3,3,.1,0.0;
     Qf=Qf*2000;
     R.diagonal() << 1,1,0.01;
-    R = R*.5;
+    R = R*.01;
   }
   else{
 //    Q.diagonal() << 1,5,0.1,0.1;

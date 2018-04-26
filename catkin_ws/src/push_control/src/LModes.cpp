@@ -23,9 +23,9 @@ LMODES::LMODES(PusherSlider *_pusher_slider, Pusher *_line_pusher, Friction *_fr
 
     int lv1=0;
     num_families=1;
-    out_matrices = readMatrices(lv1);
+//    out_matrices = readMatrices(lv1);
 
-    controller = new MPC(out_matrices, _pusher_slider, _line_pusher, _friction);
+    controller = new MPC(_pusher_slider, _line_pusher, _friction);
     list_controller[lv1] = controller;
 
     out_solution = new outSolutionStruct;
