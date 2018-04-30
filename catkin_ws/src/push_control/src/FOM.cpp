@@ -19,9 +19,9 @@ FOM::FOM(int _num_families,PusherSlider *_pusher_slider, Pusher *_line_pusher, F
     numucStates=_line_pusher->numucStates;
 
     for (int lv1=0;lv1<num_families;lv1++){
-        out_matrices = readMatrices(lv1);
+//        out_matrices = readMatrices(lv1);
 
-        controller = new MPC(out_matrices, _pusher_slider, _line_pusher, _friction);
+        controller = new MPC(_pusher_slider, _line_pusher, _friction);
         list_controller[lv1] = controller;
 
         out_solution = new outSolutionStruct;
