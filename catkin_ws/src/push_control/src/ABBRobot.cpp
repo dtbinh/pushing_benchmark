@@ -359,6 +359,25 @@ void publish_joints(VectorXd joint_states, ros::Publisher exec_joint_pub){
     exec_joint_pub.publish(msg);
 }
 
+void publish_float64_array(VectorXd data, ros::Publisher exec_pub){
+    std_msgs::Float64MultiArray msg;
+
+
+    for (int i=0;i<data.size();i++) {
+        msg.data.push_back(data(i));
+    }
+
+    exec_pub.publish(msg);
+}
+
+void publish_float64(double data, ros::Publisher exec_pub){
+    std_msgs::Float64 msg;
+
+    msg.data= data;
+
+    exec_pub.publish(msg);
+}
+
 
 void ikfast_pusher(Vector3d& _q_pusher, VectorXd& joint_states, VectorXd& _q0, bool& is_success, tf::TransformListener& listener){
     double solution[6];

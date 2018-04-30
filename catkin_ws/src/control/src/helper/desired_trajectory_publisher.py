@@ -33,27 +33,27 @@ if __name__ == '__main__':
     y_path = xs[0:end_index,1]
     z_path = y_path*0. + 0.015
     # import pdb;pdb.set_trace()
-    while True:
-        # import pdb;pdb.set_trace()
-        # print 'test'
-        # print np.abs(x_path-object_pose[0]).argmin()
-        des_array = np.vstack((x_path, y_path, z_path))
-        object_array = np.tile(object_pose, (end_index,1)).transpose()#vstack((x_path, y_path, z_path))
-        index = np.linalg.norm(des_array-object_array, axis=0).argmin()
-        index_low = index-115#np.mod(3801,3800)-1
-        index_high = index+115# np.mod(3801,3800)-1
-        if index_high>end_index:
-            index_tmp = index_low
-            index_low=np.mod(index_high,end_index)
-            index_high=index_tmp
+    # while True:
+    # import pdb;pdb.set_trace()
+    # print 'test'
+    # print np.abs(x_path-object_pose[0]).argmin()
+    # des_array = np.vstack((x_path, y_path, z_path))
+    # object_array = np.tile(object_pose, (end_index,1)).transpose()#vstack((x_path, y_path, z_path))
+    # index = np.linalg.norm(des_array-object_array, axis=0).argmin()
+    # index_low = index-115#np.mod(3801,3800)-1
+    # index_high = index+115# np.mod(3801,3800)-1
+    # if index_high>end_index:
+    #     index_tmp = index_low
+    #     index_low=np.mod(index_high,end_index)
+    #     index_high=index_tmp
 
-        # object_array =np.tile(object_pose,(end_index,1)).transpose()
-        # index = np.abs(des_array-object_array).argmin()
-        # x_path_clean=np.delete(x_path,range(max(index-erase_int,0),min(index+erase_int,end_index)),0)
-        # y_path_clean=np.delete(y_path,range(max(index-erase_int,0),min(index+erase_int,end_index)),0)
-        # z_path_clean=np.delete(z_path,range(max(index-erase_int,0),min(index+erase_int,end_index)),0)
-        line_strip, line_strip2 = helper.trajectory_viz(x_path, y_path, z_path, color = (0.,0.,0., 1.), line_thick = 0.002, indices=[index_low,index_high])
-        marker_pub.publish(line_strip)
-        marker_pub2.publish(line_strip2)
-        # marker_pub3.publish(line_strip3)
-        rospy.Rate(rate).sleep()
+    # object_array =np.tile(object_pose,(end_index,1)).transpose()
+    # index = np.abs(des_array-object_array).argmin()
+    # x_path_clean=np.delete(x_path,range(max(index-erase_int,0),min(index+erase_int,end_index)),0)
+    # y_path_clean=np.delete(y_path,range(max(index-erase_int,0),min(index+erase_int,end_index)),0)
+    # z_path_clean=np.delete(z_path,range(max(index-erase_int,0),min(index+erase_int,end_index)),0)
+    line_strip = helper.trajectory_viz(x_path, y_path, z_path, color = (0.,0.,0., 1.), line_thick = 0.002)#, indices=[index_low,index_high])
+    marker_pub.publish(line_strip)
+    # # marker_pub2.publish(line_strip2)
+    # # marker_pub3.publish(line_strip3)
+    # rospy.Rate(rate).sleep()

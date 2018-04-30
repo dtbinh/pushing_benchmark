@@ -18,7 +18,7 @@ public:
 
 
     //Static Methods
-    PointPusher(PusherSlider* _pusher_slider, Friction* _friction);
+    PointPusher(PusherSlider* _pusher_slider, Friction* _friction, string trajectory_name);
     VectorXd buildUcEq();
     VectorXd buildXcEq();
     VectorXd coordinateTransformSC(VectorXd xs);

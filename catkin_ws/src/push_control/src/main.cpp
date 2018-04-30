@@ -19,6 +19,9 @@
 #include <tf/transform_listener.h>
 #include "geometry_msgs/Twist.h"
 #include "std_msgs/String.h"
+#include "std_msgs/Float64.h"
+#include "std_msgs/Float64MultiArray.h"
+#include "std_srvs/Empty.h"
 #include <unistd.h>
 
 //ABB Robot
@@ -37,7 +40,6 @@ pthread_mutex_t nonBlockMutex;
 int main(int argc,  char *argv[]){
   cout<< "[main] Start Program" <<endl;
 
-
   //~Ros parameters
   ros::init(argc, argv, "push_control");
   ros::NodeHandle n1;
@@ -45,19 +47,38 @@ int main(int argc,  char *argv[]){
   bool is_exit=false;
   n1.setParam("is_exit", false);
 
+  //save directorty
+  string trajectory_name = "8Track_point_pusher_radius_0_15_vel_0.08_3_laps";
+  string experiment_name = trajectory_name + "_experiment";
 
+  //Define rosservices
+  ros::ServiceClient start_rosbag = n1.serviceClient<std_srvs::Empty>("start_rosbag");
+  ros::ServiceClient stop_rosbag = n1.serviceClient<std_srvs::Empty>("stop_rosbag");
+
+  //Define publishers
   ros::Publisher exec_joint_pub = n1.advertise<sensor_msgs::JointState>("/joint_states", 2);
+  ros::Publisher xc_pub = n1.advertise<std_msgs::Float64MultiArray>("/xc", 2);
+  ros::Publisher uc_pub = n1.advertise<std_msgs::Float64MultiArray>("/uc", 2);
+  ros::Publisher us_pub = n1.advertise<std_msgs::Float64MultiArray>("/us", 2);
+  ros::Publisher q_pusher_sensed_pub = n1.advertise<std_msgs::Float64MultiArray>("/q_pusher_sensed", 2);
+  ros::Publisher q_pusher_commanded_pub = n1.advertise<std_msgs::Float64MultiArray>("/q_pusher_commanded", 2);
+  ros::Publisher time_pub = n1.advertise<std_msgs::Float64>("/time", 2);
+
+  //initialize rosbag
+  std_srvs::Empty srv;
+//  srv.request.a = atoll(argv[1]);
+//  srv.request.b = atoll(argv[2]);
+  start_rosbag.call(srv);
 
   //Doubles
   double  time=0, t_ini,_time;
   double h=1.0f/1000;
   double joint6 = 1.51;
 
-
   //Depends on pusher type
   PusherSlider pusher_slider;
   Friction friction(&pusher_slider);
-  PointPusher point_pusher(&pusher_slider, &friction);    //Variable to pass to thread
+  PointPusher point_pusher(&pusher_slider, &friction, trajectory_name);    //Variable to pass to thread
 
 //  LinePusher line_pusher(&pusher_slider, &friction);    //Variable to pass to thread
   //Specify type of pusher (point or line)
@@ -196,6 +217,14 @@ int main(int argc,  char *argv[]){
 //        velocityOffsetABB(_q_pusher, _twist_pusher, 0.05, -0.15, ppusher->d);
 //      }
 
+      //publish messages
+      publish_float64_array(q_pusher_sensor, q_pusher_sensed_pub);
+      publish_float64_array(_q_pusher, q_pusher_commanded_pub);
+      publish_float64_array(xc, xc_pub);
+      publish_float64_array(uc, uc_pub);
+      publish_float64_array(us, us_pub);
+      publish_float64(time, time_pub);
+
       // Update JSON Arrays
       timeJSON.append(time);
 
@@ -244,10 +273,13 @@ int main(int argc,  char *argv[]){
   ofstream myOutput;
   string src_path = getenv("PUSHING_BENCHMARK_BASE");
 //  string fileName  = src_path + "/catkin_ws/src/push_control/src/Data/8Track_line_pusher_radius_0_15_vel_0_05_exp_fom_perturb_2.json";
-  string fileName  = src_path + "/catkin_ws/src/push_control/src/Data/8Track_point_pusher_radius_0_15_vel_0_05_exp_fom_perturb_infinity.json";
+  string fileName  = src_path + "/catkin_ws/src/push_control/src/Data/"+ experiment_name + ".json";
   myOutput.open (fileName);
   myOutput << styledWriter.write(JsonOutput);
   myOutput.close();
+
+  //terminate rosbag
+  stop_rosbag.call(srv);
 
   cout<< "[main] End of Program" <<endl;
 }

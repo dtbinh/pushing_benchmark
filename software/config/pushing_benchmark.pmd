@@ -69,6 +69,16 @@ cmd "9-object-traj" {
     host = "localhost";
 }
 
+cmd "10-tf-frames" {
+    exec = "rosrun control publish_tf.py";
+    host = "localhost";
+}
+
+cmd "11-rosbag-services" {
+    exec = "rosrun control save_rosbag.py";
+    host = "localhost";
+}
+
 
 
 script "run_real" {
@@ -94,7 +104,9 @@ script "run_FOM" {
     wait ms 2000;
     start group "visualization";
     start cmd "9-nominal-traj";
-    start cmd "9-object-traj";
+    start cmd "10-tf-frames";
+    start cmd "11-rosbag-services";
+
 }
 
 script "run_virtual" {

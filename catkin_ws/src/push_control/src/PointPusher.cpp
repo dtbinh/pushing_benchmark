@@ -19,7 +19,7 @@
 using namespace std;
 using namespace Eigen;
 
-PointPusher::PointPusher(PusherSlider* _pusher_slider, Friction* _friction): Pusher()
+PointPusher::PointPusher(PusherSlider* _pusher_slider, Friction* _friction, string trajectory_name): Pusher()
 {
     lp=0.03;
     d = 0.;
@@ -43,7 +43,7 @@ PointPusher::PointPusher(PusherSlider* _pusher_slider, Friction* _friction): Pus
 //    outStar = buildTrajectory("/Simulation/Data/8Track_point_pusher_vel_0_05.json");
 //    outStar = buildTrajectory("/Simulation/Data/inf_circle_point_pusher_vel_0_05.json");
 //    outStar = buildTrajectory("/Simulation/Data/inf_circle_point_pusher_vel_0_05_radius_neg_0_015.json");
-    outStar = buildTrajectory("/Simulation/Data/8Track_point_pusher_radius_0_15_vel_0_05_3_laps.json");
+    outStar = buildTrajectory("/Data/" + trajectory_name +".json");
     xc_star = outStar.xcStar;
     uc_star = outStar.ucStar;
     xs_star = outStar.xsStar;

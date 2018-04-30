@@ -19,6 +19,8 @@
 #include <tf/transform_listener.h>
 #include "geometry_msgs/Twist.h"
 #include "std_msgs/String.h"
+#include "std_msgs/Float64MultiArray.h"
+#include "std_msgs/Float64.h"
 #include "sensor_msgs/JointState.h"
 
 //ABB Robot
@@ -58,4 +60,6 @@ void CreateSensorJointsMessage(EgmSensor* pSensorMessage, VectorXd joints);
 void jointControlABB(robotStruct robot_struct, VectorXd &joints);
 void publish_joints(VectorXd joint_states, ros::Publisher exec_joint_pub);
 void ikfast_pusher(Vector3d& _q_pusher, VectorXd& joint_states, VectorXd& q0, bool& is_success, tf::TransformListener& listener);
+void publish_float64_array(VectorXd data, ros::Publisher exec_pub);
+void publish_float64(double data, ros::Publisher exec_pub);
 #endif
