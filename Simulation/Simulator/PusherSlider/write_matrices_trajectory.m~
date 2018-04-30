@@ -5,31 +5,41 @@ clear all;
 close all;
 clc;
 %Setup externals
-run('setup.m');
+% run('setup.m');
 
 %% Simulation Parameters
 t0 = 0;
 tf = 5;
 h_step = 0.01;
 
-%% Build Simulation object
-% pusher = LinePusher(.3);
-pusher = PointPusher(0.3);
-object = Square();
-surface = Surface(0.35);
-planar_system = PlanarSystem(pusher, object, surface);
-% simulator = Simulator(planar_system, simulation_name);
-% planner = Planner(planar_system, [], [], [], [], '8Track', 0.05); %8track
-planner = Planner(planar_system, [], [], [], [], 'Straight'); %8track
+for lv1=1:10
+    vel = 0.01*lv1;
 
-jsonFile = struct('xc_star', planner.xc_star,...
-                   'uc_star', planner.uc_star,...
-                   'xs_star', planner.xs_star,...
-                   'us_star', planner.us_star,...
-                   't_star', planner.t_star...
-                    );              
+    %% Build Simulation object
+    % pusher = LinePusher(.3);
+    pusher = PointPusher(0.3);
+    object = Square();
+    surface = Surface(0.35);
+    planar_system = PlanarSystem(pusher, object, surface);
+    % simulator = Simulator(planar_system, simulation_name);
+    planner = Planner(planar_system, [], [], [], [], '8Track', vel); %8track
+    % planner = Planner(planar_system, [], [], [], [], 'Straight'); %8track
 
-JsonFile = savejson('Matrices', jsonFile,  '../../../Data/8Track_point_pusher_radius_0_15_vel_0_05_3_laps.json');
+    jsonFile = struct('xc_star', planner.xc_star,...
+                       'uc_star', planner.uc_star,...
+                       'xs_star', planner.xs_star,...
+                       'us_star', planner.us_star,...
+                       't_star', planner.t_star...
+                        );              
+
+    filename1 = '../../../Data/8Track_point_pusher_radius_0_15_vel_0.05';
+    filename2 = num2str(vel);
+    filename3 = '_vel_0.05_3_laps.json';% '../../../Data/8Track_point_pusher_radius_0_15_vel_0_01_3_laps.json'
+    file_name = strcat(filename1, filename2, filename3);
+    JsonFile = savejson('Matrices', jsonFile, file_name);
+end
+% JsonFile = savejson('Matrices', jsonFile,  '../../../Data/Straight_point_pusher_vel_0_05.json');
+% JsonFile = savejson('Matrices', jsonFile,  '../../../Data/Straight_line_pusher_vel_0_05.json');
 
 
 json2data=loadjson(JsonFile);

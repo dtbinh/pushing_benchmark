@@ -21,7 +21,7 @@ classdef Planner < dynamicprops
     end
     methods
         %% Constructor
-        function obj = Planner(ps, simulator, Linear, data, object, name, vel)  
+        function obj = Planner(ps, simulator, Linear, data, object, name, vel, radius)  
             obj.ps = ps;
             obj.Linear=Linear;
             obj.data=data;
@@ -30,7 +30,7 @@ classdef Planner < dynamicprops
             if strcmp(name,'Straight')
                 obj.buildStraightTrajectory();
             elseif strcmp(name, '8Track')
-                obj.build8track(-0.15, vel, [0;0;0*pi/180;0]);
+                obj.build8track(-radius, vel, [0;0;0*pi/180;0]);
             elseif strcmp(name, 'inf_circle')
                 
                 obj.build_inf_circle_vel_space(-0.15, vel, [0;0;0*pi/180;0]);
