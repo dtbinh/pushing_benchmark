@@ -36,14 +36,14 @@ set(GUROBI_HOME "$ENV{HOME}/software/gurobi702/linux64")
 set(GUROBI_INCLUDE_DIR "${GUROBI_HOME}/include")
 set(GUROBI_LIBRARIES "${GUROBI_CXX_LIBRARY};${GUROBI_LIBRARY}" )
 
-find_library( GUROBI_LIBRARY 
+find_library( GUROBI_LIBRARY
               NAMES gurobi70
-              PATHS "${GUROBI_HOME}/lib" 
+              PATHS "${GUROBI_HOME}/lib"
               )
 
-find_library( GUROBI_CXX_LIBRARY 
+find_library( GUROBI_CXX_LIBRARY
               NAMES gurobi_c++
-              PATHS "${GUROBI_HOME}/lib" 
+              PATHS "${GUROBI_HOME}/lib"
               )
 
 #find_library(BLAS REQUIRED)
@@ -61,7 +61,7 @@ find_library( GUROBI_CXX_LIBRARY
 
 
 
-#~ set(software/OOQPEI_LIBS software/OOQPgensparse software/OOQPsparse software/OOQPgondzio software/OOQPbase blas MA27 gfortran)	
+#~ set(software/OOQPEI_LIBS software/OOQPgensparse software/OOQPsparse software/OOQPgondzio software/OOQPbase blas MA27 gfortran)
 
 set(GUROBI_LIBRARIES "${GUROBI_CXX_LIBRARY};${GUROBI_LIBRARY}" )
 
@@ -78,6 +78,7 @@ find_package(Protobuf REQUIRED)
 add_service_files(
 FILES
 MODE_SRV.srv
+rosbag.srv
 )
 
 ## Generate actions in the 'action' folder
@@ -138,7 +139,7 @@ include_directories(
 #################
 ## Executables ##
 #################
-#src/PracticalSocket/PracticalSocket.cpp src/egm/egm.pb.cc 
+#src/PracticalSocket/PracticalSocket.cpp src/egm/egm.pb.cc
 add_executable(push_control  src/Helper.cpp src/ikfast_interface_python.cpp src/PusherSlider.cpp src/Friction.cpp src/LinePusher.cpp src/OptProgram.cpp src/jsoncpp.cpp src/LoopControl.cpp src/MPC.cpp src/LModes.cpp src/FOM.cpp src/ABBRobot.cpp src/main.cpp src/PracticalSocket/PracticalSocket.cpp src/egm/egm.pb.cc src/Pusher.h src/PointPusher.h src/PointPusher.cpp src/MPC_thread.h src/MPC_thread.cpp src/ik_fast_interface_python.h)
 #~ add_executable(push_control  src/Helper.cpp src/PusherSlider.cpp src/Friction.cpp src/LinePusher.cpp src/OptProgram.cpp src/jsoncpp.cpp src/LoopControl.cpp src/MPC.cpp src/FOM.cpp src/ABBRobot.cpp src/main.cpp src/PracticalSocket/PracticalSocket.cpp)
 
@@ -156,7 +157,7 @@ target_link_libraries(push_control
     pthread
     ${PROTOBUF_LIBRARY}
         )
-        
+
 #############
 ## Install ##
 #############
@@ -164,4 +165,3 @@ target_link_libraries(push_control
 #############
 ## Testing ##
 #############
-

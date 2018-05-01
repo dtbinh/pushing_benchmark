@@ -11,7 +11,7 @@
 #include "Pusher.h"
 #include "PointPusher.h"
 #include "FOM.h"
-#include "LModes.h"
+//#include "LModes.h"
 //ROS
 #include <ros/ros.h>
 
@@ -65,7 +65,7 @@ void *loopControl(void *thread_arg)
     PusherSlider pusher_slider;
     Friction friction(&pusher_slider);
     FOM fom(3, &pusher_slider, ppusher, &friction);
-    LMODES lmodes(&pusher_slider, ppusher, &friction);
+//    LMODES lmodes(&pusher_slider, ppusher, &friction);
 
     double _time;
     VectorXd delta_xc(ppusher->numxcStates);
@@ -102,13 +102,14 @@ void *loopControl(void *thread_arg)
     int counter = 0;
     ros::Rate r(125);
     while(ros::ok()) {
-    bool is_exit;
-      ros::NodeHandle n1;
-    n1.getParam("is_exit", is_exit);
-    if (is_exit==true){
-      break;
-    }
-    double t0 = Helper::gettime();
+        double t0 = Helper::gettime();
+        bool is_exit;
+          ros::NodeHandle n1;
+        n1.getParam("is_exit", is_exit);
+        if (is_exit==true){
+          break;
+        }
+
 //        ---------------Protected----------------
         pthread_mutex_lock(&nonBlockMutex);
         _q_slider = q_slider;

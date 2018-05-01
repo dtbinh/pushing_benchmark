@@ -12,6 +12,7 @@
 #include "PointPusher.h"
 #include "LinePusher.h"
 #include "Helper.h"
+#include "push_control/rosbag.h"
 //Ros
 #include <ros/ros.h>
 #include "tf/tf.h"
@@ -49,11 +50,11 @@ int main(int argc,  char *argv[]){
 
   //save directorty
   string trajectory_name = "8Track_point_pusher_radius_0_15_vel_0.08_3_laps";
-  string experiment_name = trajectory_name + "_experiment";
+  string experiment_name = trajectory_name + "experiments";
 
   //Define rosservices
-  ros::ServiceClient start_rosbag = n1.serviceClient<std_srvs::Empty>("start_rosbag");
-  ros::ServiceClient stop_rosbag = n1.serviceClient<std_srvs::Empty>("stop_rosbag");
+  ros::ServiceClient start_rosbag = n1.serviceClient<push_control::rosbag>("start_rosbag");
+  ros::ServiceClient stop_rosbag = n1.serviceClient<push_control::rosbag>("stop_rosbag");
 
   //Define publishers
   ros::Publisher exec_joint_pub = n1.advertise<sensor_msgs::JointState>("/joint_states", 2);
@@ -65,10 +66,8 @@ int main(int argc,  char *argv[]){
   ros::Publisher time_pub = n1.advertise<std_msgs::Float64>("/time", 2);
 
   //initialize rosbag
-  std_srvs::Empty srv;
-//  srv.request.a = atoll(argv[1]);
-//  srv.request.b = atoll(argv[2]);
-  start_rosbag.call(srv);
+  push_control::rosbag srv;
+  srv.request.input =  experiment_name;
 
   //Doubles
   double  time=0, t_ini,_time;
@@ -168,7 +167,7 @@ int main(int argc,  char *argv[]){
 //      _q_pusher = q_pusher;
 //      _q_slider = q_slider;
     }
-
+    start_rosbag.call(srv);
     //************** Main Control Loop ****************************************************************************************
     ros::Rate r(1000);
     int i=0;
