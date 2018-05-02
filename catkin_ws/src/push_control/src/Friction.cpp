@@ -13,7 +13,7 @@ Friction::Friction(PusherSlider* _pusher_slider)
     //Static Constructor
     ppusher_slider = _pusher_slider;
     nu = 0.35;
-    nu_p = 0.3;
+    nu_p = 1.;
     f_max = nu*ppusher_slider->m*Helper::g;
     m_max =setmMax();
     c = m_max/f_max;

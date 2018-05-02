@@ -23,7 +23,7 @@ MPC::MPC(PusherSlider *_pusher_slider, Pusher *_line_pusher, Friction *_friction
     friction = _friction;
     line_pusher = _line_pusher;
     h = 0.03;
-    steps = 35;
+    steps = 50;
     num_variables = (line_pusher->numucStates + line_pusher->numxcStates)*steps;
 }
 
@@ -39,12 +39,12 @@ int MPC::getStateIndex(int lv1){
 
 void MPC::initializeMatricesMPC(){
 //
-  matricesMPC.Q_vec.reserve(315);
-  matricesMPC.Aeq_vec.reserve(900);
-  matricesMPC.Ain_vec.reserve(500);
-  matricesMPC.beq =VectorXd::Zero(200);
+  matricesMPC.Q_vec.reserve(630);//9*steps 315
+  matricesMPC.Aeq_vec.reserve(1800);//25*steps 900
+  matricesMPC.Ain_vec.reserve(100);//14*steps 500
+  matricesMPC.beq =VectorXd::Zero(400);//5*steps 200
   matricesMPC.row_start_eq = 0;
-  matricesMPC.bin =VectorXd::Zero(200);
+  matricesMPC.bin =VectorXd::Zero(400);//5*steps 200
   matricesMPC.row_start_ineq =0;
 }
 //

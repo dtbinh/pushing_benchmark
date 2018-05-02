@@ -50,7 +50,7 @@ int main(int argc,  char *argv[]){
 
   //save directorty
   string trajectory_name = "8Track_point_pusher_radius_0_15_vel_0.08_3_laps";
-  string experiment_name = trajectory_name + "experiments";
+  string experiment_name = trajectory_name + "_horizon_50";
 
   //Define rosservices
   ros::ServiceClient start_rosbag = n1.serviceClient<push_control::rosbag>("start_rosbag");
