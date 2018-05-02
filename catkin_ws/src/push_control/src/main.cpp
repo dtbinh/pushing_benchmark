@@ -49,8 +49,8 @@ int main(int argc,  char *argv[]){
   n1.setParam("is_exit", false);
 
   //save directorty
-  string trajectory_name = "8Track_point_pusher_radius_0_15_vel_0.08_3_laps";
-  string experiment_name = trajectory_name + "_horizon_50";
+  string trajectory_name = "8Track_line_pusher_radius_0.15_vel_0.05_3_laps";
+  string experiment_name = trajectory_name + "line_LMODES_8track_no_perturb";
 
   //Define rosservices
   ros::ServiceClient start_rosbag = n1.serviceClient<push_control::rosbag>("start_rosbag");
@@ -194,6 +194,8 @@ int main(int argc,  char *argv[]){
       if (isRobot) {
           getViconPose(q_slider, listener);
           q_pusher = _q_pusher;
+//        cout<<q_slider<<endl;
+//        return 0;
       }
       else {
           time = 0;

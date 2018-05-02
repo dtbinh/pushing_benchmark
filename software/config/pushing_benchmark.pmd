@@ -79,6 +79,10 @@ cmd "11-rosbag-services" {
     host = "localhost";
 }
 
+cmd "12-learning" {
+    exec = "rosrun push_control mode_learning.py";
+    host = "localhost";
+}
 
 
 script "run_real" {
@@ -106,6 +110,7 @@ script "run_FOM" {
     start cmd "9-nominal-traj";
     start cmd "10-tf-frames";
     start cmd "11-rosbag-services";
+    start cmd "12-learning";
 
 }
 

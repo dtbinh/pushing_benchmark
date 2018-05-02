@@ -11,7 +11,7 @@
 #include "Pusher.h"
 #include "PointPusher.h"
 #include "FOM.h"
-//#include "LModes.h"
+#include "LModes.h"
 //ROS
 #include <ros/ros.h>
 
@@ -65,7 +65,7 @@ void *loopControl(void *thread_arg)
     PusherSlider pusher_slider;
     Friction friction(&pusher_slider);
     FOM fom(3, &pusher_slider, ppusher, &friction);
-//    LMODES lmodes(&pusher_slider, ppusher, &friction);
+    LMODES lmodes(&pusher_slider, ppusher, &friction);
 
     double _time;
     VectorXd delta_xc(ppusher->numxcStates);
@@ -92,6 +92,8 @@ void *loopControl(void *thread_arg)
   //8Track
     _q_offset_slider << 0.3484033942222595, 0, 0; //point pusher
     _q_offset_pusher << 0.3484033942222595, 0, 0.0;//point pusher
+//    _q_offset_slider << 0.19867394381957065, 0, 0; //point pusher
+//    _q_offset_pusher << 0.19867394381957065, 0, 0.0;//point pusher
 //  _q_offset_slider << 0.111927, 0, 0; //line pusher
 //  _q_offset_pusher << 0.111927, 0, -3.1416;//line pusher
 
@@ -132,8 +134,8 @@ void *loopControl(void *thread_arg)
 //        xs(2) = (xs(5)+xs(2))/2.0;
         xc =  ppusher->coordinateTransformSC(xs);
         //Compute FOM control input
-        uc = fom.solveFOM(xc, _time);
-//        uc = lmodes.solveLMODES(xc, _time);
+//        uc = fom.solveFOM(xc, _time);
+        uc = lmodes.solveLMODES(xc, _time);
 
 
 

@@ -29,18 +29,18 @@ if __name__ == '__main__':
 
     while True:
         if len(x_path_buffer)>buffer_len:
-            print len(x_path_buffer)
+            # print len(x_path_buffer)
             x_path_buffer = x_path_buffer[-buffer_len:-1]
             y_path_buffer = y_path_buffer[-buffer_len:-1]
-
-        if len(x_path_buffer)>150:
-            x_path = np.array(x_path_buffer[0:-150])
-            y_path = np.array(y_path_buffer[0:-150])
-            z_path = y_path*0
-        else:
-            x_path = np.array(x_path_buffer)
-            y_path = np.array(y_path_buffer)
-            z_path = y_path*0
+        #
+        # if len(x_path_buffer)>150:
+        #     x_path = np.array(x_path_buffer[0:-150])
+        #     y_path = np.array(y_path_buffer[0:-150])
+        #     z_path = y_path*0
+        # else:
+        x_path = np.array(x_path_buffer)
+        y_path = np.array(y_path_buffer)
+        z_path = y_path*0
         # print x_path[-1], y_path[-1], z_path[-1]
         # import pdb;pdb.set_trace()
         # print x_path
