@@ -4,8 +4,8 @@ catch
 end
 
 %Define objects
-% pusher = PointPusher(0.3);
-pusher = LinePusher(0.3);
+pusher = PointPusher(0.3);
+% pusher = LinePusher(0.3);
 object = Square();
 surface = Surface(0.35);
 planar_system = PlanarSystem(pusher, object, surface);

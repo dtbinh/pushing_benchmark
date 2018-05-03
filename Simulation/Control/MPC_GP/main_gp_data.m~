@@ -2,7 +2,7 @@
 %% Date: 07/03/2018
 %--------------------------------------------------------
 % Description:
-% This script simulates the motion of a square object subject to robot
+% This script simulaLtes the motion of a square object subject to robot
 % velocites. The simulation total time (line 18), object and robot initial
 % configurations (line 24), and robot applied velocities (line 40)
 %--------------------------------------------------------
@@ -23,18 +23,18 @@ sim_time = 5;
 % x0 = [x;y;theta;xp;yp]
 % x: x position of object, y: y position of object, theta: orientation of object
 % xp: x position of pusher, yp: y position of pusher
-x0_c = [0.0;0.03*0;*pi/180*1;.009*1];
+x0_c = [0.0;-0.03*1;15*pi/180*1;.00*1];
 %%Initiaze system
 is_gp=true;
 initialize_system();
 load('learning_output_model_from_train_size_4000');
 simulator.data = data;
-planner = Planner(planar_system, simulator, Linear, data, object, 'inf_circle', 0.05); %8track
+planner = Planner(planar_system, simulator, Linear, data, object, '8Track_gp', 0.05, 0.15); %8track
 planner.ps.num_ucStates = 2;
 %Controller setup
-Q = 1*diag([1,1,.01,0.0000]);
-Qf=  1*2000*diag([1,1,.1,.0000]);
-R = .01*diag([1,1]);
+Q = 1*diag([1,1,.01,0.1]);
+Qf=  1*2000*diag([1,1,.1,.1]);
+R = .0*diag([1,1]);
 mpc = MPC(planner, Q, Qf, R, Linear, data, object);
 %send planned trajectory to simulator for plotting
 simulator.x_star = planner.xs_star;
@@ -53,8 +53,8 @@ for i1=1:simulator.N
         
         %apply lqr controller
         xc = planar_system.coordinateTransformSC(xs);
-         uc = mpc.solveMPC(xc, simulator.t(i1));
-         uc
+        uc = mpc.solveMPC(xc, simulator.t(i1));
+%          uc
         us = mpc.get_robot_vel(xc, uc);
 % us = [.05;0];
         %simulate forward

@@ -6,7 +6,7 @@ pusher_gp = PointPusher(.3);
 object_gp = Square();
 surface_gp = Surface(.35);
 planar_system_gp = PlanarSystem(pusher_gp, object_gp, surface_gp);
-load('learning_output_model_from_train_size_4000.mat');
+load('learning_output_model_from_train_size_4000_debug.mat');
 
 %build variables
 xo = sym('xo', [3,1]);
@@ -24,7 +24,7 @@ for lv1=1:3
     %build symbolic derivatives of kernel
     [k_sym{lv1} dk_sym{lv1}] = covFunc_data(data.theta1{lv1}, x_data, gp_input./exp(data.lengthscales{lv1}(:)), exp(data.lengthscales{lv1}(:)));
 %     [k_sym{lv1} dk_sym{lv1}] = covFunc(theta, x_data, gp_input);
-dk_dc_sym{lv1} = dk_sym{lv1}(1,:);
+    dk_dc_sym{lv1} = dk_sym{lv1}(1,:);
     dk_dphi_sym{lv1} = dk_sym{lv1}(2,:);
     
 %     dk_dx_sym_test{lv1} = jacobian(k_sym{lv1}, x);
@@ -64,9 +64,9 @@ Linear.dI_dx = dI_dx;
 % Linear.dv_dx_fun = matlabFunction(dv_dx,'Vars', {x,u});
 % Linear.dv_du_fun = matlabFunction(dv_du,'Vars', {x});
 % Linear.Gc_fun = planar_system_gp.Gc_fun;
-
-% [A,B] = GP_linearization_data([0;0;0;0], [.05;0], Linear, data, object_gp);
-return
+return 
+[A,B] = GP_linearization_data([0;0;0;0], [.05;0], Linear, data, object_gp);
+% return
 
     rx = -object_gp.a/2;
     %Build A and B matrices
@@ -155,21 +155,21 @@ return
 
     dR_dx = [zeros(size(Linear.dRib_dtheta_fun(x_star)))*g zeros(size(Linear.dRib_dtheta_fun(x_star)))*g Linear.dRib_dtheta_fun(x_star)*g zeros(size(Linear.dRib_dtheta_fun(x_star)))*0*g];
 
-    A = [dR_dx + R_fun(x_star)*dg_dx; dry_dx];
-    B = [R_fun(x_star)*dg_dv; dry_dv];
-    
+    A1 = [dR_dx + R_fun(x_star)*dg_dx; dry_dx];
+    B1 = [R_fun(x_star)*dg_dv; dry_dv];
+    return 
     
 % return
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-V_new =sqrt(v(1)^2+v(2)^2);%sqrt(v(1)^2+v(2)^2);%I(1);%
-c_new = 1/2-ry/object_gp.a;
-phi_new = atan(v(2)/v(1));;%atan(v(2)/v(1));%I(3);%
+V_new =I(1);%sqrt(v(1)^2+v(2)^2);%sqrt(v(1)^2+v(2)^2);%I(1);%
+c_new = I(2);%1/2-ry/object_gp.a;
+phi_new = I(3);%atan(v(2)/v(1));;%atan(v(2)/v(1));%I(3);%
 
 gp_input_new = [c_new;phi_new];%gp_input;%
 
 Ccb = Helper.C3_2d(phi_new);
 Cbi = Helper.C3_2d(x(3));
-Rbc = [transpose(Ccb) [0; 0];0 0 1];
+Rbc = [(Ccb) [0; 0];0 0 1];
 Rib = [transpose(Cbi) [0; 0];0 0 1];
 fc = twist_b_gp_data(gp_input_new)*(V_new/V_nom);
 fb = Rbc*fc;
@@ -183,7 +183,7 @@ fb_fun = matlabFunction(fb, 'Vars', {x,v});
 fi_fun = matlabFunction(fi, 'Vars', {x,v});
 dfc_dI = jacobian(fc, I);
 dfb_dx = jacobian(fb, x);
-% dfb_dI = jacobian(fb, I);
+dfb_dI = jacobian(fb, I);
 dfb_dv = jacobian(fb, v);
 
 % dfc_dI_fun = matlabFunction(dfc_dI, 'Vars', {I});

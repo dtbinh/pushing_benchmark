@@ -7,7 +7,7 @@ function [A, B] = GP_linearization_data(x, v, Linear, data, object)
     
     V_star =sqrt(v(1)^2+v(2)^2);%sqrt(v(1)^2+v(2)^2);%I(1);%
     c_star = 1/2-x(4)/object.a;
-    phi_star = atan(v(2)/v(1));;%atan(v(2)/v(1));%I(3);%
+    phi_star = atan(v(2)/v(1)); %atan(v(2)/v(1));%I(3);%
 %     I_star = [V_star, phi_star, c_star]';
     gp_input_star = [c_star; phi_star];
     V_nom = .2*.02;

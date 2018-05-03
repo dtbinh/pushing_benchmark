@@ -15,10 +15,10 @@ if ismac()
 elseif isunix() && ~ismac()
     baseName = getenv('HOME');
     drakePath = strcat(baseName, '/software/drake-distro/drake/addpath_drake');
-    gurobiPath = strcat(baseName, '/software/gurobi702/linux64/matlab');
+%     gurobiPath = strcat(baseName, '/software/gurobi702/linux64/matlab');
     run(drakePath);
-    addpath(gurobiPath);
-    gurobi_setup;
+%     addpath(gurobiPath);
+%     gurobi_setup;
 elseif ispc()
     addpath('C:\gurobi701\win64\matlab');
 end

@@ -2,7 +2,7 @@
 %% Date: 07/03/2018
 %--------------------------------------------------------
 % Description:
-% This script simulates the motion of a square object subject to robot
+% This script simulaLtes the motion of a square object subject to robot
 % velocites. The simulation total time (line 18), object and robot initial
 % configurations (line 24), and robot applied velocities (line 40)
 %--------------------------------------------------------
@@ -17,7 +17,7 @@ symbolic_linearize_data;
 %% Simulation data and video are stored in /home/Data/<simulation_name>
 simulation_name = 'gp_data';
 %% Simulation time
-sim_time = 5;
+sim_time = 45;
 
 %% Initial conditions 
 % x0 = [x;y;theta;xp;yp]
@@ -29,7 +29,7 @@ is_gp=true;
 initialize_system();
 load('learning_output_model_from_train_size_4000');
 simulator.data = data;
-planner = Planner(planar_system, simulator, Linear, data, object, 'inf_circle', 0.05); %8track
+planner = Planner(planar_system, simulator, Linear, data, object, '8Track_gp', 0.05, 0.15); %8track
 planner.ps.num_ucStates = 2;
 %Controller setup
 Q = 1*diag([1,1,.01,0.1]);
@@ -53,15 +53,15 @@ for i1=1:simulator.N
         
         %apply lqr controller
         xc = planar_system.coordinateTransformSC(xs);
-         uc = mpc.solveMPC(xc, simulator.t(i1));
-         uc
+        uc = mpc.solveMPC(xc, simulator.t(i1));
+%          uc
         us = mpc.get_robot_vel(xc, uc);
 % us = [.05;0];
         %simulate forward
         %1. analytical model
-        xs_next = simulator.get_next_state_i(xs, us, simulator.h);
+%         xs_next = simulator.get_next_state_i(xs, us, simulator.h);
         %2. gp model
-%         xs_next = simulator.get_next_state_gpData_i(xs, us, simulator.h);
+        xs_next = simulator.get_next_state_gpData_i(xs, us, simulator.h);
         %update plot
         simulator.update_plot(xs_next, simulator.t(i1));
 %       %Perform Euler Integration
