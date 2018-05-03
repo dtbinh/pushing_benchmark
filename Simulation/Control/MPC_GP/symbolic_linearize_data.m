@@ -6,8 +6,9 @@ pusher_gp = PointPusher(.3);
 object_gp = Square();
 surface_gp = Surface(.35);
 planar_system_gp = PlanarSystem(pusher_gp, object_gp, surface_gp);
-load('learning_output_model_from_train_size_4000_debug.mat');
+% load('learning_output_model_from_train_size_4000_debug.mat');
 
+load('trained_new_inputs_outputs_validation_side_0_only_5000.mat');
 %build variables
 xo = sym('xo', [3,1]);
 rx = -object_gp.b/2;
