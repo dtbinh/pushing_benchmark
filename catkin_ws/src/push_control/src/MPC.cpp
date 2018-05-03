@@ -70,7 +70,8 @@ void MPC::buildWeightMatrices(){
     Qf.diagonal() << 3,3,.1,0.0;
     Qf=Qf*2000;
     R.diagonal() << 1,1,0.01;
-    R = R*.5;
+//    R = R*.5; //LMODES
+    R = R*.01; //FOM
   }
   else{
 //    Q.diagonal() << 1,5,0.1,0.1;
