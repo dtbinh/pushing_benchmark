@@ -162,11 +162,11 @@ if __name__=='__main__':
     time_steps -= time_steps[0]
     for it in range(time_steps.shape[0]): #range(x_act.shape[0]):
         img_name = 'Images/anew_push_set_{}.png'.format(it)
-
+        
         imgs.append(img_name)
-        print img_name
+        #print img_name
         if os.path.isfile(img_name):
-            pass#continue
+            pass #continue
         #plt.imshow(img)
         while t_im[it_im]< time_steps[it]:
             it_im += 1
@@ -178,7 +178,7 @@ if __name__=='__main__':
         c, s = np.cos(obj_ori), np.sin(obj_ori)
         R = np.array(((c,-s), (s, c)))
         act_obj = np.dot(R, np.transpose(square))
-        act_obj = np.insert(act_obj, 2, 0, axis = 0)
+        act_obj = np.insert(act_obj, 2, z_off, axis = 0)
         for i in range(3):
             act_obj[i] = act_obj[i]+obj_pose[i]
         act_obj = np.insert(act_obj, 3, 1, axis = 0)
@@ -228,7 +228,7 @@ if __name__=='__main__':
         hspace = 0, wspace = 0)
         plt.savefig(img_name,bbox_inches='tight',pad_inches = 0)
         #plt.show()
-        pdb.set_trace()
+        
         plt.close()
         
         fig = plt.figure()
@@ -251,15 +251,18 @@ if __name__=='__main__':
     pdb.set_trace()
     '''
     
-    frame = cv2.imread(imgs[0])
+    frame = cv2.imread(imgs[0])[90:410,220:820]
     height, width, layers = frame.shape
     #pdb.set_trace()
     #video = cv2.VideoWriter(video_name, -1, 1, (width,height))
     fourcc = cv2.VideoWriter_fourcc(*'DIVX')
-    video = cv2.VideoWriter('new_output.avi',fourcc, 29.0, (width,height))
+    video = cv2.VideoWriter('anew_output.avi',fourcc, fps, (width,height))  #Check if fps gives problems
     for image in imgs:
-        video.write(cv2.imread(image))
-
+        im = cv2.imread(image)
+        im = im[90:410,220:820]
+        
+        video.write(im)
+    
     cv2.destroyAllWindows()
     video.release()
 
