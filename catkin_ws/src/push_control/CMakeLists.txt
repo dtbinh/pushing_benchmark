@@ -139,9 +139,7 @@ include_directories(
 #################
 ## Executables ##
 #################
-#src/PracticalSocket/PracticalSocket.cpp src/egm/egm.pb.cc
-add_executable(push_control  src/Helper.cpp src/ikfast_interface_python.cpp src/PusherSlider.cpp src/Friction.cpp src/LinePusher.cpp src/OptProgram.cpp src/jsoncpp.cpp src/LoopControl.cpp src/MPC.cpp src/LModes.cpp src/FOM.cpp src/ABBRobot.cpp src/main.cpp src/PracticalSocket/PracticalSocket.cpp src/egm/egm.pb.cc src/Pusher.h src/PointPusher.h src/PointPusher.cpp src/MPC_thread.h src/MPC_thread.cpp src/ik_fast_interface_python.h)
-#~ add_executable(push_control  src/Helper.cpp src/PusherSlider.cpp src/Friction.cpp src/LinePusher.cpp src/OptProgram.cpp src/jsoncpp.cpp src/LoopControl.cpp src/MPC.cpp src/FOM.cpp src/ABBRobot.cpp src/main.cpp src/PracticalSocket/PracticalSocket.cpp)
+add_executable(push_control  src/GPController.cpp src/Helper.cpp src/ikfast_interface_python.cpp src/PusherSlider.cpp src/Friction.cpp src/LinePusher.cpp src/OptProgram.cpp src/jsoncpp.cpp src/LoopControl.cpp src/MPC.cpp src/LModes.cpp src/FOM.cpp src/ABBRobot.cpp src/main.cpp src/PracticalSocket/PracticalSocket.cpp src/egm/egm.pb.cc src/Pusher.h src/PointPusher.h src/PointPusher.cpp src/MPC_thread.h src/MPC_thread.cpp src/ik_fast_interface_python.h)
 
 ###########################
 ## Target link libraries ##

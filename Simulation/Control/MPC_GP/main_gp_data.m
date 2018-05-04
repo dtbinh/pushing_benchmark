@@ -27,7 +27,8 @@ x0_c = [0.0;-0.03*1;15*pi/180*1;.00*1];
 %%Initiaze system
 is_gp=true;
 initialize_system();
-load('learning_output_model_from_train_size_4000');
+% load('learning_output_model_from_train_size_4000');
+load('trained_new_inputs_outputs_validation_side_0_only_5000');
 simulator.data = data;
 planner = Planner(planar_system, simulator, Linear, data, object, '8Track_gp', 0.05, 0.15); %8track
 planner.ps.num_ucStates = 2;

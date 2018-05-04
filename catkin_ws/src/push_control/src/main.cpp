@@ -34,7 +34,6 @@
 using namespace std;
 using namespace Eigen;
 
-
 //*********************** Global variables *************************************
 pthread_mutex_t nonBlockMutex;
 //*********************** Main Program *************************************
@@ -49,8 +48,8 @@ int main(int argc,  char *argv[]){
   n1.setParam("is_exit", false);
 
   //save directorty
-  string trajectory_name = "Straight_point_pusher_vel_0_05";
-  string experiment_name = trajectory_name + "point_FOM_straight_with_perturb";
+  string trajectory_name = "8Track_point_pusher_radius_0_15_vel_0_05_3_laps_gp_controller";
+  string experiment_name = trajectory_name + "test";
 
   //Define rosservices
   ros::ServiceClient start_rosbag = n1.serviceClient<push_control::rosbag>("start_rosbag");
@@ -76,10 +75,11 @@ int main(int argc,  char *argv[]){
 
   //Depends on pusher type
   PusherSlider pusher_slider;
-  Friction friction(&pusher_slider);
-  PointPusher point_pusher(&pusher_slider, &friction, trajectory_name);    //Variable to pass to thread
 
-//  LinePusher line_pusher(&pusher_slider, &friction);    //Variable to pass to thread
+  Friction friction(&pusher_slider);
+  PointPusher point_pusher(&pusher_slider, &friction, trajectory_name, 2);    //Variable to pass to thread
+//  LinePusher line_pusher(&pusher_slider, &friction, trajectory_name, 5);    //Variable to pass to thread
+
   //Specify type of pusher (point or line)
   Pusher * ppusher = &point_pusher;
 //   Pusher * ppusher = &line_pusher;
@@ -123,10 +123,11 @@ int main(int argc,  char *argv[]){
   thread_data_array.ppusher = ppusher;
 
   robotStruct robot_struct;
-  bool isRobot = true;
+  bool isRobot;
   bool is_success;
-  bool isExecute = true;
-
+  bool isExecute=true;
+  //~ n1.getParam("have_robot", isExecute);
+  n1.getParam("have_robot", isRobot);
 
   //initialize values
   joint_states << 0,0,0,0,0,0;
@@ -136,7 +137,6 @@ int main(int argc,  char *argv[]){
   //First Loop (Check Vicon, Robot connection, ros)
   if (isExecute && ros::ok()) {
 
-
     if (isRobot) {
         initializeVicon(q_slider, listener);
 //        cout<<q_slider<<endl;
@@ -144,6 +144,7 @@ int main(int argc,  char *argv[]){
         initializeEGM(robot_struct, q_pusher, joint_states);
         }
     initializeThread((void *) &thread_data_array);
+
 
     if (isRobot) {
       pauseEGM(robot_struct, 2, joint_states);
@@ -167,7 +168,10 @@ int main(int argc,  char *argv[]){
 //      _q_pusher = q_pusher;
 //      _q_slider = q_slider;
     }
-    start_rosbag.call(srv);
+    
+    if (isRobot){
+        start_rosbag.call(srv);
+    }
     //************** Main Control Loop ****************************************************************************************
     ros::Rate r(1000);
     int i=0;
@@ -261,26 +265,27 @@ int main(int argc,  char *argv[]){
   else{
     cout << "[main][warning] isExecute set to false and/or ros!=ok"<<endl;
   }
+  
+  if (isRobot){
+      // Save JSON Output file
+      JsonOutput["timeJSON"] = timeJSON;
+      JsonOutput["q_pusher_sensed"] = q_pusher_sensedJSON;
+      JsonOutput["q_pusher_commanded"] = q_pusher_commandedJSON;
+      JsonOutput["xc"] = xc_JSON;
+      JsonOutput["xs"] = xs_JSON;
+      JsonOutput["uc"] = uc_JSON;
+      JsonOutput["us"] = us_JSON;
 
-  // Save JSON Output file
-  JsonOutput["timeJSON"] = timeJSON;
-  JsonOutput["q_pusher_sensed"] = q_pusher_sensedJSON;
-  JsonOutput["q_pusher_commanded"] = q_pusher_commandedJSON;
-  JsonOutput["xc"] = xc_JSON;
-  JsonOutput["xs"] = xs_JSON;
-  JsonOutput["uc"] = uc_JSON;
-  JsonOutput["us"] = us_JSON;
+      ofstream myOutput;
+      string src_path = getenv("PUSHING_BENCHMARK_BASE");
+    //  string fileName  = src_path + "/catkin_ws/src/push_control/src/Data/8Track_line_pusher_radius_0_15_vel_0_05_exp_fom_perturb_2.json";
+      string fileName  = src_path + "/catkin_ws/src/push_control/src/Data/"+ experiment_name + ".json";
+      myOutput.open (fileName);
+      myOutput << styledWriter.write(JsonOutput);
+      myOutput.close();
 
-  ofstream myOutput;
-  string src_path = getenv("PUSHING_BENCHMARK_BASE");
-//  string fileName  = src_path + "/catkin_ws/src/push_control/src/Data/8Track_line_pusher_radius_0_15_vel_0_05_exp_fom_perturb_2.json";
-  string fileName  = src_path + "/catkin_ws/src/push_control/src/Data/"+ experiment_name + ".json";
-  myOutput.open (fileName);
-  myOutput << styledWriter.write(JsonOutput);
-  myOutput.close();
-
-  //terminate rosbag
-  stop_rosbag.call(srv);
-
+      //terminate rosbag
+      stop_rosbag.call(srv);
+    }
   cout<< "[main] End of Program" <<endl;
 }

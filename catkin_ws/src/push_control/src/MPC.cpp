@@ -12,6 +12,8 @@
 #include "MPC.h"
 #include "OptProgram.h"
 #include "StructuresOptProgram.h"
+#include <unistd.h>
+
 
 using namespace std;
 using namespace Eigen;
@@ -58,20 +60,24 @@ void MPC::buildWeightMatrices(){
   int u_index;
 
   if (line_pusher->num_contact_points==1) {
-//    Q.diagonal() << 1,5,1,0.01;
-//    Q=Q*10;
-//    Qf.diagonal() << 1,5,1,0.01;
-//    Qf=Qf*2000;
-//    R.diagonal() << 1,1,0.001;
-//    R = R*0.1;
 
-    Q.diagonal() << 3,3,.1,0.0;
-    Q=Q*10;
-    Qf.diagonal() << 3,3,.1,0.0;
-    Qf=Qf*2000;
-    R.diagonal() << 1,1,0.01;
+    if (line_pusher->numucStates==3){
+      Q.diagonal() << 3,3,.1,0.0;
+      Q=Q*10;
+      Qf.diagonal() << 3,3,.1,0.0;
+      Qf=Qf*2000;
+      R.diagonal() << 1,1,0.01;
 //    R = R*.5; //LMODES
-    R = R*.01; //FOM
+      R = R*.01; //FOM
+    }
+    else{
+      Q.diagonal() << 1,1,.01,0.1;
+      Q=Q*1;
+      Qf.diagonal() << 1,1,.1,0.1;
+      Qf=Qf*2000;
+      R.diagonal() << 1,1;
+      R = R*1; //FOM
+      }
   }
   else{
 //    Q.diagonal() << 1,5,0.1,0.1;
@@ -87,6 +93,7 @@ void MPC::buildWeightMatrices(){
     R.diagonal() << 1,1,1,1,0.1;
     R = R*.5;
   }
+
 
   for (int i= 0; i<steps; i++){
 

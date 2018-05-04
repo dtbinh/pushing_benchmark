@@ -12,6 +12,7 @@
 #include "PointPusher.h"
 #include "FOM.h"
 #include "LModes.h"
+#include "GPController.h"
 //ROS
 #include <ros/ros.h>
 
@@ -64,8 +65,10 @@ void *loopControl(void *thread_arg)
     outMatrices out_matrices;
     PusherSlider pusher_slider;
     Friction friction(&pusher_slider);
+
     FOM fom(3, &pusher_slider, ppusher, &friction);
     LMODES lmodes(&pusher_slider, ppusher, &friction);
+    GPController gpmpc(&pusher_slider, ppusher, &friction);
 
     double _time;
     VectorXd delta_xc(ppusher->numxcStates);
@@ -82,21 +85,13 @@ void *loopControl(void *thread_arg)
     VectorXd _q_slider_zeroed(_q_slider.rows());
     VectorXd _q_pusher_zeroed(_q_pusher.rows());
 
-    // Frank hack Parameters
-  //Straight Line
-//    _q_offset_slider << 0.199752, 0, 0; //point pusher
-//    _q_offset_pusher << 0.199752, 0, 0*1.57079;//point pusher
-//  _q_offset_slider << 0.198955, 0, 0.; //line pusher
-//  _q_offset_pusher << 0.198955, 0, 0.;//line pusher
-
   //8Track
 //    _q_offset_slider << 0.3484033942222595, 0, 0; //point pusher
 //    _q_offset_pusher << 0.3484033942222595, 0, 0.0;//point pusher
+
+    //Straight Line
     _q_offset_slider << 0.19867394381957065, 0, 0; //point pusher
     _q_offset_pusher << 0.19867394381957065, 0, 0.0;//point pusher
-//  _q_offset_slider << 0.111927, 0, 0; //line pusher
-//  _q_offset_pusher << 0.111927, 0, -3.1416;//line pusher
-
 
     //**********************************************************************
     //************************ Begin Loop **********************************
@@ -104,10 +99,13 @@ void *loopControl(void *thread_arg)
     int counter = 0;
     ros::Rate r(125);
     while(ros::ok()) {
+        cout<<counter<<endl;
+
         double t0 = Helper::gettime();
         bool is_exit;
-          ros::NodeHandle n1;
+        ros::NodeHandle n1;
         n1.getParam("is_exit", is_exit);
+
         if (is_exit==true){
           break;
         }
@@ -125,7 +123,7 @@ void *loopControl(void *thread_arg)
 //        //--------------------------------------
         //define state variables from vicon and pusher states
         outStateNominal out_state_nominal;
-        out_state_nominal = ppusher->getStateNominal(_time);
+        out_state_nominal = ppusher->getStateNominalGP(_time);
 
         _q_slider_zeroed = _q_slider - _q_offset_slider;
         _q_pusher_zeroed = _q_pusher - _q_offset_pusher;
@@ -134,8 +132,9 @@ void *loopControl(void *thread_arg)
 //        xs(2) = (xs(5)+xs(2))/2.0;
         xc =  ppusher->coordinateTransformSC(xs);
         //Compute FOM control input
-        uc = fom.solveFOM(xc, _time);
+//        uc = fom.solveFOM(xc, _time);
 //        uc = lmodes.solveLMODES(xc, _time);
+        uc = gpmpc.solveGPMPC(xc, _time);
 //
 
 

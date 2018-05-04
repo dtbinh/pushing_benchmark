@@ -1,7 +1,7 @@
 classdef MPC < dynamicprops  
     properties (Constant)
         h_opt = 0.01;
-        steps = 50;
+        steps = 35;
     end
     
     properties

@@ -33,8 +33,8 @@ FOM::FOM(int _num_families,PusherSlider *_pusher_slider, Pusher *_line_pusher, F
 
         list_controller[lv1]->initializeMatricesMPC();
         list_controller[lv1]->buildWeightMatrices();
-
         thread_data_list[lv1] = thread_data_array;
+
     }
 }
 

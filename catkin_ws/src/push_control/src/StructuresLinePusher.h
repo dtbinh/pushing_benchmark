@@ -17,6 +17,8 @@ struct outStarStruct{
     MatrixXd ucStar;
     MatrixXd xsStar;
     MatrixXd usStar;
+    MatrixXd AStar;
+    MatrixXd BStar;
     MatrixXd tStar;
 };
 //**************
@@ -25,6 +27,8 @@ struct outStateNominal{
     VectorXd ucStar;
     VectorXd xsStar;
     VectorXd usStar;
+    MatrixXd AStar;
+    MatrixXd BStar;
 };
 //**************
 struct xcStateStruct{

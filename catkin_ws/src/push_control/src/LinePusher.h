@@ -18,7 +18,7 @@ class LinePusher: public Pusher {
 
 
         //Static Methods
-        LinePusher(PusherSlider* _pusher_slider, Friction* _friction, string trajectory_name);
+        LinePusher(PusherSlider* _pusher_slider, Friction* _friction, string trajectory_name, int _numuc_states);
         VectorXd buildUcEq();
         VectorXd buildXcEq();
         VectorXd coordinateTransformSC(VectorXd xs);

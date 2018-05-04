@@ -192,6 +192,7 @@ void Helper::write_array_JSON(Json::Value root, int num_rows, int num_cols, doub
 //***************************************
 void Helper::write_matrix_JSON(Json::Value root, MatrixXd &A)
 {
+
   for (int i=0;i<A.rows();i++){
     for (int j=0;j<A.cols();j++)
         {

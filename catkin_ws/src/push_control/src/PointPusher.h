@@ -18,18 +18,19 @@ public:
 
 
     //Static Methods
-    PointPusher(PusherSlider* _pusher_slider, Friction* _friction, string trajectory_name);
-    VectorXd buildUcEq();
-    VectorXd buildXcEq();
+    PointPusher(PusherSlider* _pusher_slider, Friction* _friction, string trajectory_name, int _numuc_states);
+//    VectorXd buildUcEq();
+//    VectorXd buildXcEq();
     VectorXd coordinateTransformSC(VectorXd xs);
     VectorXd offsetPusher(VectorXd xs);
     VectorXd coordinateTransformCS(VectorXd xc);
     VectorXd force2Velocity(VectorXd xc, VectorXd uc);
-    outStarStruct buildNominalTrajectory(double h_star);
+//    outStarStruct buildNominalTrajectory(double h_star);
     outStateNominal getStateNominal(double t);
-    outStateNominal getStateNominal2(double t);
-    outStarStruct buildStraightLineTrajectory(string v_eq);
-    outStarStruct build8TrackTrajectory(string v_eq);
+    outStateNominal getStateNominalGP(double t);
+//    outStateNominal getStateNominal2(double t);
+//    outStarStruct buildStraightLineTrajectory(string v_eq);
+//    outStarStruct build8TrackTrajectory(string v_eq);
     outStarStruct buildTrajectory(string v_eq);
     VectorXd getError(VectorXd xc, double t);
     MatrixXd B_fun(VectorXd xc_star, VectorXd uc_star, double rx, double d, MatrixXd A_ls);

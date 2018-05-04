@@ -14,12 +14,12 @@
 using namespace std;
 using namespace Eigen;
 
-LinePusher::LinePusher(PusherSlider* _pusher_slider, Friction* _friction, string trajectory_name): Pusher()
+LinePusher::LinePusher(PusherSlider* _pusher_slider, Friction* _friction, string trajectory_name, int _numuc_states): Pusher()
 {
 lp=0.03;
 d = lp/2;
 numxcStates = 4;
-numucStates = 5;
+numucStates = _numuc_states;
 numxsStates = 6;
 numusStates = 3;
 pusher_type = "line";

@@ -19,12 +19,12 @@
 using namespace std;
 using namespace Eigen;
 
-PointPusher::PointPusher(PusherSlider* _pusher_slider, Friction* _friction, string trajectory_name): Pusher()
+PointPusher::PointPusher(PusherSlider* _pusher_slider, Friction* _friction, string trajectory_name, int _numuc_states): Pusher()
 {
     lp=0.03;
     d = 0.;
     numxcStates = 4;
-    numucStates = 3;
+    numucStates = _numuc_states;
     numxsStates = 6;
     numusStates = 3;
     pusher_type = "point";
@@ -34,171 +34,29 @@ PointPusher::PointPusher(PusherSlider* _pusher_slider, Friction* _friction, stri
 
 
 //Static Eigen Constructor
-    uc_eq = buildUcEq();
-    xc_eq = buildXcEq();;
+
     struct outStarStruct outStar;
-//    outStar = buildNominalTrajectory(0.001);
-//    outStar = buildStraightLineTrajectory("0_05");
-//    outStar = build8TrackTrajectory("0_05");
-//    outStar = buildTrajectory("/Simulation/Data/8Track_point_pusher_vel_0_05.json");
-//    outStar = buildTrajectory("/Simulation/Data/inf_circle_point_pusher_vel_0_05.json");
-//    outStar = buildTrajectory("/Simulation/Data/inf_circle_point_pusher_vel_0_05_radius_neg_0_015.json");
     outStar = buildTrajectory("/Data/" + trajectory_name +".json");
     xc_star = outStar.xcStar;
     uc_star = outStar.ucStar;
     xs_star = outStar.xsStar;
     us_star = outStar.usStar;
+    A_star = outStar.AStar;
+    B_star = outStar.BStar;
     t_star  = outStar.tStar;
 
-  struct outStarStruct outStar2;
-    outStar2 = outStar;
-//  outStar2 = buildNominalTrajectory(0.03);
-//    outStar = buildStraightLineTrajectory("0_05");
-//    outStar = build8TrackTrajectory("0_05");
-//
-//
-//  xc_star2 = outStar2.xcStar;
-//    uc_star2 = outStar2.ucStar;
-//  xs_star2 = outStar2.xsStar;
-//  us_star2 = outStar2.usStar;
-//    cout<< outStar.tStar;
-//    t_star2 = outStar2.tStar;
-//    cout<<"finish"<<endl;
-
 }
 
-VectorXd PointPusher::buildUcEq()
-{
-    VectorXd tmp(numusStates);
-    tmp <<  0.3268,0,0;
-    return tmp;
-}
-
-VectorXd PointPusher::buildXcEq()
-{
-    VectorXd tmp(numxcStates);
-    tmp << 0,0,0,0;
-    return tmp;
-}
-
-outStarStruct PointPusher::buildNominalTrajectory(double h_star){
-    double v_eq = 0.05;
-    double t0 = 0;
-    double tf = 7;
-//    double h_star = 0.001;
-    int N_star = (1/h_star)*(tf-t0);
-    VectorXd t_star  = VectorXd::Zero(N_star);
-    MatrixXd xsStar(N_star, numxsStates);
-    MatrixXd usStar(N_star, numusStates);
-    MatrixXd xcStar(N_star, numxcStates);
-    MatrixXd ucStar(N_star, numucStates);
-    VectorXd tStar(N_star);
-
-    for ( int lv1 =0; lv1<N_star; lv1+=1){
-        //~ Define nominal values (simulator coordinates)
-        xsStar.row(lv1) <<  v_eq*tStar(lv1) ,0, 0, v_eq*tStar(lv1)-ppusher_slider->a/2, 0, 0;
-        usStar.row(lv1) <<  v_eq, 0, 0;
-        //~ %Define nominal values (controller coordinates)
-        xcStar.row(lv1) = coordinateTransformSC(xsStar.row(lv1));
-        ucStar.row(lv1)= uc_eq;
-        //~ Build nominal time vector
-        if (lv1<N_star-1){
-            tStar(lv1+1)  = tStar(lv1) + h_star;
-        }
-    }
-    // Return outStar object
-    struct outStarStruct outStar;
-    outStar.xcStar = xcStar;
-    outStar.ucStar = ucStar;
-    outStar.xsStar = xsStar;
-    outStar.usStar = usStar;
-    outStar.tStar = tStar;
-    return outStar;
-}
-
-
-outStarStruct PointPusher::buildStraightLineTrajectory(string v_eq){
-
-    Json::Value root;
-    Json::Reader reader;
-    char const* tmp = getenv( "PUSHING_BENCHMARK_BASE" );
-    string envStr( tmp );
-    string fileName;
-    fileName = envStr + "/Simulation/Data/Straight_point_pusher_vel_" + v_eq + ".json";
-//    cout<<fileName<<endl;
-    ifstream file(fileName);
-    file >> root;
-
-    int N_star = root["Matrices"]["t_star"].size();
-    VectorXd t_star  = VectorXd::Zero(N_star);
-    MatrixXd xc_star(N_star, numxcStates);
-    MatrixXd uc_star(N_star, numucStates);
-    MatrixXd xs_star(N_star, numxsStates);
-    MatrixXd us_star(N_star, numusStates);
-    VectorXd tStar(N_star);
-
-    Helper::write_matrix_JSON(root["Matrices"]["xc_star"], xc_star);
-    Helper::write_matrix_JSON(root["Matrices"]["uc_star"], uc_star);
-    Helper::write_matrix_JSON(root["Matrices"]["xs_star"], xs_star);
-    Helper::write_matrix_JSON(root["Matrices"]["us_star"], us_star);
-    Helper::write_vector_JSON(root["Matrices"]["t_star"], t_star);
-
-    // Return outStar object
-    struct outStarStruct outStar;
-    outStar.xcStar = xc_star;
-    outStar.ucStar = uc_star;
-    outStar.xsStar = xs_star;
-    outStar.usStar = us_star;
-    outStar.tStar = t_star;
-
-    return outStar;
-}
-
-outStarStruct PointPusher::build8TrackTrajectory(string v_eq){
-
-    Json::Value root;
-    Json::Reader reader;
-    char const* tmp = getenv( "PUSHING_BENCHMARK_BASE" );
-    string envStr( tmp );
-    string fileName;
-    fileName = envStr + "/Simulation/Data/8Track_point_pusher_vel_" + v_eq + ".json";
-//    cout<<fileName<<endl;
-    ifstream file(fileName);
-    file >> root;
-
-    int N_star = root["Matrices"]["t_star"].size();
-    VectorXd t_star  = VectorXd::Zero(N_star);
-    MatrixXd xc_star(N_star, numxcStates);
-    MatrixXd uc_star(N_star, numucStates);
-    MatrixXd xs_star(N_star, numxsStates);
-    MatrixXd us_star(N_star, numusStates);
-    VectorXd tStar(N_star);
-
-    Helper::write_matrix_JSON(root["Matrices"]["xc_star"], xc_star);
-    Helper::write_matrix_JSON(root["Matrices"]["uc_star"], uc_star);
-    Helper::write_matrix_JSON(root["Matrices"]["xs_star"], xs_star);
-    Helper::write_matrix_JSON(root["Matrices"]["us_star"], us_star);
-    Helper::write_vector_JSON(root["Matrices"]["t_star"], t_star);
-
-    // Return outStar object
-    struct outStarStruct outStar;
-    outStar.xcStar = xc_star;
-    outStar.ucStar = uc_star;
-    outStar.xsStar = xs_star;
-    outStar.usStar = us_star;
-    outStar.tStar = t_star;
-
-    return outStar;
-}
 outStarStruct PointPusher::buildTrajectory(string file_name){
 
     Json::Value root;
     Json::Reader reader;
+    struct outStarStruct outStar;
 
     char const* tmp = getenv( "PUSHING_BENCHMARK_BASE" );
     string envStr( tmp );
     string fileName;
-  cout<<"*****************"<<endl;
+    cout<<"*****************"<<endl;
     fileName = envStr + file_name;
     cout<<fileName<<endl;
     ifstream file(fileName);
@@ -206,11 +64,13 @@ outStarStruct PointPusher::buildTrajectory(string file_name){
     file >> root;
 
     int N_star = root["Matrices"]["t_star"].size();
+
     VectorXd t_star  = VectorXd::Zero(N_star);
     MatrixXd xc_star(N_star, numxcStates);
     MatrixXd uc_star(N_star, numucStates);
     MatrixXd xs_star(N_star, numxsStates);
     MatrixXd us_star(N_star, numusStates);
+
     VectorXd tStar(N_star);
 
     Helper::write_matrix_JSON(root["Matrices"]["xc_star"], xc_star);
@@ -219,8 +79,31 @@ outStarStruct PointPusher::buildTrajectory(string file_name){
     Helper::write_matrix_JSON(root["Matrices"]["us_star"], us_star);
     Helper::write_vector_JSON(root["Matrices"]["t_star"], t_star);
 
+    try{
+        int A_size;
+        int B_size;
+        A_size = numxcStates*numxcStates;
+        B_size = numxcStates*numucStates;
+        MatrixXd A_star(N_star, A_size);
+        MatrixXd B_star(N_star, B_size);
+        Helper::write_matrix_JSON(root["Matrices"]["A_star"], A_star);
+        Helper::write_matrix_JSON(root["Matrices"]["B_star"], B_star);
+//        MatrixXd A_row(A_size,1);
+//        MatrixXd B_row(B_size,1);
+//        A_row = A_star.row(0);
+//        B_row = B_star.row(0);
+//        Map<MatrixXd> A_matrix(A_row.data(), numxcStates,numxcStates);
+//        Map<MatrixXd> B_matrix(B_row.data(), numxcStates,numucStates);
+//        cout<<A_matrix<<endl;
+//        cout<<B_matrix<<endl;
+        outStar.AStar = A_star;
+        outStar.BStar = B_star;
+
+    }
+    catch (int e){
+        cout<<"[Warning]: A and B matrices not properly loaded"<<endl;
+    }
     // Return outStar object
-    struct outStarStruct outStar;
     outStar.xcStar = xc_star;
     outStar.ucStar = uc_star;
     outStar.xsStar = xs_star;
@@ -228,6 +111,40 @@ outStarStruct PointPusher::buildTrajectory(string file_name){
     outStar.tStar = t_star;
 
     return outStar;
+}
+
+outStateNominal PointPusher::getStateNominalGP(double t) {
+
+    VectorXd vecDif(t_star.rows());
+    MatrixXf::Index   minIndex;
+    double minVal;
+    outStateNominal out_state_nominal;
+
+    vecDif = (t*VectorXd::Ones(t_star.rows()) - t_star).cwiseAbs();
+    minVal = vecDif.minCoeff(&minIndex);
+
+    //get linear matrices for MPC
+    int A_size;
+    int B_size;
+    A_size = numxcStates*numxcStates;
+    B_size = numxcStates*numucStates;
+    MatrixXd A_row(A_size,1);
+    MatrixXd B_row(B_size,1);
+    A_row = A_star.row(minIndex);
+    B_row = B_star.row(minIndex);
+
+    Map<MatrixXd> A_matrix(A_row.data(), numxcStates,numxcStates);
+    Map<MatrixXd> B_matrix(B_row.data(), numxcStates,numucStates);
+
+    //get nominal states and inputs
+    out_state_nominal.xcStar = xc_star.row(minIndex);
+    out_state_nominal.ucStar = uc_star.row(minIndex);
+    out_state_nominal.xsStar = xs_star.row(minIndex);
+    out_state_nominal.usStar = us_star.row(minIndex);
+    out_state_nominal.AStar = A_matrix;
+    out_state_nominal.BStar = B_matrix;
+
+    return out_state_nominal;
 }
 
 outStateNominal PointPusher::getStateNominal(double t) {
@@ -250,34 +167,6 @@ outStateNominal PointPusher::getStateNominal(double t) {
     out_state_nominal.usStar = us_star.row(minIndex);
 
     return out_state_nominal;
-}
-
-
-outStateNominal PointPusher::getStateNominal2(double t) {
-//            % Get nominal trajectory values at time T
-//            %
-//            %   Parameters:
-//            %   t       -   Time at which the nominal state is evaluated
-
-  VectorXd vecDif(t_star2.rows());
-  MatrixXf::Index   minIndex;
-  double minVal;
-  outStateNominal out_state_nominal;
-
-  double t0 = Helper::gettime();
-  vecDif = (t*VectorXd::Ones(t_star2.rows()) - t_star2).cwiseAbs();
-  double tf = Helper::gettime();
-
-  t0 = Helper::gettime();
-  minVal = vecDif.minCoeff(&minIndex);
-  tf = Helper::gettime();
-
-  out_state_nominal.xcStar = xc_star2.row(minIndex);
-  out_state_nominal.ucStar = uc_star2.row(minIndex);
-  out_state_nominal.xsStar = xs_star2.row(minIndex);
-  out_state_nominal.usStar = us_star2.row(minIndex);
-
-  return out_state_nominal;
 }
 
 
