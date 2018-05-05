@@ -23,7 +23,7 @@ import cv2
 import rosbag
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
-
+from shapely.geometry import Point, Polygon
 
 def get_tranf_matrix(extrinsics, camera_matrix):
     # Matrix for extrinsics
@@ -80,6 +80,7 @@ if __name__=='__main__':
                         data['timeJSON'].append(t.to_sec())
         np.savez(data_filename, data)
     else:
+        print 'hi!!'
         data = np.load(data_filename+'.npz')['arr_0'][()]
     act_var = data
     
@@ -92,6 +93,9 @@ if __name__=='__main__':
     x_off = 0.345
     y_off = 0
     z_off = 0.015
+    
+    #Object properties
+    obj_len = 0.09
 
     # t,x,y,z of the desired trajectory
     t_des = np.array(des_var['t_star'])[:,0]
@@ -144,18 +148,20 @@ if __name__=='__main__':
     time_steps -= time_steps[0]
     for it in range(time_steps.shape[0]): #range(x_act.shape[0]):
         img_name = 'Images/anew_push_set_{}.png'.format(it)
-        
         imgs.append(img_name)
         print img_name
         if os.path.isfile(img_name):
             continue
-        #plt.imshow(img)
-        while t_im[it_im]< time_steps[it]:
+        
+        # Get real image
+        while t_im[it_im]< time_steps[it]: #What is the right image from the sequence to plot?
             it_im += 1
         plt.imshow(data['images'][it_im])
+        
+        # Locate object position
         obj_pose = np.array([x_act[it], y_act[it], z_act[it]])  
         obj_ori = ori_act[it]
-        obj_len = 0.09;
+        # Create square representing the object
         square = np.array([[-1, -1],[1, -1],[1, 1], [-1, 1],[-1, -1]])*obj_len/2;
         c, s = np.cos(obj_ori), np.sin(obj_ori)
         R = np.array(((c,-s), (s, c)))
@@ -164,85 +170,52 @@ if __name__=='__main__':
         for i in range(3):
             act_obj[i] = act_obj[i]+obj_pose[i]
         act_obj = np.insert(act_obj, 3, 1, axis = 0)
+        # Locate object pixels
         pixels_obj = np.dot(transformation_matrix, act_obj)
-        ext_obj_pose = np.concatenate([obj_pose, [1]])
-        pixels_center = np.dot(transformation_matrix, ext_obj_pose)
-        #plt.plot(pixels_center[0]/pixels_center[2], pixels_center[1]/pixels_center[2], 'o')
-        #plt.plot(pixels_obj[0]/pixels_obj[2], pixels_obj[1]/pixels_obj[2], 'g')
-        
-        
         a = pixels_obj[0]/pixels_obj[2]
         b = pixels_obj[1]/pixels_obj[2]
-        from shapely.geometry import Point, Polygon
         polygon = Polygon([(a[0], b[0]), (a[1], b[1]), (a[2], b[2]), (a[3], b[3])])
-        x = []
-        y = []
-        for it_2 in range(x_act.shape[0]):
-            point = Point(pix_x_act[it_2],pix_y_act[it_2])
-            if polygon.contains(point) and t_act[it_2] < t_act[it]:
-                plt.plot(x,y, 'b')
-                x = []
-                y = []
-            else:
-                x.append(pix_x_act[it_2])
-                y.append(pix_y_act[it_2])
-        #if len(x) >  0:
-        #    plt.plot(x,y, 'r')
         
-        x = []
-        y = []
+        # Plot desired trajectory        
+        x = []; y = []
         for it_2 in range(x_des.shape[0]):
             point = Point(pix_x_des[it_2],pix_y_des[it_2])
             if polygon.contains(point):
                 plt.plot(x,y, 'k')
-                x = []
-                y = []
+                x = []; y = []
             else:
-                x.append(pix_x_des[it_2])
-                y.append(pix_y_des[it_2])
+                x.append(pix_x_des[it_2]); y.append(pix_y_des[it_2])
         if len(x) >  0:
             plt.plot(x,y, 'k')
-        #writer.grab_frame()
+            
+        # Plot actual trajectory
+        x = []; y = []
+        for it_2 in range(x_act.shape[0]):
+            point = Point(pix_x_act[it_2],pix_y_act[it_2])
+            if polygon.contains(point) and t_act[it_2] < t_act[it]:
+                plt.plot(x,y, 'b')
+                x = []; y = []
+            else:
+                x.append(pix_x_act[it_2]); y.append(pix_y_act[it_2])
         
-        
+        # Plot properties
         plt.axis('off')
-        plt.subplots_adjust(top = 1, bottom = 0, right = 1, left = 0, 
-        hspace = 0, wspace = 0)
+        plt.subplots_adjust(top = 1, bottom = 0, right = 1, left = 0, hspace = 0, wspace = 0)
         plt.savefig(img_name,bbox_inches='tight',pad_inches = 0)
-        plt.show()
-        
         plt.close()
         
+        # Create new figure
         fig = plt.figure()
-        #video.write(cv2.imread(img_name))
-#    cv2.destroyAllWindows()
-#    video.release()
-    #plt.show()
-
-    # Do video with right frequency
-    '''
-    for image in imgs:
-        print 'video: ', image
-        im = cv2.imread(image)
-        cv2.imshow(im)
-        video.write(cv2.imread(image))
-        
     
-    cv2.destroyAllWindows()
-    video.release()
-    pdb.set_trace()
-    '''
     
+    # Create video using sequence (cropped) images 
     frame = cv2.imread(imgs[0])[90:410,220:820]
     height, width, layers = frame.shape
-    #pdb.set_trace()
-    #video = cv2.VideoWriter(video_name, -1, 1, (width,height))
     fourcc = cv2.VideoWriter_fourcc(*'DIVX')
-    video = cv2.VideoWriter('anew_output.avi',fourcc, fps, (width,height))  #Check if fps gives problems
+    video = cv2.VideoWriter('anew_output.avi',fourcc, fps, (width,height)) 
     for image in imgs:
         im = cv2.imread(image)
         im = im[90:410,220:820]
-        
         video.write(im)
     
     cv2.destroyAllWindows()
