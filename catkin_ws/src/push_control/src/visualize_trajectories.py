@@ -201,8 +201,7 @@ if __name__=='__main__':
         # Initialize video
         if it == 0:
             video_name = data_filename + '.avi'
-            frame = cv2.imread(img)
-            height, width, layers = frame.shape
+            height, width, layers = img.shape
             fourcc = cv2.VideoWriter_fourcc(*'DIVX')
             video = cv2.VideoWriter(video_name,fourcc, fps, (width,height)) 
         
@@ -210,7 +209,7 @@ if __name__=='__main__':
         video.write(img)
 
         # Create new figure
-        img_name = 'Images/push_frame_{}.png'.format(it)
+        #img_name = 'Images/push_frame_{}.png'.format(it)
         #plt.savefig(img_name,bbox_inches='tight',pad_inches = 0)
         plt.close()
         fig = plt.figure()
