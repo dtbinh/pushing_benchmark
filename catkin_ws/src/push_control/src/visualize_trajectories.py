@@ -68,7 +68,7 @@ if __name__=='__main__':
     if not os.path.isfile(data_filename+'.npy'):
         bridge = CvBridge()
         data = {}
-        data['images'] = [], data['t_images'] = [], data['xc'] = [], data['timeJSON'] = []
+        data['images'] = []; data['t_images'] = []; data['xc'] = []; data['timeJSON'] = []
         with rosbag.Bag(data_filename+'.bag', 'r') as bag:
                 for topic, msg, t in bag.read_messages():
                     if topic == '/viewer/image_raw':
