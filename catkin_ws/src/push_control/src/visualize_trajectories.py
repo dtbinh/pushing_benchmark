@@ -146,9 +146,9 @@ if __name__=='__main__':
         img_name = 'Images/anew_push_set_{}.png'.format(it)
         
         imgs.append(img_name)
-        #print img_name
+        print img_name
         if os.path.isfile(img_name):
-            pass #continue
+            continue
         #plt.imshow(img)
         while t_im[it_im]< time_steps[it]:
             it_im += 1
@@ -209,7 +209,7 @@ if __name__=='__main__':
         plt.subplots_adjust(top = 1, bottom = 0, right = 1, left = 0, 
         hspace = 0, wspace = 0)
         plt.savefig(img_name,bbox_inches='tight',pad_inches = 0)
-        #plt.show()
+        plt.show()
         
         plt.close()
         
