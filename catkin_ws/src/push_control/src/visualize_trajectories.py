@@ -80,7 +80,6 @@ if __name__=='__main__':
                         data['timeJSON'].append(t.to_sec())
         np.savez(data_filename, data)
     else:
-        print 'hi!!'
         data = np.load(data_filename+'.npz')['arr_0'][()]
     act_var = data
     
