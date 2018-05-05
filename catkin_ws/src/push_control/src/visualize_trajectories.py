@@ -141,7 +141,7 @@ if __name__=='__main__':
     
     # For each time steps / frame
     for it in range(time_steps.shape[0]): #range(x_act.shape[0]):
-        
+        print 'Building frame:', it
         # Get real image
         while t_im[it_im]< time_steps[it]: #What is the right image from the sequence to plot?
             it_im += 1
