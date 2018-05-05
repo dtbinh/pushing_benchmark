@@ -200,25 +200,31 @@ if __name__=='__main__':
         # Plot properties
         plt.axis('off')
         plt.subplots_adjust(top = 1, bottom = 0, right = 1, left = 0, hspace = 0, wspace = 0)
-        plt.savefig(img_name,bbox_inches='tight',pad_inches = 0)
-        plt.close()
+
+        # Convert canvas to image
+        fig.canvas.draw()
+        img = np.fromstring(fig.canvas.tostring_rgb(), dtype=np.uint8, sep='')
+        img  = img.reshape(fig.canvas.get_width_height()[::-1] + (3,))
+        #   Img is rgb, convert to opencv's default bgr
+        img = cv2.cvtColor(img,cv2.COLOR_RGB2BGR)[90:410,220:820]
         
+        # Initialize video
+        if it == 0:
+            video_name = data_filename + '.avi'
+            frame = cv2.imread(img)
+            height, width, layers = frame.shape
+            fourcc = cv2.VideoWriter_fourcc(*'DIVX')
+            video = cv2.VideoWriter(video_name,fourcc, fps, (width,height)) 
+        
+        # Record video
+        video.write(img)
+
         # Create new figure
+        #plt.savefig(img_name,bbox_inches='tight',pad_inches = 0)
+        plt.close()
         fig = plt.figure()
-    
-    
-    # Create video using sequence (cropped) images 
-    frame = cv2.imread(imgs[0])[90:410,220:820]
-    height, width, layers = frame.shape
-    fourcc = cv2.VideoWriter_fourcc(*'DIVX')
-    video = cv2.VideoWriter('anew_output.avi',fourcc, fps, (width,height)) 
-    for image in imgs:
-        im = cv2.imread(image)
-        im = im[90:410,220:820]
-        video.write(im)
     
     cv2.destroyAllWindows()
     video.release()
-
     
     
