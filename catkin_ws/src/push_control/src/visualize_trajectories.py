@@ -133,24 +133,14 @@ if __name__=='__main__':
     pix_x_act = np.divide(pixels_act[0], pixels_act[2])
     pix_y_act = np.divide(pixels_act[1], pixels_act[2])
         
-    # Video characteristics
+    # Initialize time and figure
     fig = plt.figure()
-    imgs = []
-    t = 0
     it_im = 0
     t_im = np.array(data['t_images']) - data['t_images'][0]
-    
-    frame = data['images'][0]
-    height, width, layers = frame.shape
-    fourcc = cv2.VideoWriter_fourcc(*'DIVX') 
-    video = cv2.VideoWriter('output.avi',fourcc, fps , (width,height))
     time_steps -= time_steps[0]
+    
+    # For each time steps / frame
     for it in range(time_steps.shape[0]): #range(x_act.shape[0]):
-        img_name = 'Images/anew_push_set_{}.png'.format(it)
-        imgs.append(img_name)
-        print img_name
-        if os.path.isfile(img_name):
-            continue
         
         # Get real image
         while t_im[it_im]< time_steps[it]: #What is the right image from the sequence to plot?
@@ -220,6 +210,7 @@ if __name__=='__main__':
         video.write(img)
 
         # Create new figure
+        img_name = 'Images/push_frame_{}.png'.format(it)
         #plt.savefig(img_name,bbox_inches='tight',pad_inches = 0)
         plt.close()
         fig = plt.figure()
