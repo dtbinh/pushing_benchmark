@@ -50,7 +50,7 @@ if __name__=='__main__':
     #Default camera info
     camera_matrix = np.array([[1391.26, 0.0, 939.721], [0.0, 1391.26, 531.336], [0.0, 0.0, 1.0]])    
     extrinsics = np.array([-0.011075975475308975, -0.15364479808584514, 1.0761464358218347, -0.6417773633094387, -0.6349911003061667, 0.30488743414700425, -0.3032355041462077])
-    tranformation_matrix = get_tranf_matrix(extrinsics, camera_matrix)
+    transformation_matrix = get_tranf_matrix(extrinsics, camera_matrix)
     
     #Desired trajectory
     desired_traj_JSON = os.environ['PUSHING_BENCHMARK_BASE'] + '/Data/'+'8Track_point_pusher_radius_0.15_vel_0.08_3_laps.json'
@@ -65,7 +65,7 @@ if __name__=='__main__':
     '''
     #   Load from BAG
     data_filename = '/home/mcube/pushing_benchmark_data/2018-05-02-11-04-558Track_point_pusher_radius_0_15_vel_0.08_3_laps_horizon_5'
-    if not os.path.isfile(data_filename+'.npy'):
+    if not os.path.isfile(data_filename+'.npz'):
         bridge = CvBridge()
         data = {}
         data['images'] = []; data['t_images'] = []; data['xc'] = []; data['timeJSON'] = []
@@ -78,9 +78,9 @@ if __name__=='__main__':
                     if topic == '/xc':
                         data['xc'].append(np.array(msg.data))
                         data['timeJSON'].append(t.to_sec())
-        np.savez(data_filename+'.npy', data)
+        np.savez(data_filename, data)
     else:
-        data = np.load(data_filename+'.npy')['arr_0']
+        data = np.load(data_filename+'.npz')['arr_0'][()]
     act_var = data
     
     # Video time
