@@ -1,6 +1,6 @@
 classdef MPC < dynamicprops  
     properties (Constant)
-        h_opt = 0.01;
+        h_opt = 0.03;
         steps = 35;
     end
     
@@ -118,7 +118,7 @@ classdef MPC < dynamicprops
                 %Add dynamic constraints
                 Opt = obj.addMotionConstraints(Opt, lv3, xcStar, ucStar, A, B);
                 Opt = obj.addVelocityConstraints(Opt, lv3, xcStar, ucStar);
-%                 Opt = obj.addStateConstraints(Opt, lv3, xcStar, ucStar);
+                %Opt = obj.addStateConstraints(Opt, lv3, xcStar, ucStar);
 
                 t_init = t_init + obj.h_opt;
             end
@@ -233,9 +233,10 @@ classdef MPC < dynamicprops
             Ain = [];
             bin = [];
             %% tangential velocity bounds
+            low_bound = .02;
             num_constraints = 4;
             Ain_tmp = [1 0;0 1;-1 0;0 -1];
-            bin_tmp = [.15;.15; 0.03; .15];
+            bin_tmp = [.2-un(1);.2-un(2); un(1)-low_bound; .2+un(2)];
             Ain = [Ain;zeros(num_constraints, 2)];
             bin = [bin;zeros(num_constraints, 1)];
             Ain(end-num_constraints+1:end,:) = Ain_tmp;

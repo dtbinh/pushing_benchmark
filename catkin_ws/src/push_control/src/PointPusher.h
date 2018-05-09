@@ -27,7 +27,7 @@ public:
     VectorXd force2Velocity(VectorXd xc, VectorXd uc);
 //    outStarStruct buildNominalTrajectory(double h_star);
     outStateNominal getStateNominal(double t);
-    outStateNominal getStateNominalGP(double t);
+    outStateNominal getStateNominalGPData(double t);
 //    outStateNominal getStateNominal2(double t);
 //    outStarStruct buildStraightLineTrajectory(string v_eq);
 //    outStarStruct build8TrackTrajectory(string v_eq);

@@ -12,7 +12,9 @@
 #include "PointPusher.h"
 #include "FOM.h"
 #include "LModes.h"
-#include "GPController.h"
+#include "GPDataController.h"
+#include "HybridController.h"
+
 //ROS
 #include <ros/ros.h>
 
@@ -66,9 +68,30 @@ void *loopControl(void *thread_arg)
     PusherSlider pusher_slider;
     Friction friction(&pusher_slider);
 
-    FOM fom(3, &pusher_slider, ppusher, &friction);
-    LMODES lmodes(&pusher_slider, ppusher, &friction);
-    GPController gpmpc(&pusher_slider, ppusher, &friction);
+    ///////////////////////
+    // TO EDIT ////////////
+    ///////////////////////
+    MatrixXd Q = MatrixXd::Zero(ppusher->numxcStates, ppusher->numxcStates);
+    MatrixXd Qf = MatrixXd::Zero(ppusher->numxcStates, ppusher->numxcStates);
+    MatrixXd R = MatrixXd::Zero(ppusher->numucStates, ppusher->numucStates);
+
+    //FOM control parameters
+    Q.diagonal() << 3,3,.1,0.0;Q=Q*10;
+    Qf.diagonal() << 3,3,.1,0.0;Qf=Qf*2000;
+    R.diagonal() << 1,1,0.01;R = R*.01;
+    //LMODES control parameters
+//    Q.diagonal() << 3,3,.1,0.0;Q=Q*10;
+//    Qf.diagonal() << 3,3,.1,0.0;Qf=Qf*2000;
+//    R.diagonal() << 1,1,0.01;R = R*.5;
+    //GPController control parameters
+//    Q.diagonal() << 1,1,.01,1;Q=Q*1;
+//    Qf.diagonal() << 1,1,.1,.1;Qf=Qf*1000;
+//    R.diagonal() << 1,1;R = R*10;
+//    FOM mpc(3, &pusher_slider, ppusher, &friction, Q, Qf, R);
+//    LMODES mpc(&pusher_slider, ppusher, &friction, Q, Qf, R);
+//    GPDataController mpc(&pusher_slider, ppusher, &friction, Q, Qf, R);
+
+    HybridController mpc(3, &pusher_slider, ppusher, &friction, Q, Qf, R);
 
     double _time;
     VectorXd delta_xc(ppusher->numxcStates);
@@ -123,25 +146,29 @@ void *loopControl(void *thread_arg)
 //        //--------------------------------------
         //define state variables from vicon and pusher states
         outStateNominal out_state_nominal;
-        out_state_nominal = ppusher->getStateNominalGP(_time);
+        out_state_nominal = ppusher->getStateNominalGPData(_time);
 
         _q_slider_zeroed = _q_slider - _q_offset_slider;
         _q_pusher_zeroed = _q_pusher - _q_offset_pusher;
         _q_slider_zeroed(2) = Helper::find_best_angle(_q_slider_zeroed(2), out_state_nominal.xcStar(2));
         xs << _q_slider_zeroed, _q_pusher_zeroed;
 //        xs(2) = (xs(5)+xs(2))/2.0;
+
         xc =  ppusher->coordinateTransformSC(xs);
-        //Compute FOM control input
-//        uc = fom.solveFOM(xc, _time);
-//        uc = lmodes.solveLMODES(xc, _time);
-        uc = gpmpc.solveGPMPC(xc, _time);
+        //Compute MPC control input
+        uc = mpc.solveMPC(xc, _time);
 //
 
 
 //      outStateNominal out_state_nominal;
 //      out_state_nominal = ppusher->getStateNominal(_time);
 //      us = ppusher->force2Velocity(out_state_nominal.xcStar, out_state_nominal.ucStar);
-        us = ppusher->force2Velocity(xc, uc);
+
+//        us = ppusher->force2Velocity(xc, uc);
+
+        us = mpc.get_robot_velocity(xc, uc);
+
+        sleep(10.);
 //        //-------Protected---------------------
         pthread_mutex_lock(&nonBlockMutex);
         twist_pusher = us;

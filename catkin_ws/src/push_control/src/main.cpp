@@ -77,7 +77,7 @@ int main(int argc,  char *argv[]){
   PusherSlider pusher_slider;
 
   Friction friction(&pusher_slider);
-  PointPusher point_pusher(&pusher_slider, &friction, trajectory_name, 2);    //Variable to pass to thread
+  PointPusher point_pusher(&pusher_slider, &friction, trajectory_name, 3);    //Variable to pass to thread
 //  LinePusher line_pusher(&pusher_slider, &friction, trajectory_name, 5);    //Variable to pass to thread
 
   //Specify type of pusher (point or line)

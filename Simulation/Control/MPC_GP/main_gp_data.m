@@ -15,15 +15,16 @@ run(strcat(getenv('HOME'),'/pushing_benchmark/Simulation/Simulator/setup.m'));
 symbolic_linearize_data;
 
 %% Simulation data and video are stored in /home/Data/<simulation_name>
-simulation_name = 'gp_data';
+simulation_name = 'gp_data_2_on_analytical';
 %% Simulation time
-sim_time = 45;
+sim_time = 40;
 
 %% Initial conditions 
 % x0 = [x;y;theta;xp;yp]
 % x: x position of object, y: y position of object, theta: orientation of object
 % xp: x position of pusher, yp: y position of pusher
-x0_c = [0.0;-0.03*1;15*pi/180*1;.00*1];
+x0_c = [-.198674;0;0;-.00];
+% x0_c = [-0.0;0.03;15*pi/180;-.009];
 %%Initiaze system
 is_gp=true;
 initialize_system();
@@ -33,9 +34,9 @@ simulator.data = data;
 planner = Planner(planar_system, simulator, Linear, data, object, '8Track_gp', 0.05, 0.15); %8track
 planner.ps.num_ucStates = 2;
 %Controller setup
-Q = 1*diag([1,1,.01,0.1]);
-Qf=  1*2000*diag([1,1,.1,.1]);
-R = 1*diag([1,1]);
+Q = 1*diag([1,1,.01,1]);
+Qf=  1*1000*diag([1,1,.1,.1]);
+R = 10*diag([1,1]);
 mpc = MPC(planner, Q, Qf, R, Linear, data, object);
 %send planned trajectory to simulator for plotting
 simulator.x_star = planner.xs_star;

@@ -258,8 +258,12 @@ classdef MPCforce < dynamicprops
             ucStar = obj.planner.uc_star(indexDif,:)'; 
             xsStar = obj.planner.xs_star(indexDif,:)';
             usStar = obj.planner.us_star(indexDif,:)'; 
-            A = reshape(obj.planner.A_star(indexDif,:,:), 4,4);
-            B = reshape(obj.planner.B_star(indexDif,:,:), 4,3); 
+            try
+                A = reshape(obj.planner.A_star(indexDif,:,:), 4,4);
+                B = reshape(obj.planner.B_star(indexDif,:,:), 4,3);
+            catch
+
+            end
         end
         %Get nominal trajectory values at time T
         function [tStar] = getxStateNominal(obj, x)

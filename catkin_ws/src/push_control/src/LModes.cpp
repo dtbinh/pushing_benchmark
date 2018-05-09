@@ -15,7 +15,7 @@
 
 typedef SparseMatrix<double> SparseMatrixXd;
 
-LMODES::LMODES(PusherSlider *_pusher_slider, Pusher *_line_pusher, Friction *_friction) {
+LMODES::LMODES(PusherSlider *_pusher_slider, Pusher *_line_pusher, Friction *_friction, MatrixXd Q, MatrixXd Qf, MatrixXd R) {
     line_pusher = _line_pusher;
     friction=_friction;
     pusher_slider=_pusher_slider;
@@ -25,7 +25,7 @@ LMODES::LMODES(PusherSlider *_pusher_slider, Pusher *_line_pusher, Friction *_fr
     num_families=1;
 //    out_matrices = readMatrices(lv1);
 
-    controller = new MPC(_pusher_slider, _line_pusher, _friction);
+    controller = new MPC(_pusher_slider, _line_pusher, _friction,  Q,  Qf,  R);
     list_controller[lv1] = controller;
 
     out_solution = new outSolutionStruct;
@@ -35,8 +35,8 @@ LMODES::LMODES(PusherSlider *_pusher_slider, Pusher *_line_pusher, Friction *_fr
     thread_data_array->controller = list_controller[lv1];
     thread_data_array->out_solution = list_out_solution[lv1];
 
-    list_controller[lv1]->initializeMatricesMPC();
-    list_controller[lv1]->buildWeightMatrices();
+//    list_controller[lv1]->initializeMatricesMPC();
+//    list_controller[lv1]->buildWeightMatrices();
 
     thread_data_list[lv1] = thread_data_array;
 
@@ -96,7 +96,7 @@ VectorXd LMODES::learnModeSchedule(VectorXd delta_xc, double _y_star, double _th
 
   return _mode_schedule;
 }
-VectorXd LMODES::solveLMODES(VectorXd xc, double time){
+VectorXd LMODES::solveMPC(VectorXd xc, double time){
 
     //Initialize variables
     VectorXd objList(num_families);
@@ -148,53 +148,7 @@ VectorXd LMODES::solveLMODES(VectorXd xc, double time){
     return uc;
 }
 
-// Read matrices from JSON file
-outMatrices LMODES::readMatrices(int flag){
-  //~ Read Matrices
-  Json::Value root;
-  Json::Reader reader;
-  char const* tmp = getenv( "PUSHING_BENCHMARK_BASE" );
-  string envStr( tmp );
-  string fileName;
-  if (flag==0){fileName = envStr + "/Simulation/Data/MatricesMode0_" + line_pusher->pusher_type + ".json"; }
-  else if(flag==1){fileName = envStr + "/Simulation/Data/MatricesMode1_" + line_pusher->pusher_type + ".json"; }
-  else{fileName = envStr + "/Simulation/Data/MatricesMode2_" + line_pusher->pusher_type + ".json";}
+VectorXd LMODES::get_robot_velocity(VectorXd xc, VectorXd uc) {
 
-  ifstream file(fileName);
-  file >> root;
-  int num_eq_constraints = root["Matrices"]["beq"].size();
-  int num_ineq_constraints = root["Matrices"]["bin"].size();
-  int num_variables = root["Matrices"]["Q"].size();
-  Eigen::MatrixXd Q(num_variables, num_variables);
-  Eigen::MatrixXd Aeq(num_eq_constraints,num_variables);
-  Eigen::MatrixXd Ain(num_ineq_constraints,num_variables);
-  Eigen::MatrixXd A_bar(4,4);
-  Eigen::VectorXd fobj(num_variables);
-  Eigen::VectorXd beq(num_eq_constraints);
-  Eigen::VectorXd bin(num_ineq_constraints);
-  Eigen::VectorXd lb(num_variables);
-  Eigen::VectorXd ub(num_variables);
-
-  Helper::write_matrix_JSON(root["Matrices"]["Q"], Q);
-  Helper::write_matrix_JSON(root["Matrices"]["Aeq"], Aeq);
-  Helper::write_matrix_JSON(root["Matrices"]["Ain"], Ain);
-  Helper::write_matrix_JSON(root["Matrices"]["A_bar"], A_bar);
-  Helper::write_vector_JSON(root["Matrices"]["f"], fobj);
-  Helper::write_vector_JSON(root["Matrices"]["bin"], bin);
-  Helper::write_vector_JSON(root["Matrices"]["beq"], beq);
-  Helper::write_vector_JSON(root["Matrices"]["lb"], lb);
-  Helper::write_vector_JSON(root["Matrices"]["ub"], ub);
-
-  outMatrices out_matrices;
-  out_matrices.Q=Q;
-  out_matrices.fobj=fobj;
-  out_matrices.A_bar=A_bar;
-  out_matrices.Ain=Ain;
-  out_matrices.bin=bin;
-  out_matrices.Aeq=Aeq;
-  out_matrices.beq=beq;
-  out_matrices.lb=lb;
-  out_matrices.ub=ub;
-
-  return out_matrices;
+  return line_pusher->force2Velocity(xc, uc);
 }

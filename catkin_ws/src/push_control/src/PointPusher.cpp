@@ -113,7 +113,7 @@ outStarStruct PointPusher::buildTrajectory(string file_name){
     return outStar;
 }
 
-outStateNominal PointPusher::getStateNominalGP(double t) {
+outStateNominal PointPusher::getStateNominalGPData(double t) {
 
     VectorXd vecDif(t_star.rows());
     MatrixXf::Index   minIndex;

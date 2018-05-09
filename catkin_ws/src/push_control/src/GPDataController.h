@@ -12,7 +12,7 @@
 #ifndef PUSH_CONTROL_GPCONTROLLER_H
 #define PUSH_CONTROL_GPCONTROLLER_H
 
-class GPController {
+class GPDataController {
 public:
     //Properties
     MPC *controller;
@@ -24,8 +24,9 @@ public:
     int numucStates;
 
     //Methods
-    GPController(PusherSlider *pusher_slider, Pusher *_line_pusher, Friction *_friction);
-    VectorXd solveGPMPC(VectorXd xc, double _time);
+    GPDataController(PusherSlider *pusher_slider, Pusher *_line_pusher, Friction *_friction, MatrixXd Q, MatrixXd Qf, MatrixXd R);
+    VectorXd solveMPC(VectorXd xc, double _time);
+    VectorXd get_robot_velocity(VectorXd xc, VectorXd uc);
 };
 
 #endif //PUSH_CONTROL_GPCONTROLLER_H

@@ -31,10 +31,10 @@ class LMODES {
         int numucStates;
         pthread_t my_thread[3];
         //Methods
-        LMODES(PusherSlider *pusher_slider, Pusher *_line_pusher, Friction *_friction);
-        VectorXd solveLMODES(VectorXd xc, double _time);
-        outMatrices readMatrices(int flag);
+        LMODES(PusherSlider *pusher_slider, Pusher *_line_pusher, Friction *_friction, MatrixXd Q, MatrixXd Qf, MatrixXd R);
+        VectorXd solveMPC(VectorXd xc, double _time);
         VectorXd learnModeSchedule(VectorXd delta_xc, double _y_star, double _theta_star);
+        VectorXd get_robot_velocity(VectorXd xc, VectorXd uc);
 };
 
 

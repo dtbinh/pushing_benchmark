@@ -56,6 +56,10 @@ struct outBuildForceIndConstraints{
     Eigen::MatrixXd Ain;
     Eigen::VectorXd bin;
 };
+struct outBuildVelConstraintsGPData{
+    Eigen::MatrixXd Ain;
+    Eigen::VectorXd bin;
+};
 
 struct outBuildForceDepConstraints{
     Eigen::MatrixXd Ain;
@@ -85,7 +89,7 @@ public:
     Friction *friction;
 
     //Static Methods
-    MPC(PusherSlider *pusher_slider, Pusher *line_pusher, Friction *friction);
+    MPC(PusherSlider *pusher_slider, Pusher *line_pusher, Friction *friction, MatrixXd Q, MatrixXd Qf, MatrixXd R);
     void buildProgram();
     int getControlIndex(int lv1);
     int getStateIndex(int lv1);
@@ -95,14 +99,19 @@ public:
     outSolutionStruct solveMPC();
     void initializeMatricesMPC();
     void buildConstraintMatrices(double time, VectorXd mode_scedule, VectorXd delta_xc);
-    void buildWeightMatrices();
+    void buildConstraintMatricesGPData(double time, VectorXd delta_xc);
+    void buildWeightMatrices(MatrixXd Q, MatrixXd Qf, MatrixXd R);
     void addMotionConstraints(VectorXd& xc_star,VectorXd& uc_star, int lv1);
+    void addMotionConstraintsGPData(outStateNominal out_state_nominal, int lv1);
     void addICConstraints(VectorXd& xc_star,VectorXd& uc_star, int lv1, VectorXd delta_xc);
+    void addICConstraintsGPData(outStateNominal out_state_nominal, int lv1, VectorXd delta_xc);
     void addVelConstraints(VectorXd& xc_star, VectorXd& uc_star, int lv1, VectorXd delta_xc);
+    void addVelConstraintsGPData(outStateNominal out_state_nominal, int lv1);
     void addForceDepConstraints(VectorXd& xc_star,VectorXd& uc_star, int mode, int lv1);
     void addForceIndConstraints(VectorXd& xc_star,VectorXd& uc_star, int lv1);
     outBuildForceIndConstraints buildForceIndConstraints(VectorXd& xc_star,VectorXd& uc_star);
     outBuildForceDepConstraints buildForceDepConstraints(VectorXd& xc_star,VectorXd& uc_star, int mode);
+    outBuildVelConstraintsGPData buildVelConstraintsGPData(outStateNominal out_state_nominal);
     outBuildMotionConstraints buildMotionConstraints(VectorXd& xc_star, VectorXd& uc_star, double rx, double d, MatrixXd A_ls);
 
 };

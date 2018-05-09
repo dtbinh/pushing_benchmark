@@ -371,7 +371,7 @@ classdef Simulator < dynamicprops
             %Animation parameters
             tf = 10;%obj.t(end);
             N = length(obj.t);
-            accFactor = 15;
+            accFactor = 25;
             x_state = obj.xs_state;
             videoname = strcat(obj.FilePath,'/',(obj.SimName),'.avi');
             obj.v = VideoWriter(videoname);

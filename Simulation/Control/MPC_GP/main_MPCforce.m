@@ -27,7 +27,7 @@ x0_c = [0.0;0.03*1;15*pi/180*1;-.009];
 %%Initiaze system
 is_gp=true;
 initialize_system();
-planner = Planner(planar_system, simulator, Linear, data, object, 'inf_circle', 0.05); %8track
+planner = Planner(planar_system, simulator, Linear, data, object, '8Track', 0.05, 0.15 ); %8track
 %Controller setup
 Q = 10*diag([3,3,.1,0.1]);
 Qf=  1*2000*diag([3,3,1,.1]);
