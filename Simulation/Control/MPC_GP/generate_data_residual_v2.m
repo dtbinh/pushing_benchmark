@@ -4,8 +4,8 @@
 clear all;
 close all;
 clc;
-load('model_from_train_size=4000_proportion=0_kkk=3_lll=6.mat')
-
+load('new_inputs_outputs_validation_side_0_only_5000.mat')
+output_residual_training = [];
 %Setup externals
 filename = 'data_residual_05_09_2018.mat'
 simulation_name='data_collection_residual'
@@ -22,7 +22,7 @@ planar_system = PlanarSystem(pusher, object, surface);
 simulator = Simulator(planar_system, simulation_name);
 load('trained_new_inputs_outputs_validation_side_0_only_5000');
 simulator.data = data;
-data.residual_output = []
+
 
 for i=1:length(input_training)
     i
@@ -52,7 +52,7 @@ for i=1:length(input_training)
 %     delta_xc_gp_test = simulator.pointSimulatorGPDataRaw(c,phi);
     %get new residual data point
     res = delta_xc_gp-delta_xc_model;
-    data.residual_output = [data.residual_output;res];
+    residual_output = [output_residual_training;res];
 
 end
-save(filename, 'data');
+save(filename, 'input_training', 'output_training', 'output_residual_training');
