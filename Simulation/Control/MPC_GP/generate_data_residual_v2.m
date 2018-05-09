@@ -52,7 +52,7 @@ for i=1:length(input_training)
 %     delta_xc_gp_test = simulator.pointSimulatorGPDataRaw(c,phi);
     %get new residual data point
     res = delta_xc_gp-delta_xc_model;
-    residual_output = [output_residual_training;res];
+    output_residual_training = [output_residual_training;res];
 
 end
 save(filename, 'input_training', 'output_training', 'output_residual_training');
