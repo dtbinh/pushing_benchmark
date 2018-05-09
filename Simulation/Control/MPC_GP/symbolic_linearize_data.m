@@ -6,9 +6,9 @@ pusher_gp = PointPusher(.3);
 object_gp = Square();
 surface_gp = Surface(.35);
 planar_system_gp = PlanarSystem(pusher_gp, object_gp, surface_gp);
-% load('learning_output_model_from_train_size_4000_debug.mat');
+load('trained_new_inputs_outputs_validation_side_0_only_5000_debug.mat');
 
-load('trained_new_inputs_outputs_validation_side_0_only_5000.mat');
+% load('trained_new_inputs_outputs_validation_side_0_only_5000.mat');
 %build variables
 xo = sym('xo', [3,1]);
 rx = -object_gp.b/2;
@@ -65,7 +65,7 @@ Linear.dI_dx = dI_dx;
 % Linear.dv_dx_fun = matlabFunction(dv_dx,'Vars', {x,u});
 % Linear.dv_du_fun = matlabFunction(dv_du,'Vars', {x});
 % Linear.Gc_fun = planar_system_gp.Gc_fun;
-return 
+% return 
 [A,B] = GP_linearization_data([0;0;0;0], [.05;0], Linear, data, object_gp);
 % return
 
@@ -158,13 +158,17 @@ return
 
     A1 = [dR_dx + R_fun(x_star)*dg_dx; dry_dx];
     B1 = [R_fun(x_star)*dg_dv; dry_dv];
-    return 
+%     return 
     
 % return
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-V_new =I(1);%sqrt(v(1)^2+v(2)^2);%sqrt(v(1)^2+v(2)^2);%I(1);%
-c_new = I(2);%1/2-ry/object_gp.a;
-phi_new = I(3);%atan(v(2)/v(1));;%atan(v(2)/v(1));%I(3);%
+% V_new =I(1);%sqrt(v(1)^2+v(2)^2);%sqrt(v(1)^2+v(2)^2);%I(1);%
+% c_new = I(2);%1/2-ry/object_gp.a;
+% phi_new = I(3);%atan(v(2)/v(1));;%atan(v(2)/v(1));%I(3);%
+
+V_new =sqrt(v(1)^2+v(2)^2);%sqrt(v(1)^2+v(2)^2);%I(1);%
+c_new = 1/2-ry/object_gp.a;
+phi_new = atan(v(2)/v(1));;%atan(v(2)/v(1));%I(3);%
 
 gp_input_new = [c_new;phi_new];%gp_input;%
 
@@ -178,7 +182,7 @@ fi = Rib*fb;
 
 % dfc_dI = jacobian(fc, v);
 % dfc_dI_fun = matlabFunction(dfc_dI, 'Vars', {x,v});
-% fc_fun = matlabFunction(fc, 'Vars', {x,I});
+fc_fun = matlabFunction(fc, 'Vars', {x,v});
 
 fb_fun = matlabFunction(fb, 'Vars', {x,v});
 fi_fun = matlabFunction(fi, 'Vars', {x,v});
@@ -222,3 +226,7 @@ f_non_fun = matlabFunction(f_non, 'Vars', {x,v});
 
 A_fun = matlabFunction(A_fun, 'Vars', {x,v});
 B_fun = matlabFunction(B_fun, 'Vars', {x,v});
+
+A3 = A_fun(x_star, v_star);
+B
+B3 = B_fun(x_star, v_star);

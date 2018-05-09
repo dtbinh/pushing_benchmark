@@ -11,8 +11,8 @@ close all
 % frac_train = 1;
 %% Load data
 load('data_residual_05_09_2018.mat')
-x = input_training(1:200,:);
-y = output_residual_training(1:200,:);
+x = input_training(1:10,:);
+y = output_residual_training(1:10,:);
 % y = output_training(:,:);
 frac_train = 1;
 
