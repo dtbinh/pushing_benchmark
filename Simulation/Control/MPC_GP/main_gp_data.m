@@ -36,7 +36,7 @@ planner.ps.num_ucStates = 2;
 %Controller setup
 Q = 1*diag([1,1,.01,1]);
 Qf=  1*1000*diag([1,1,.1,.1]);
-R = 10*diag([1,1]);
+R = .1*diag([1,1]);
 mpc = MPC(planner, Q, Qf, R, Linear, data, object);
 %send planned trajectory to simulator for plotting
 simulator.x_star = planner.xs_star;
