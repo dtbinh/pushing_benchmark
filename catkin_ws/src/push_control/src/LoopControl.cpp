@@ -97,9 +97,9 @@ void *loopControl(void *thread_arg)
 //    Qf.diagonal() << 3,3,.1,0.0;Qf=Qf*2000;
 //    R.diagonal() << 1,1,0.01;R = R*.5;
     //GPDataController control parameters
-    Q.diagonal() << 1,1,.01,1;Q=Q*1;
-    Qf.diagonal() << 1,1,.1,.1;Qf=Qf*1000;
-    R.diagonal() << 1,1;R = R*10;
+    Q.diagonal() << 1,1,.01,10;Q=Q*1;
+    Qf.diagonal() << 1,1,.1,10;Qf=Qf*1000;
+    R.diagonal() << 1,.1;R = R*10;
 //    FOM mpc(3, &pusher_slider, ppusher, &friction, Q, Qf, R);
 //    LMODES mpc(&pusher_slider, ppusher, &friction, Q, Qf, R);
     GPDataController mpc(&pusher_slider, ppusher, &friction, Q, Qf, R);
