@@ -65,6 +65,7 @@ if __name__=='__main__':
     '''
     #   Load from BAG
     data_filename = '/home/mcube/pushing_benchmark_data/2018-05-02-11-04-558Track_point_pusher_radius_0_15_vel_0.08_3_laps_horizon_5'
+    print('Loading data from BAG file ...')
     if not os.path.isfile(data_filename+'.npz'):
         bridge = CvBridge()
         data = {}
@@ -82,6 +83,7 @@ if __name__=='__main__':
     else:
         data = np.load(data_filename+'.npz')['arr_0'][()]
     act_var = data
+    print('Done!')
     
     # Video time
     fps = np.floor(len(data['t_images'])/(data['t_images'][-1]-data['t_images'][0]))
@@ -155,7 +157,7 @@ if __name__=='__main__':
         c, s = np.cos(obj_ori), np.sin(obj_ori)
         R = np.array(((c,-s), (s, c)))
         act_obj = np.dot(R, np.transpose(square))
-        act_obj = np.insert(act_obj, 2, z_off, axis = 0)
+        act_obj = np.insert(act_obj, 2, 0, axis = 0)
         for i in range(3):
             act_obj[i] = act_obj[i]+obj_pose[i]
         act_obj = np.insert(act_obj, 3, 1, axis = 0)
@@ -196,7 +198,7 @@ if __name__=='__main__':
         img = np.fromstring(fig.canvas.tostring_rgb(), dtype=np.uint8, sep='')
         img  = img.reshape(fig.canvas.get_width_height()[::-1] + (3,))
         #   Img is rgb, convert to opencv's default bgr
-        img = cv2.cvtColor(img,cv2.COLOR_RGB2BGR)[90:410,220:820]
+        img = cv2.cvtColor(img,cv2.COLOR_RGB2BGR)[120:380,150:600] #[90:410,220:820]
         
         # Initialize video
         if it == 0:
