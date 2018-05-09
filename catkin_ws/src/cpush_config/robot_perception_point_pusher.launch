@@ -6,6 +6,7 @@
   <arg name="irb_120" default="true" />
 
   <param name="use_gui" value="$(arg gui)"/>
+  <param name="have_robot" value="$(arg have_robot)"/>
   <param name="robot_description" command="$(find xacro)/xacro.py $(find cpush_config)/models/IRB120/irb_120_twofinger.xacro" />
 
   <node if="$(arg irb_120)" pkg="tf" type="static_transform_publisher" name="baselink_broadcaster" args="0 0 0.60 0 1.57079632679 0 map base_link 100" />
@@ -24,7 +25,7 @@
   <node name="viewer_cam_tf" pkg="tf" type="static_transform_publisher" args="9.32469439e-01 7.41843937e-03 5.58807896e-01 6.41777363e-01 6.34991100e-01 -3.04887434e-01 -3.03235504e-01 /map /viewer_rgb_optical_frame 100" />
 
   <node pkg="tf" type="static_transform_publisher" name="viconworldlink_broadcaster"
-  args=" 9.38854514e-02 4.67152691e-02 8.03740244e-03 7.30550771e-04 -6.00570022e-04 -7.13280428e-01 7.00878119e-01 /map /viconworld 100" />
+  args=" 8.40322907e-02 4.84114774e-02 6.58463565e-03 1.73900605e-03 -2.32148957e-03 -6.99118153e-01 7.15000276e-01 /map /viconworld 100" />
 
     <node pkg="tf" type="static_transform_publisher" name="cross_tip_broadcaster" args="0 0 0.156 0 0 0 /link_6 /cross_tip 100" /> <!-- for transferring calib tip to link6-->
 

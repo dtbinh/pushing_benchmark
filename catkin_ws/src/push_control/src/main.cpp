@@ -47,9 +47,26 @@ int main(int argc,  char *argv[]){
   bool is_exit=false;
   n1.setParam("is_exit", false);
 
-  //save directorty
+
+  PusherSlider pusher_slider;
+  Friction friction(&pusher_slider);
+
+  /* ***************Edit this section*************** */
+  //name of desired trajectory json file
+//  string trajectory_name = "8Track_point_pusher_radius_0.15_vel_0.05_3_laps";
   string trajectory_name = "8Track_point_pusher_radius_0_15_vel_0_05_3_laps_gp_controller";
+  //save directory
   string experiment_name = trajectory_name + "test";
+
+  //Depends on pusher type
+  PointPusher point_pusher(&pusher_slider, &friction, trajectory_name, 2);//GPDataController
+//  PointPusher point_pusher(&pusher_slider, &friction, trajectory_name, 3);//All other
+  /* ***************Edit this section*************** */
+
+  //  LinePusher line_pusher(&pusher_slider, &friction, trajectory_name, 5);    //Variable to pass to thread
+  //Specify type of pusher (point or line)
+  Pusher * ppusher = &point_pusher;
+//   Pusher * ppusher = &line_pusher;
 
   //Define rosservices
   ros::ServiceClient start_rosbag = n1.serviceClient<push_control::rosbag>("start_rosbag");
@@ -72,17 +89,6 @@ int main(int argc,  char *argv[]){
   double  time=0, t_ini,_time;
   double h=1.0f/1000;
   double joint6 = 1.51;
-
-  //Depends on pusher type
-  PusherSlider pusher_slider;
-
-  Friction friction(&pusher_slider);
-  PointPusher point_pusher(&pusher_slider, &friction, trajectory_name, 3);    //Variable to pass to thread
-//  LinePusher line_pusher(&pusher_slider, &friction, trajectory_name, 5);    //Variable to pass to thread
-
-  //Specify type of pusher (point or line)
-  Pusher * ppusher = &point_pusher;
-//   Pusher * ppusher = &line_pusher;
 
   //VectorsMatrixXd
   Vector3d q_slider; //pose of object

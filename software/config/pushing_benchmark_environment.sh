@@ -98,6 +98,7 @@ alias lcmlocal='sudo ifconfig lo multicast; sudo route add -net 224.0.0.0 netmas
 
 
 alias catmake='cd $PUSHING_BENCHMARK_BASE/catkin_ws; catkin_make; cd -;'
+alias catrun='cd $PUSHING_BENCHMARK_BASE/catkin_ws; catkin_make -DCMAKE_CXX_FLAGS=-Ofast; cd -;'
 alias catsim='cd $PUSHING_BENCHMARK_BASE/catkin_ws; catkin_make -DCATKIN_BLACKLIST_PACKAGES="apriltags;realsense-ros;abb-ros-catkin;irb120_moveit_config;vicon_bridge"; cd -;'
 alias simrun='cd $PUSHING_BENCHMARK_BASE;  rosrun  push_control push_control'
 alias realrun='cd $PUSHING_BENCHMARK_BASE/catkin_ws; catkin_make && rosrun  push_control push_control'

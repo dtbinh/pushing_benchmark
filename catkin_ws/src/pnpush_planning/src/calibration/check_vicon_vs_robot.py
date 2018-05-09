@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 
 # this is to find out the transform between the vicon frame and robot frame
-
+import sys
+sys.path.append('..')
 import tf.transformations as tfm
 import numpy as np
 from ik.roshelper import lookupTransform
@@ -25,7 +26,7 @@ import tf.transformations as tfm
 from ik.ik import setSpeed
 
 #limits = [0.32, 0.38, -0.2, +0.1, 0.27, 0.27]  #[xmin, xmax, ymin, ymax, zmin, zmax]
-limits = [0.32, 0.38, -0.2, +0.0, 0.30+0.02-0.05, 0.30+0.02-0.05]  #[xmin, xmax, ymin, ymax, zmin, zmax]
+limits = [0.32, 0.38, -0.2, +0.1, 0.30, 0.30]  #[xmin, xmax, ymin, ymax, zmin, zmax]
 nseg = [3, 3, 1]
 nrotate = 8
 ori = [0, 0, 1, 0]
@@ -66,11 +67,12 @@ setAcc(acc=globalacc, deacc=globalacc)
 for x in np.linspace(limits[0],limits[1], nseg[0]):
     for y in np.linspace(limits[2],limits[3], nseg[1]):
         for z in np.linspace(limits[4],limits[5], nseg[2]):
+            # import pdb;pdb.set_trace()
             setCart([x,y,z], ori)
             js = getJoint()
             
-            # raw_input('pause') # to see where is bad
             for th in np.linspace(-180,180,nrotate):
+                # import pdb;pdb.set_trace()
                 setJoint(js.j1, js.j2, js.j3, js.j4, js.j5, th)
                 
                 # get the marker pos from vicon
@@ -110,44 +112,11 @@ plt.show()
 viconpts = np.vstack([xs, ys, zs]).T
 robotpts = np.vstack([xt, yt, zt]).T
 
-(R,t,rmse,err) = rigid_transform_3D(viconpts, robotpts)  # then you'll get vicon frame wrt robot frame
+(R,t,rmse) = rigid_transform_3D(viconpts, robotpts)  # then you'll get vicon frame wrt robot frame
 
-def maxindex(a):
-    maxx = a[0]
-    maxIndex = 0
-    for i in range(len(a)):
-        if a[i] > maxx:
-            maxx = a[i]
-            maxIndex = i
-    return maxIndex
+Rh = tfm.identity_matrix()
+Rh[np.ix_([0,1,2],[0,1,2])] = R
+quat = tfm.quaternion_from_matrix(Rh)
 
-print 'viconpts', viconpts
-print 'robotpts', robotpts
-
-while True:  # 
-    
-    import pdb; pdb.set_trace()
-    #print err
-    err = np.linalg.norm(err, axis=1)
-
-    thres = 0.1
-    maxind = maxindex(err)
-    filtered_viconpts = np.array([pts for i,pts in enumerate(viconpts.tolist()) if err[i] < thres and i != maxind])
-    filtered_robotpts = np.array([pts for i,pts in enumerate(robotpts.tolist()) if err[i] < thres and i != maxind])
-
-    plt.scatter(filtered_viconpts[:,0], filtered_viconpts[:,1], c='r', marker='o')
-    plt.scatter(filtered_robotpts[:,0], filtered_robotpts[:,1], c='b', marker='o')
-
-    plt.show()
-
-    (R,t,rmse,err) = rigid_transform_3D(filtered_viconpts, filtered_robotpts)  # then you'll get vicon frame wrt robot frame
-
-    Rh = tfm.identity_matrix()
-    Rh[np.ix_([0,1,2],[0,1,2])] = R
-    quat = tfm.quaternion_from_matrix(Rh)
-
-    print 'vicon_T_robot:', " ".join('%.8e' % x for x in (t.tolist() + quat.tolist()))
-    print 'rmse:', rmse
-
-    viconpts = filtered_viconpts
-    robotpts = filtered_robotpts
+print 'vicon_T_robot:', " ".join('%.8e' % x for x in (t.tolist() + quat.tolist()))
+print 'rmse:', rmse

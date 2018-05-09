@@ -68,30 +68,9 @@ void *loopControl(void *thread_arg)
     PusherSlider pusher_slider;
     Friction friction(&pusher_slider);
 
-    ///////////////////////
-    // TO EDIT ////////////
-    ///////////////////////
     MatrixXd Q = MatrixXd::Zero(ppusher->numxcStates, ppusher->numxcStates);
     MatrixXd Qf = MatrixXd::Zero(ppusher->numxcStates, ppusher->numxcStates);
     MatrixXd R = MatrixXd::Zero(ppusher->numucStates, ppusher->numucStates);
-
-    //FOM control parameters
-    Q.diagonal() << 3,3,.1,0.0;Q=Q*10;
-    Qf.diagonal() << 3,3,.1,0.0;Qf=Qf*2000;
-    R.diagonal() << 1,1,0.01;R = R*.01;
-    //LMODES control parameters
-//    Q.diagonal() << 3,3,.1,0.0;Q=Q*10;
-//    Qf.diagonal() << 3,3,.1,0.0;Qf=Qf*2000;
-//    R.diagonal() << 1,1,0.01;R = R*.5;
-    //GPController control parameters
-//    Q.diagonal() << 1,1,.01,1;Q=Q*1;
-//    Qf.diagonal() << 1,1,.1,.1;Qf=Qf*1000;
-//    R.diagonal() << 1,1;R = R*10;
-//    FOM mpc(3, &pusher_slider, ppusher, &friction, Q, Qf, R);
-//    LMODES mpc(&pusher_slider, ppusher, &friction, Q, Qf, R);
-//    GPDataController mpc(&pusher_slider, ppusher, &friction, Q, Qf, R);
-
-    HybridController mpc(3, &pusher_slider, ppusher, &friction, Q, Qf, R);
 
     double _time;
     VectorXd delta_xc(ppusher->numxcStates);
@@ -108,13 +87,34 @@ void *loopControl(void *thread_arg)
     VectorXd _q_slider_zeroed(_q_slider.rows());
     VectorXd _q_pusher_zeroed(_q_pusher.rows());
 
+    /* ************ TO EDIT ************** */
+    //FOM control parameters
+//    Q.diagonal() << 3,3,.1,0.0;Q=Q*10;
+//    Qf.diagonal() << 3,3,.1,0.0;Qf=Qf*2000;
+//    R.diagonal() << 1,1,0.01;R = R*.01;
+    //LMODES control parameters
+//    Q.diagonal() << 3,3,.1,0.0;Q=Q*10;
+//    Qf.diagonal() << 3,3,.1,0.0;Qf=Qf*2000;
+//    R.diagonal() << 1,1,0.01;R = R*.5;
+    //GPDataController control parameters
+    Q.diagonal() << 1,1,.01,1;Q=Q*1;
+    Qf.diagonal() << 1,1,.1,.1;Qf=Qf*1000;
+    R.diagonal() << 1,1;R = R*10;
+//    FOM mpc(3, &pusher_slider, ppusher, &friction, Q, Qf, R);
+//    LMODES mpc(&pusher_slider, ppusher, &friction, Q, Qf, R);
+    GPDataController mpc(&pusher_slider, ppusher, &friction, Q, Qf, R);
+
+//    HybridController mpc(3, &pusher_slider, ppusher, &friction, Q, Qf, R);
+
+
   //8Track
-//    _q_offset_slider << 0.3484033942222595, 0, 0; //point pusher
-//    _q_offset_pusher << 0.3484033942222595, 0, 0.0;//point pusher
+    _q_offset_slider << 0.3484033942222595, 0, 0; //point pusher
+    _q_offset_pusher << 0.3484033942222595, 0, 0.0;//point pusher
+    /* ************ TO EDIT ************** */
 
     //Straight Line
-    _q_offset_slider << 0.19867394381957065, 0, 0; //point pusher
-    _q_offset_pusher << 0.19867394381957065, 0, 0.0;//point pusher
+//    _q_offset_slider << 0.19867394381957065, 0, 0; //point pusher
+//    _q_offset_pusher << 0.19867394381957065, 0, 0.0;//point pusher
 
     //**********************************************************************
     //************************ Begin Loop **********************************
@@ -168,8 +168,7 @@ void *loopControl(void *thread_arg)
 
         us = mpc.get_robot_velocity(xc, uc);
 
-        sleep(10.);
-//        //-------Protected---------------------
+//      //-------Protected---------------------
         pthread_mutex_lock(&nonBlockMutex);
         twist_pusher = us;
         pthread_mutex_unlock(&nonBlockMutex);
