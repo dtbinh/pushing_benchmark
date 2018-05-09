@@ -11,8 +11,13 @@ close all
 % frac_train = 1;
 %% Load data
 load('data_residual_05_09_2018.mat')
-x = input_training(1:10,:);
-y = output_residual_training(1:10,:);
+%~ <<<<<<< HEAD
+%~ x = input_training(1:10,:);
+%~ y = output_residual_training(1:10,:);
+%~ =======
+x = input_training(:,:);
+y = output_residual_training(:,:);
+
 % y = output_training(:,:);
 frac_train = 1;
 
@@ -84,11 +89,11 @@ data.X=X;
 data.lengthscales=lengthscales;
 
 
-save('trained_gp_model_data_residual_05_09_2018_debug', 'data');
+save('trained_gp_model_data_residual_05_09_2018', 'data');
 % save('learning_output_03_19_2018', 'data');
-twist_b1 = matlabFunction(fun{1}, 'Vars', {u}, 'File', 'twist_b_gp1_residual');
-twist_b2 = matlabFunction(fun{2}, 'Vars', {u}, 'File', 'twist_b_gp2_residual');
-twist_b3 = matlabFunction(fun{3}, 'Vars', {u}, 'File', 'twist_b_gp3_residual');
+% twist_b1 = matlabFunction(fun{1}, 'Vars', {u}, 'File', 'twist_b_gp1_residual');
+% twist_b2 = matlabFunction(fun{2}, 'Vars', {u}, 'File', 'twist_b_gp2_residual');
+% twist_b3 = matlabFunction(fun{3}, 'Vars', {u}, 'File', 'twist_b_gp3_residual');
 
 % f = k_star*alpha;
 % 
