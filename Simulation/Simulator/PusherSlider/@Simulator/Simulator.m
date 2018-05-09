@@ -283,6 +283,17 @@ classdef Simulator < dynamicprops
             vibi = Cbi'*vbbi;
             twist_i = [vibi;dtheta;us];
 %             twist_i(2) = -twist_i(2);
+       end
+        
+       
+       function twist_c = pointSimulatorGPDataRaw(obj, c, phi)
+            gp_input = [c,phi];
+            twist_c=[];
+            for lv1=1:3
+                [~, K1star] = feval(obj.data.covfunc1{lv1}{:}, obj.data.theta1{lv1}, obj.data.X{lv1}, gp_input./exp(obj.data.lengthscales{lv1}(:)'));
+                twist_c = [twist_c;K1star'*obj.data.alpha{lv1}];
+            end
+            
         end
         
         function twist_i = pointSimulatorGP_vel(obj, xs, us)
