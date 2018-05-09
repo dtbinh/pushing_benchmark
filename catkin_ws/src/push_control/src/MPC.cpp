@@ -24,7 +24,7 @@ MPC::MPC(PusherSlider *_pusher_slider, Pusher *_line_pusher, Friction *_friction
     pusher_slider = _pusher_slider;
     friction = _friction;
     line_pusher = _line_pusher;
-    h = 0.02;
+    h = 0.01;
     steps = 35;
     num_variables = (line_pusher->numucStates + line_pusher->numxcStates)*steps;
     initializeMatricesMPC();
@@ -340,7 +340,7 @@ outBuildForceIndConstraints MPC::buildForceIndConstraints(VectorXd& xc_star,Vect
 outBuildVelConstraintsGPData MPC::buildVelConstraintsGPData(outStateNominal out_state_nominal) {
 
     float low_bound = .01;
-    float up_bound = 1.;
+    float up_bound = .1;
     MatrixXd Ain(4, line_pusher->numucStates);
     Ain << 1,0,0,1,-1,0,0,-1;
     VectorXd bin(4);

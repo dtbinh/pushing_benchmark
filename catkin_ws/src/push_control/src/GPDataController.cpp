@@ -67,7 +67,7 @@ VectorXd GPDataController::solveMPC(VectorXd xc, double time){
 //
 //    cout<< "Q"<<MatrixXd(H)<<endl;
 //    if (mode_schedule(0)==2){
-//    cout<<"delta_xc"<<delta_xc<<endl;
+    cout<<"delta_xc"<<delta_xc<<endl;
 //    cout<< "Aeq"<<MatrixXd(Aeq)<<endl;
 //    cout<< "Ain"<<MatrixXd(Ain)<<endl;
 //    cout<< "bin"<<controller->matricesMPC.bin.segment(0, controller->matricesMPC.row_start_ineq)<<endl;
@@ -96,6 +96,11 @@ VectorXd GPDataController::solveMPC(VectorXd xc, double time){
 
   //retrieve solution
   VectorXd delta_uc =  z_sol.head(controller->line_pusher->numucStates);
+//
+//  cout<< "u_solution"<<endl;
+//  cout<< z_sol.head(controller->line_pusher->numucStates*35)<<endl;
+//  cout<< "z_sol" <<endl;
+//  cout<< z_sol <<endl;
 
   //Add feedforward with feedback control
   VectorXd uc = delta_uc + out_state_nominal.ucStar;
