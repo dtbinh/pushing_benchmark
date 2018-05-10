@@ -26,6 +26,15 @@ struct thread_data{
     VectorXd *xs;
     VectorXd *uc;
     VectorXd *us;
+    VectorXd *xc_des;
+    VectorXd *xs_des;
+    VectorXd *uc_des;
+    VectorXd *us_des;
+    MatrixXd *Q;
+    MatrixXd *Qf;
+    MatrixXd *R;
+    int *steps;
+    double *h;
     Pusher * ppusher;
 };
 

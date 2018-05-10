@@ -17,7 +17,7 @@
 
 typedef SparseMatrix<double> SparseMatrixXd;
 
-GPDataController::GPDataController(PusherSlider *_pusher_slider, Pusher *_line_pusher, Friction *_friction, MatrixXd Q, MatrixXd Qf, MatrixXd R) {
+GPDataController::GPDataController(PusherSlider *_pusher_slider, Pusher *_line_pusher, Friction *_friction, MatrixXd Q, MatrixXd Qf, MatrixXd R, double _h, int _steps) {
   line_pusher = _line_pusher;
   _line_pusher->numucStates=2;
   friction=_friction;
@@ -25,7 +25,7 @@ GPDataController::GPDataController(PusherSlider *_pusher_slider, Pusher *_line_p
   numucStates=_line_pusher->numucStates;
 
   //initialize controller and output
-  controller = new MPC(_pusher_slider, _line_pusher, _friction,  Q,  Qf,  R);
+  controller = new MPC(_pusher_slider, _line_pusher, _friction,  Q,  Qf,  R, _h, _steps);
   out_solution = new outSolutionStruct;
 
   //initialize cost function weights and reserve memory for large MPC matrices

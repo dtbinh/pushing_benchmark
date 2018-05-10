@@ -19,13 +19,13 @@ using namespace std;
 using namespace Eigen;
 using namespace Eigen;
 
-MPC::MPC(PusherSlider *_pusher_slider, Pusher *_line_pusher, Friction *_friction, MatrixXd Q, MatrixXd Qf, MatrixXd R)
+MPC::MPC(PusherSlider *_pusher_slider, Pusher *_line_pusher, Friction *_friction, MatrixXd Q, MatrixXd Qf, MatrixXd R, double _h, int _steps)
 {
     pusher_slider = _pusher_slider;
     friction = _friction;
     line_pusher = _line_pusher;
-    h = 0.01;
-    steps = 35;
+    h = _h;
+    steps = _steps;
     num_variables = (line_pusher->numucStates + line_pusher->numxcStates)*steps;
     initializeMatricesMPC();
     buildWeightMatrices(Q, Qf, R);

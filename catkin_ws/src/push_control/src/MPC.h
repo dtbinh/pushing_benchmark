@@ -89,7 +89,7 @@ public:
     Friction *friction;
 
     //Static Methods
-    MPC(PusherSlider *pusher_slider, Pusher *line_pusher, Friction *friction, MatrixXd Q, MatrixXd Qf, MatrixXd R);
+    MPC(PusherSlider *pusher_slider, Pusher *line_pusher, Friction *friction, MatrixXd Q, MatrixXd Qf, MatrixXd R, double _h, int _steps);
     void buildProgram();
     int getControlIndex(int lv1);
     int getStateIndex(int lv1);

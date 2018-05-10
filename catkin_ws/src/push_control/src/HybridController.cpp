@@ -11,7 +11,7 @@
 
 typedef SparseMatrix<double> SparseMatrixXd;
 
-HybridController::HybridController(int _num_families, PusherSlider *_pusher_slider, Pusher *_line_pusher, Friction *_friction, MatrixXd Q, MatrixXd Qf, MatrixXd R) {
+HybridController::HybridController(int _num_families, PusherSlider *_pusher_slider, Pusher *_line_pusher, Friction *_friction, MatrixXd Q, MatrixXd Qf, MatrixXd R, double _h, int _steps) {
 
   line_pusher = _line_pusher;
   num_families=_num_families;
@@ -23,7 +23,7 @@ HybridController::HybridController(int _num_families, PusherSlider *_pusher_slid
 
   for (int lv1=0;lv1<num_families;lv1++){
 
-    controller = new MPC(_pusher_slider, _line_pusher, _friction,  Q,  Qf, R);
+    controller = new MPC(_pusher_slider, _line_pusher, _friction,  Q,  Qf, R, _h, _steps);
     list_controller[lv1] = controller;
 
     out_solution = new outSolutionStruct;

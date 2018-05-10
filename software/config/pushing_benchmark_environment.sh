@@ -99,7 +99,7 @@ alias lcmlocal='sudo ifconfig lo multicast; sudo route add -net 224.0.0.0 netmas
 
 alias catmake='cd $PUSHING_BENCHMARK_BASE/catkin_ws; catkin_make; cd -;'
 alias catrun='cd $PUSHING_BENCHMARK_BASE/catkin_ws; catkin_make -DCMAKE_CXX_FLAGS=-Ofast; cd -;'
-alias catsim='cd $PUSHING_BENCHMARK_BASE/catkin_ws; catkin_make -DCATKIN_BLACKLIST_PACKAGES="apriltags;realsense-ros;abb-ros-catkin;irb120_moveit_config;vicon_bridge"; cd -;'
+alias catsim='cd $PUSHING_BENCHMARK_BASE/catkin_ws; catkin_make -DCMAKE_CXX_FLAGS=-Ofast -DCATKIN_BLACKLIST_PACKAGES="apriltags;realsense-ros;abb-ros-catkin;irb120_moveit_config;vicon_bridge"; cd -;'
 alias simrun='cd $PUSHING_BENCHMARK_BASE;  rosrun  push_control push_control'
 alias realrun='cd $PUSHING_BENCHMARK_BASE/catkin_ws; catkin_make && rosrun  push_control push_control'
 alias pythonssh='f(){ FILEPATH_TMP="$1" ; CURRENTPATH="$PWD"; cd $PUSHING_BENCHMARK_BASE/../mcube_learning/helper/; FOLDER_NAME=$(python transfer_files.py server "string_as_arg"); cd $PUSHING_BENCHMARK_BASE/../mcube_learning/ ;./run_server.sh $CURRENTPATH $FILEPATH_TMP $FOLDER_NAME mcube@192.168.0.191; cd $CURRENTPATH; unset -f f; }; f'

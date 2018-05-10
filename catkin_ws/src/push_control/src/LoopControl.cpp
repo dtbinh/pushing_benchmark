@@ -50,6 +50,15 @@ void *loopControl(void *thread_arg)
     VectorXd *pxs    = my_data->xs;
     VectorXd *puc    = my_data->uc;
     VectorXd *pus    = my_data->us;
+    VectorXd *pxc_des    = my_data->xc_des;
+    VectorXd *pxs_des    = my_data->xs_des;
+    VectorXd *puc_des    = my_data->uc_des;
+    VectorXd *pus_des    = my_data->us_des;
+    MatrixXd *pQ    = my_data->Q;
+    MatrixXd *pQf    = my_data->Qf;
+    MatrixXd *pR    = my_data->R;
+    int *psteps = my_data->steps;
+    double *ph = my_data->h;
     Pusher * ppusher    = my_data->ppusher;
 
     Vector3d &q_slider     = *pq_slider;
@@ -59,6 +68,15 @@ void *loopControl(void *thread_arg)
     VectorXd &xs_thread    = *pxs;
     VectorXd &uc_thread    = *puc;
     VectorXd &us_thread    = *pus;
+    VectorXd &xc_des    = *pxc_des;
+    VectorXd &xs_des    = *pxs_des;
+    VectorXd &uc_des    = *puc_des;
+    VectorXd &us_des    = *pus_des;
+    MatrixXd &Q  = *pQ;
+    MatrixXd &Qf = *pQf;
+    MatrixXd &R  = *pR;
+    int &steps  = *psteps;
+    double &h  = *ph;
     double &time = *ptime;
     //--------------------------------------
     pthread_mutex_unlock(&nonBlockMutex);
@@ -67,10 +85,9 @@ void *loopControl(void *thread_arg)
     outMatrices out_matrices;
     PusherSlider pusher_slider;
     Friction friction(&pusher_slider);
-
-    MatrixXd Q = MatrixXd::Zero(ppusher->numxcStates, ppusher->numxcStates);
-    MatrixXd Qf = MatrixXd::Zero(ppusher->numxcStates, ppusher->numxcStates);
-    MatrixXd R = MatrixXd::Zero(ppusher->numucStates, ppusher->numucStates);
+//    MatrixXd Q = MatrixXd::Zero(ppusher->numxcStates, ppusher->numxcStates);
+//    MatrixXd Qf = MatrixXd::Zero(ppusher->numxcStates, ppusher->numxcStates);
+//    MatrixXd R = MatrixXd::Zero(ppusher->numucStates, ppusher->numucStates);
 
     double _time;
     VectorXd delta_xc(ppusher->numxcStates);
@@ -88,23 +105,10 @@ void *loopControl(void *thread_arg)
     VectorXd _q_pusher_zeroed(_q_pusher.rows());
 
     /* ************ TO EDIT ************** */
-    //FOM control parameters
-//    Q.diagonal() << 3,3,.1,0.0;Q=Q*10;
-//    Qf.diagonal() << 3,3,.1,0.0;Qf=Qf*2000;
-//    R.diagonal() << 1,1,0.01;R = R*.01;
-    //LMODES control parameters
-//    Q.diagonal() << 3,3,.1,0.0;Q=Q*10;
-//    Qf.diagonal() << 3,3,.1,0.0;Qf=Qf*2000;
-//    R.diagonal() << 1,1,0.01;R = R*.5;
-    //GPDataController control parameters
-    Q.diagonal() << 1,1,.01,10;Q=Q*100;
-    Qf.diagonal() << 1,1,.1,1;Qf=Qf*1000;
-    R.diagonal() << 1,.1;R = R*.1;
-//    FOM mpc(3, &pusher_slider, ppusher, &friction, Q, Qf, R);
-//    LMODES mpc(&pusher_slider, ppusher, &friction, Q, Qf, R);
-    GPDataController mpc(&pusher_slider, ppusher, &friction, Q, Qf, R);
-
-//    HybridController mpc(3, &pusher_slider, ppusher, &friction, Q, Qf, R);
+//    FOM mpc(3, &pusher_slider, ppusher, &friction, Q, Qf, R, h, steps);
+//    LMODES mpc(&pusher_slider, ppusher, &friction, Q, Qf, R, h, steps);
+    GPDataController mpc(&pusher_slider, ppusher, &friction, Q, Qf, R, h, steps);
+//    HybridController mpc(3, &pusher_slider, ppusher, &friction, Q, Qf, R, h, steps);
 
 
   //8Track
@@ -147,6 +151,14 @@ void *loopControl(void *thread_arg)
         //define state variables from vicon and pusher states
         outStateNominal out_state_nominal;
         out_state_nominal = ppusher->getStateNominalGPData(_time);
+        //---------------Protected----------------
+        pthread_mutex_lock(&nonBlockMutex);
+        xc_des = out_state_nominal.xcStar;
+        xs_des = out_state_nominal.xsStar;
+        uc_des = out_state_nominal.ucStar;
+        us_des = out_state_nominal.usStar;
+        pthread_mutex_unlock(&nonBlockMutex);
+//        //--------------------------------------
 
         _q_slider_zeroed = _q_slider - _q_offset_slider;
         _q_pusher_zeroed = _q_pusher - _q_offset_pusher;
