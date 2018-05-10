@@ -6,7 +6,7 @@ pusher_gp = PointPusher(.3);
 object_gp = Square();
 surface_gp = Surface(.35);
 planar_system_gp = PlanarSystem(pusher_gp, object_gp, surface_gp);
-load('trained_gp_model_data_residual_05_09_2018_debug.mat');
+load('trained_gp_model_data_residual_05_09_2018.mat');
 
 % load('trained_new_inputs_outputs_validation_side_0_only_5000.mat');
 %build variables
@@ -68,7 +68,7 @@ Linear.dv_du_fun = matlabFunction(dv_du,'Vars', {x});
 Linear.Gc_fun = planar_system_gp.Gc_fun;
  
 return
-[A,B] = GP_linearization_residual([0;0;0;0], [.32;0;0], Linear, data, object_gp);
+[A,B] = GP_linearization_residual([0;0;0;0.009], [.32;0;0], Linear, data, object_gp);
 % % return
 % 
 %     rx = -object_gp.a/2;

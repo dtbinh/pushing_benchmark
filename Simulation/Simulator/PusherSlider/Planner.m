@@ -31,6 +31,8 @@ classdef Planner < dynamicprops
                 obj.buildStraightTrajectory();
             elseif strcmp(name, '8Track')
                 obj.build8track(-radius, vel, [0;0;0*pi/180;0]);
+            elseif strcmp(name, '8Track_residual')
+                obj.build8track_residual(-radius, vel, [0;0;0*pi/180;0]);
             elseif strcmp(name, '8Track_gp')
                 obj.build8track_gp(-radius, vel, [0;0;0*pi/180;0]);
             elseif strcmp(name, 'inf_circle')
@@ -194,6 +196,58 @@ classdef Planner < dynamicprops
             
         end
         
+         function obj = build8track_residual(obj, radius, velocity, x0)
+                        
+            x0_initial = x0;
+            obj.buildCircleTrajectory_residual(radius, velocity, x0);
+            xs_star = obj.xs_star;
+            us_star = obj.us_star;
+            xc_star = obj.xc_star;
+            uc_star = obj.uc_star;
+            A_star = obj.A_star;
+            B_star = obj.B_star;
+            t_star = obj.t_star;
+            x0(3) = x0(3)-2*pi;
+            obj.buildCircleTrajectory_residual(-radius, velocity, x0);
+            xs_star2 = [xs_star; obj.xs_star];
+            us_star2 = [us_star; obj.us_star];
+            xc_star2 = [xc_star; obj.xc_star];
+            uc_star2 = [uc_star; obj.uc_star];
+            A_star2 = [A_star; obj.A_star];
+            B_star2 = [B_star; obj.B_star];
+            t_star2 = [t_star; t_star(end) + obj.t_star];
+            
+            xs_star_total = [];
+            us_star_total = [];
+            xc_star_total = [];
+            uc_star_total = []; 
+            A_star_total = [];
+            B_star_total = []; 
+            t_star_total = [];  
+            for lv1=1:3
+                xs_star_total = [xs_star_total;xs_star2];
+                us_star_total = [us_star_total;us_star2];
+                xc_star_total = [xc_star_total;xc_star2];
+                uc_star_total = [uc_star_total;uc_star2];
+                A_star_total = [A_star_total;A_star2];
+                B_star_total = [B_star_total;B_star2];
+                if lv1==1
+                    t_star_total = [t_star_total; t_star2];  
+                else
+                    t_star_total = [t_star_total; t_star_total(end) + t_star2];  
+                end
+            end
+            
+            obj.xs_star=xs_star_total;
+            obj.us_star=us_star_total;
+            obj.xc_star=xc_star_total;
+            obj.uc_star=uc_star_total;
+            obj.A_star=A_star_total;
+            obj.B_star=B_star_total;
+            obj.t_star=t_star_total;
+            
+        end
+        
           function obj = build_inf_circle(obj, radius, velocity, x0)
             obj.buildCircleTrajectory_gp(radius, velocity, x0);
             xs_star = obj.xs_star;
@@ -299,6 +353,60 @@ classdef Planner < dynamicprops
                 obj.xc_star(lv1+1,:) = xcStarTemp';
                 obj.uc_star(lv1+1,:) = ucStarTemp';
 %                 [obj.A_star(lv1+1,:,:), obj.B_star(lv1+1,:,:)] = GP_linearization_u(obj.xc_star(lv1+1,:)', obj.uc_star(lv1+1,:)', obj.Linear, obj.data, obj.object);
+                if lv1<N_star
+                    obj.t_star(lv1+1)  = obj.t_star(lv1) + h_star;
+                end
+            end
+        end
+        
+        function obj = buildCircleTrajectory_residual(obj, radius, velocity, x0)
+            
+            xc = x0;
+            uc = zeros(obj.ps.p.num_contacts * 2 + 1, 1);
+            tf = abs(2*pi*radius)/velocity;
+            t0 = 0;
+            h_star = 0.01;
+            N_star = (1/h_star)*(tf-t0);
+            obj.t_star = zeros(floor(N_star), 1);
+            %Perform inverse dynamics
+            nominal_states = obj.inverseDynamics(radius, velocity);
+            fn = nominal_states(1:obj.ps.p.num_contacts);
+            ft = nominal_states(obj.ps.p.num_contacts + 1: obj.ps.p.num_contacts * 2);
+            ry = nominal_states(obj.ps.p.num_contacts * 2 + 1);
+            uc = [fn; ft; 0];
+            xc(4) = ry;
+            %initial state
+            xsStarTemp = obj.ps.coordinateTransformCS(xc);
+            usStarTemp = obj.ps.force2Velocity(xc, uc);
+            obj.xs_star(1,:) = xsStarTemp';
+            obj.us_star(1,:) = usStarTemp';
+            obj.xc_star(1,:) = xc';
+            obj.uc_star(1,:) = uc';
+            
+            [obj.A_star(1,:,:), obj.B_star(1,:,:)] = GP_linearization_residual(obj.xc_star(1,:)', obj.uc_star(1,:)', obj.Linear, obj.data, obj.object);
+            
+            for lv1=1:N_star
+                %get object velocity
+                xs = obj.ps.coordinateTransformCS(xc);
+                us = obj.ps.force2Velocity(xc, uc);
+%                 dxs = obj.simulator.pointSimulatorGP(xs,us);
+                dxs = obj.ps.forceSimulator(xc, uc);
+                 dxc= [dxs(1:3); 0];
+%                  xs = xs + h_star*dxs;
+                xc = xc + h_star*dxc;
+                
+                %convert to state coordinates
+                xcStarTemp = xc;
+                ucStarTemp = uc;
+                xsStarTemp = obj.ps.coordinateTransformCS(xcStarTemp);
+                usStarTemp = obj.ps.force2Velocity(xcStarTemp, ucStarTemp);
+                %Build control matrices A and B (symbolic linearization of motion
+                %equations)
+                obj.xs_star(lv1+1,:) = xsStarTemp';
+                obj.us_star(lv1+1,:) = usStarTemp';
+                obj.xc_star(lv1+1,:) = xcStarTemp';
+                obj.uc_star(lv1+1,:) = ucStarTemp';
+                [obj.A_star(lv1+1,:,:), obj.B_star(lv1+1,:,:)] = GP_linearization_residual(obj.xc_star(lv1+1,:)', obj.uc_star(lv1+1,:)', obj.Linear, obj.data, obj.object);
                 if lv1<N_star
                     obj.t_star(lv1+1)  = obj.t_star(lv1) + h_star;
                 end

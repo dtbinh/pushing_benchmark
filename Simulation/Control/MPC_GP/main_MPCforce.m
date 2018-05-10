@@ -12,7 +12,7 @@ close all
 
 run(strcat(getenv('HOME'),'/pushing_benchmark/Simulation/Simulator/setup.m'));
 
-symbolic_linearize_residual;
+symbolic_linearize_residual_v2;
 
 %% Simulation data and video are stored in /home/Data/<simulation_name>
 simulation_name = 'mpc_force1';
@@ -27,7 +27,8 @@ x0_c = [0.0;0.03*1;15*pi/180*1;-.009];
 %%Initiaze system
 is_gp=true;
 initialize_system();
-planner = Planner(planar_system, simulator, Linear, data, object, '8Track', 0.05, 0.15 ); %8track
+planner = Planner(planar_system, simulator, Linear, data, object, '8Track_residual', 0.05, 0.15 ); %8track
+
 %Controller setup
 Q = 10*diag([3,3,.1,0.1]);
 Qf=  1*2000*diag([3,3,1,.1]);
@@ -57,9 +58,9 @@ for i1=1:simulator.N
         us = planar_system.force2Velocity(xc, uc);
         %simulate forward
         %1. analytical model
-%         xs_next = simulator.get_next_state_i(xs, us, simulator.h);
+        xs_next = simulator.get_next_state_i(xs, us, simulator.h);
         %2. gp model
-        xs_next = simulator.get_next_state_gp_i(xs, us, simulator.h);
+%         xs_next = simulator.get_next_state_gp_i(xs, us, simulator.h);
         %update plot
         simulator.update_plot(xs_next, simulator.t(i1));
 %       %Perform Euler Integration
