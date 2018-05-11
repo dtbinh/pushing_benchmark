@@ -436,7 +436,6 @@ outBuildForceDepConstraints MPC::buildForceDepConstraints(VectorXd& xc_star, Vec
           un_tmp(lv1) = uc_star(index(lv1));
           Aeq(0,index(lv1))  =  Aeq_tmp(0, lv1);
         }
-
         beq = -Aeq_tmp*un_tmp;
         out_solution.Aeq = Aeq;
         out_solution.beq = beq;

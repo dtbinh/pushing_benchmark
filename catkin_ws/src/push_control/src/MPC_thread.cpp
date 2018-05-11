@@ -68,12 +68,12 @@ void *MPC_thread(void *thread_arg)
     VectorXd z_sol(my_data->controller->num_variables);
 //
 //    cout<< "Q"<<MatrixXd(H)<<endl;
-//    if (my_data->mode_schedule(0)==2){
-//    cout<< "Aeq"<<MatrixXd(Aeq)<<endl;
-//    cout<< "Ain"<<MatrixXd(Ain)<<endl;
-//    cout<< "bin"<<my_data->controller->matricesMPC.bin.segment(0, my_data->controller->matricesMPC.row_start_ineq)<<endl;
-//    cout<< "beq"<< my_data->controller->matricesMPC.beq.segment(0, my_data->controller->matricesMPC.row_start_eq)<<endl;}
-//
+////    if (my_data->mode_schedule(0)==2){
+//    cout<< "Aeq"<<endl<<MatrixXd(Aeq)<<endl;
+//    cout<< "Ain"<<endl<<MatrixXd(Ain)<<endl;
+//    cout<< "bin"<<endl<<my_data->controller->matricesMPC.bin.segment(0, my_data->controller->matricesMPC.row_start_ineq)<<endl;
+//    cout<< "beq"<< endl<<my_data->controller->matricesMPC.beq.segment(0, my_data->controller->matricesMPC.row_start_eq)<<endl;
+
 //    sleep(10);
 //    cout<< "Q"<<MatrixXd(H)<<endl;
 //    cout<< "Aeq"<<MatrixXd(Aeq)<<endl;

@@ -86,6 +86,10 @@ int main(int argc,  char *argv[]){
 //  Q.diagonal() << 1,1,.01,10;Q=Q*100;
 //  Qf.diagonal() << 1,1,.1,1;Qf=Qf*1000;
 //  R.diagonal() << 1,.1;R = R*.1;
+  //Hybrid control parameters
+//  Q.diagonal() << 3,3,.1,0.0;Q=Q*10;
+//  Qf.diagonal() << 3,3,.1,0.0;Qf=Qf*2000;
+//  R.diagonal() << 1,1,0.01;R = R*.01;
   steps_mpc = 35;
   h_mpc = 0.03; //use .01 for GPDataController
   /* ********************************** */
@@ -255,10 +259,10 @@ int main(int argc,  char *argv[]){
           time = 0;
 //          cout<<"time"<<_time<<endl;
           _time = time;
-          q_slider(0) = 0.0;
+          q_slider(0) = 0.3484033942222595;
           q_slider(1) = 0.0;
-          q_slider(2) = 0.0;
-          q_pusher << 0.0, 0, 0;
+          q_slider(2) = 0.;
+          q_pusher << 0.3484033942222595, 0, 0;
 //
 //          cout << "xc" <<endl<< xc<<endl;
 //          cout << "uc" <<endl<< uc<<endl;
