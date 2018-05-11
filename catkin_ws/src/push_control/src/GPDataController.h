@@ -24,7 +24,7 @@ public:
     int numucStates;
 
     //Methods
-    GPDataController(PusherSlider *pusher_slider, Pusher *_line_pusher, Friction *_friction, MatrixXd Q, MatrixXd Qf, MatrixXd R);
+    GPDataController(PusherSlider *pusher_slider, Pusher *_line_pusher, Friction *_friction, MatrixXd Q, MatrixXd Qf, MatrixXd R, double _h, int _steps);
     VectorXd solveMPC(VectorXd xc, double _time);
     VectorXd get_robot_velocity(VectorXd xc, VectorXd uc);
 };

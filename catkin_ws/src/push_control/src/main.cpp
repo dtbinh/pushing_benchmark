@@ -68,6 +68,28 @@ int main(int argc,  char *argv[]){
   Pusher * ppusher = &point_pusher;
 //   Pusher * ppusher = &line_pusher;
 
+  /* ********************************** */
+  MatrixXd Q = MatrixXd::Zero(ppusher->numxcStates, ppusher->numxcStates);
+  MatrixXd Qf = MatrixXd::Zero(ppusher->numxcStates, ppusher->numxcStates);
+  MatrixXd R = MatrixXd::Zero(ppusher->numucStates, ppusher->numucStates);
+  int steps_mpc;
+  double h_mpc;
+  //FOM control parameters
+//    Q.diagonal() << 3,3,.1,0.0;Q=Q*10;
+//    Qf.diagonal() << 3,3,.1,0.0;Qf=Qf*2000;
+//    R.diagonal() << 1,1,0.01;R = R*.01;
+  //LMODES control parameters
+//    Q.diagonal() << 3,3,.1,0.0;Q=Q*10;
+//    Qf.diagonal() << 3,3,.1,0.0;Qf=Qf*2000;
+//    R.diagonal() << 1,1,0.01;R = R*.5;
+  //GPDataController control parameters
+  Q.diagonal() << 1,1,.01,10;Q=Q*100;
+  Qf.diagonal() << 1,1,.1,1;Qf=Qf*1000;
+  R.diagonal() << 1,.1;R = R*.1;
+  steps_mpc = 35;
+  h_mpc = 0.03; //use .01 for GPDataController
+  /* ********************************** */
+
   //Define rosservices
   ros::ServiceClient start_rosbag = n1.serviceClient<push_control::rosbag>("start_rosbag");
   ros::ServiceClient stop_rosbag = n1.serviceClient<push_control::rosbag>("stop_rosbag");
@@ -102,6 +124,10 @@ int main(int argc,  char *argv[]){
   VectorXd uc(ppusher->numucStates);
   VectorXd xs(ppusher->numxsStates);
   VectorXd us(ppusher->numusStates);
+  VectorXd xc_des(ppusher->numxcStates);
+  VectorXd uc_des(ppusher->numucStates);
+  VectorXd xs_des(ppusher->numxsStates);
+  VectorXd us_des(ppusher->numusStates);
   VectorXd joint_states(6);
   VectorXd q0(6);
 
@@ -115,6 +141,15 @@ int main(int argc,  char *argv[]){
   Json::Value xs_JSON;
   Json::Value uc_JSON;
   Json::Value us_JSON;
+  Json::Value xc_desired;
+  Json::Value xs_desired;
+  Json::Value uc_desired;
+  Json::Value us_desired;
+  Json::Value Q_JSON;
+  Json::Value Qf_JSON;
+  Json::Value R_JSON;
+  Json::Value steps_mpc_JSON;
+  Json::Value h_mpc_JSON;
 
 //Variable to pass to thread
   thread_data thread_data_array;
@@ -126,6 +161,15 @@ int main(int argc,  char *argv[]){
   thread_data_array.xs = &xs;
   thread_data_array.uc = &uc;
   thread_data_array.us = &us;
+  thread_data_array.xc_des = &xc_des;
+  thread_data_array.xs_des = &xs_des;
+  thread_data_array.uc_des = &uc_des;
+  thread_data_array.us_des = &us_des;
+  thread_data_array.Q = &Q;
+  thread_data_array.Qf = &Qf;
+  thread_data_array.R = &R;
+  thread_data_array.steps = &steps_mpc;
+  thread_data_array.h = &h_mpc;
   thread_data_array.ppusher = ppusher;
 
   robotStruct robot_struct;
@@ -228,6 +272,7 @@ int main(int argc,  char *argv[]){
 //        velocityOffsetABB(_q_pusher, _twist_pusher, 0.05, -0.15, ppusher->d);
 //      }
 
+
       //publish messages
       publish_float64_array(q_pusher_sensor, q_pusher_sensed_pub);
       publish_float64_array(_q_pusher, q_pusher_commanded_pub);
@@ -246,6 +291,12 @@ int main(int argc,  char *argv[]){
       for (int j =0;j<ppusher->numusStates;j++){us_JSON[j].append(us(j));}
       for (int j =0;j<ppusher->numxcStates;j++){xc_JSON[j].append(xc(j));}
       for (int j =0;j<ppusher->numxsStates;j++){xs_JSON[j].append(xs(j));}
+
+      for (int j =0;j<ppusher->numucStates;j++){uc_desired[j].append(uc_des(j));}
+      for (int j =0;j<ppusher->numusStates;j++){us_desired[j].append(us_des(j));}
+      for (int j =0;j<ppusher->numxcStates;j++){xc_desired[j].append(xc_des(j));}
+      for (int j =0;j<ppusher->numxsStates;j++){xs_desired[j].append(xs_des(j));}
+
       pthread_mutex_unlock(&nonBlockMutex);
       //-----------------------------------
 
@@ -272,7 +323,14 @@ int main(int argc,  char *argv[]){
     cout << "[main][warning] isExecute set to false and/or ros!=ok"<<endl;
   }
   
-  if (isRobot){
+//  if (isRobot){
+
+      //save static variables
+      for (int j =0;j<ppusher->numxcStates;j++){Q_JSON[j].append(Q(j,j));}
+      for (int j =0;j<ppusher->numxcStates;j++){Qf_JSON[j].append(Qf(j,j));}
+      for (int j =0;j<ppusher->numucStates;j++){R_JSON[j].append(R(j,j));}
+      for (int j =0;j<1;j++){h_mpc_JSON[j].append(h_mpc);}
+      for (int j =0;j<1;j++){steps_mpc_JSON[j].append(steps_mpc);}
       // Save JSON Output file
       JsonOutput["timeJSON"] = timeJSON;
       JsonOutput["q_pusher_sensed"] = q_pusher_sensedJSON;
@@ -281,6 +339,15 @@ int main(int argc,  char *argv[]){
       JsonOutput["xs"] = xs_JSON;
       JsonOutput["uc"] = uc_JSON;
       JsonOutput["us"] = us_JSON;
+      JsonOutput["xc_desired"] = xc_desired;
+      JsonOutput["xs_desired"] = xs_desired;
+      JsonOutput["uc_desired"] = uc_desired;
+      JsonOutput["us_desired"] = us_desired;
+      JsonOutput["Q"] = Q_JSON;
+      JsonOutput["Qf"] = Qf_JSON;
+      JsonOutput["R"] = R_JSON;
+      JsonOutput["h_mpc"] = h_mpc_JSON;
+      JsonOutput["steps_mpc"] = steps_mpc_JSON;
 
       ofstream myOutput;
       string src_path = getenv("PUSHING_BENCHMARK_BASE");
@@ -291,7 +358,7 @@ int main(int argc,  char *argv[]){
       myOutput.close();
 
       //terminate rosbag
-      stop_rosbag.call(srv);
-    }
+//      stop_rosbag.call(srv);
+//    }
   cout<< "[main] End of Program" <<endl;
 }

@@ -31,7 +31,7 @@ public:
     int numucStates;
     pthread_t my_thread[3];
     //Methods
-    HybridController(int _num_families, PusherSlider *pusher_slider, Pusher *_line_pusher, Friction *_friction, MatrixXd Q, MatrixXd Qf, MatrixXd R);
+    HybridController(int _num_families, PusherSlider *pusher_slider, Pusher *_line_pusher, Friction *_friction, MatrixXd Q, MatrixXd Qf, MatrixXd R, double _h, int _steps);
     VectorXd solveMPC(VectorXd xc, double _time);
     VectorXd get_robot_velocity(VectorXd xc, VectorXd uc);
 };

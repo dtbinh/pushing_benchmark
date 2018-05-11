@@ -15,7 +15,7 @@
 
 typedef SparseMatrix<double> SparseMatrixXd;
 
-LMODES::LMODES(PusherSlider *_pusher_slider, Pusher *_line_pusher, Friction *_friction, MatrixXd Q, MatrixXd Qf, MatrixXd R) {
+LMODES::LMODES(PusherSlider *_pusher_slider, Pusher *_line_pusher, Friction *_friction, MatrixXd Q, MatrixXd Qf, MatrixXd R, double _h, int _steps) {
     line_pusher = _line_pusher;
     friction=_friction;
     pusher_slider=_pusher_slider;
@@ -25,7 +25,7 @@ LMODES::LMODES(PusherSlider *_pusher_slider, Pusher *_line_pusher, Friction *_fr
     num_families=1;
 //    out_matrices = readMatrices(lv1);
 
-    controller = new MPC(_pusher_slider, _line_pusher, _friction,  Q,  Qf,  R);
+    controller = new MPC(_pusher_slider, _line_pusher, _friction,  Q,  Qf,  R, _h, _steps);
     list_controller[lv1] = controller;
 
     out_solution = new outSolutionStruct;
