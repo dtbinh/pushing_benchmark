@@ -55,6 +55,7 @@ VectorXd FOM::solveMPC(VectorXd xc, double time){
         thread_data_list[i]->delta_xc = delta_xc;
         thread_data_list[i]->time = time;
         thread_data_list[i]->mode_schedule = mode_schedule;
+        thread_data_list[i]->is_gp = false;
     }
 
     //Find state error at current time

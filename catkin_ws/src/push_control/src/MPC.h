@@ -99,13 +99,16 @@ public:
     outSolutionStruct solveMPC();
     void initializeMatricesMPC();
     void buildConstraintMatrices(double time, VectorXd mode_scedule, VectorXd delta_xc);
+    void buildConstraintMatricesHybrid(double time, VectorXd mode_scedule, VectorXd delta_xc);
     void buildConstraintMatricesGPData(double time, VectorXd delta_xc);
     void buildWeightMatrices(MatrixXd Q, MatrixXd Qf, MatrixXd R);
     void addMotionConstraints(VectorXd& xc_star,VectorXd& uc_star, int lv1);
+    void addMotionConstraintsHybrid(outStateNominal out_state_nominal, int lv1);
     void addMotionConstraintsGPData(outStateNominal out_state_nominal, int lv1);
     void addICConstraints(VectorXd& xc_star,VectorXd& uc_star, int lv1, VectorXd delta_xc);
     void addICConstraintsGPData(outStateNominal out_state_nominal, int lv1, VectorXd delta_xc);
     void addVelConstraints(VectorXd& xc_star, VectorXd& uc_star, int lv1, VectorXd delta_xc);
+    void addVelConstraintsHybrid(outStateNominal out_state_nominal, int lv1, VectorXd delta_xc);
     void addVelConstraintsGPData(outStateNominal out_state_nominal, int lv1);
     void addForceDepConstraints(VectorXd& xc_star,VectorXd& uc_star, int mode, int lv1);
     void addForceIndConstraints(VectorXd& xc_star,VectorXd& uc_star, int lv1);
@@ -113,6 +116,7 @@ public:
     outBuildForceDepConstraints buildForceDepConstraints(VectorXd& xc_star,VectorXd& uc_star, int mode);
     outBuildVelConstraintsGPData buildVelConstraintsGPData(outStateNominal out_state_nominal);
     outBuildMotionConstraints buildMotionConstraints(VectorXd& xc_star, VectorXd& uc_star, double rx, double d, MatrixXd A_ls);
+    outBuildMotionConstraints buildMotionConstraintsHybrid(outStateNominal out_state_nominal, double rx, double d, MatrixXd A_ls);
 
 };
 #endif

@@ -130,6 +130,22 @@ void MPC::addMotionConstraints(VectorXd& xc_star,VectorXd& uc_star, int lv1){
   matricesMPC.row_start_eq = matricesMPC.row_start_eq + line_pusher->numxcStates;
 }
 
+void MPC::addMotionConstraintsHybrid(outStateNominal out_state_nominal, int lv1){
+
+  outBuildMotionConstraints out_solution;
+  out_solution = buildMotionConstraintsHybrid(out_state_nominal, -pusher_slider->a/2., line_pusher->d, friction->A_ls);
+
+  int x1_index = getStateIndex(lv1-1);
+  int x2_index = getStateIndex(lv1);
+  int u1_index = getControlIndex(lv1);
+
+  Helper::assign_sparse(matricesMPC.Aeq_vec, -out_solution.A_bar, matricesMPC.row_start_eq, x1_index);
+  Helper::assign_sparse(matricesMPC.Aeq_vec, MatrixXd::Identity(line_pusher->numxcStates, line_pusher->numxcStates), matricesMPC.row_start_eq, x2_index);
+  Helper::assign_sparse(matricesMPC.Aeq_vec, -out_solution.B_bar, matricesMPC.row_start_eq, u1_index);
+
+  matricesMPC.row_start_eq = matricesMPC.row_start_eq + line_pusher->numxcStates;
+}
+
 void MPC::addVelConstraintsGPData(outStateNominal out_state_nominal, int lv1){
 
   outBuildVelConstraintsGPData out_solution;
@@ -254,8 +270,37 @@ void MPC::buildConstraintMatrices(double time, VectorXd mode_schedule, VectorXd 
     //5. increment time
     time = time + h;
   }
-
 }
+
+void MPC::buildConstraintMatricesHybrid(double time, VectorXd mode_schedule, VectorXd delta_xc){
+
+  outStateNominal out_state_nominal;
+
+//  double t0 = Helper::gettime();
+  for (int i= 0; i<steps; i++){
+
+    out_state_nominal = line_pusher->getStateNominalGPData(time);
+
+    //1. build cost
+    //2. build motion constraints
+
+    if (i==0){
+      addICConstraints(out_state_nominal.xcStar, out_state_nominal.ucStar, i, delta_xc);
+      addVelConstraints(out_state_nominal.xcStar, out_state_nominal.ucStar, i, delta_xc);
+    }
+    else {
+      addMotionConstraintsHybrid(out_state_nominal, i);
+    }
+    //3. build force independant constraints
+    addForceIndConstraints(out_state_nominal.xcStar, out_state_nominal.ucStar, i);
+    //4. build force dependant constraints
+    addForceDepConstraints(out_state_nominal.xcStar, out_state_nominal.ucStar, mode_schedule(i), i);
+
+    //5. increment time
+    time = time + h;
+  }
+}
+
 void MPC::buildConstraintMatricesGPData(double time, VectorXd delta_xc){
 
   outStateNominal out_state_nominal;
@@ -287,6 +332,22 @@ outBuildMotionConstraints MPC::buildMotionConstraints(VectorXd& xc_star, VectorX
 //  cout<<"line_pusher->B_fun(xc_star, uc_star, rx, d, A_ls)"<<line_pusher->B_fun(xc_star, uc_star, rx, d, A_ls)<<endl;
   A_bar_tmp = MatrixXd::Identity(xc_star.size(),xc_star.size()) + h*line_pusher->A_fun(xc_star, uc_star, rx, d, A_ls);
   B_bar_tmp = h*line_pusher->B_fun(xc_star, uc_star, rx, d, A_ls);
+
+  outBuildMotionConstraints out_solution;
+  out_solution.A_bar = A_bar_tmp;
+  out_solution.B_bar = B_bar_tmp;
+
+  return out_solution;
+  }
+outBuildMotionConstraints MPC::buildMotionConstraintsHybrid(outStateNominal out_state_nominal, double rx, double d, MatrixXd A_ls){
+  VectorXd xc_star = out_state_nominal.xcStar;
+  VectorXd uc_star = out_state_nominal.ucStar;
+  MatrixXd A_bar_tmp(xc_star.size(),xc_star.size());
+  MatrixXd B_bar_tmp(xc_star.size(),uc_star.size());
+
+//
+  A_bar_tmp = MatrixXd::Identity(xc_star.size(),xc_star.size()) + h*(line_pusher->A_fun(xc_star, uc_star, rx, d, A_ls)+ out_state_nominal.AStar);
+  B_bar_tmp = h*(line_pusher->B_fun(xc_star, uc_star, rx, d, A_ls)+out_state_nominal.BStar);
 
   outBuildMotionConstraints out_solution;
   out_solution.A_bar = A_bar_tmp;

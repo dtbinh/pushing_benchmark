@@ -107,8 +107,8 @@ void *loopControl(void *thread_arg)
     /* ************ TO EDIT ************** */
 //    FOM mpc(3, &pusher_slider, ppusher, &friction, Q, Qf, R, h, steps);
 //    LMODES mpc(&pusher_slider, ppusher, &friction, Q, Qf, R, h, steps);
-    GPDataController mpc(&pusher_slider, ppusher, &friction, Q, Qf, R, h, steps);
-//    HybridController mpc(3, &pusher_slider, ppusher, &friction, Q, Qf, R, h, steps);
+//    GPDataController mpc(&pusher_slider, ppusher, &friction, Q, Qf, R, h, steps);
+    HybridController mpc(3, &pusher_slider, ppusher, &friction, Q, Qf, R, h, steps);
 
 
   //8Track

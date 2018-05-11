@@ -48,7 +48,12 @@ void *MPC_thread(void *thread_arg)
     my_data->controller->matricesMPC.row_start_ineq=0;
 
     //build data
-    my_data->controller->buildConstraintMatrices(my_data->time, my_data->mode_schedule, my_data->delta_xc);
+    if (my_data->is_gp==true){
+        my_data->controller->buildConstraintMatricesHybrid(my_data->time, my_data->mode_schedule, my_data->delta_xc);
+    }
+    else{
+        my_data->controller->buildConstraintMatrices(my_data->time, my_data->mode_schedule, my_data->delta_xc);
+    }
 
     //convert triplets to sparse matrices
     Eigen::SparseMatrix<double,Eigen::RowMajor> Aeq(my_data->controller->matricesMPC.row_start_eq,my_data->controller->num_variables);

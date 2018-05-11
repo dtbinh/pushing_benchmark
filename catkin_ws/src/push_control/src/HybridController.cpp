@@ -19,8 +19,6 @@ HybridController::HybridController(int _num_families, PusherSlider *_pusher_slid
   pusher_slider=_pusher_slider;
   numucStates=_line_pusher->numucStates;
 
-
-
   for (int lv1=0;lv1<num_families;lv1++){
 
     controller = new MPC(_pusher_slider, _line_pusher, _friction,  Q,  Qf, R, _h, _steps);
@@ -48,20 +46,21 @@ VectorXd HybridController::solveMPC(VectorXd xc, double time){
   VectorXd mode_schedule(list_controller[0]->steps);
 
   delta_xc = line_pusher->getError(xc, time);
+  cout<<"delta_xc: "<<endl;
+  cout<<delta_xc<<endl;
 
   for (int i=0;i<num_families;i++){
     mode_schedule << i, VectorXd::Zero(list_controller[i]->steps-1);
     thread_data_list[i]->delta_xc = delta_xc;
     thread_data_list[i]->time = time;
     thread_data_list[i]->mode_schedule = mode_schedule;
+    thread_data_list[i]->is_gp = true;
   }
 
   //Find state error at current time
   delta_xc = line_pusher->getError(xc, time);
   outStateNominal out_state_nominal;
-  out_state_nominal = line_pusher->getStateNominal(time);
-  cout<<"Pause"<<endl;
-  sleep(10.);
+  out_state_nominal = line_pusher->getStateNominalGPData(time);
 
 //  cout<<"xc_star"<<out_state_nominal.xcStar<<endl;
 //  cout<<"uc_star"<<out_state_nominal.ucStar<<endl;
@@ -83,6 +82,9 @@ VectorXd HybridController::solveMPC(VectorXd xc, double time){
 
   VectorXd delta_uc = list_controller[minIndex]->out_solution.solution;
   VectorXd uc = delta_uc + out_state_nominal.ucStar;
+
+//  cout<<"Pause"<<endl;
+//  sleep(10.);
 
   return uc;
 

@@ -23,7 +23,7 @@ struct MPC_thread_data{
     VectorXd delta_xc;
     VectorXd mode_schedule;
     double time;
-
+    bool is_gp;
 };
 
 using namespace std;

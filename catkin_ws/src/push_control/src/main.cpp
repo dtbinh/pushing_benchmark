@@ -53,14 +53,14 @@ int main(int argc,  char *argv[]){
 
   /* ***************Edit this section*************** */
   //name of desired trajectory json file
-//  string trajectory_name = "8Track_point_pusher_radius_0.15_vel_0.05_3_laps";
-  string trajectory_name = "8Track_point_pusher_radius_0_15_vel_0_05_3_laps_gp_controller";
+  string trajectory_name = "8Track_point_pusher_radius_0_15_vel_0_05_3_laps_hybrid_controller";
+//  string trajectory_name = "8Track_point_pusher_radius_0_15_vel_0_05_3_laps_gp_controller";
   //save directory
   string experiment_name = trajectory_name + "test";
 
   //Depends on pusher type
-  PointPusher point_pusher(&pusher_slider, &friction, trajectory_name, 2);//GPDataController
-//  PointPusher point_pusher(&pusher_slider, &friction, trajectory_name, 3);//All other
+//  PointPusher point_pusher(&pusher_slider, &friction, trajectory_name, 2);//GPDataController
+  PointPusher point_pusher(&pusher_slider, &friction, trajectory_name, 3);//All other
   /* ***************Edit this section*************** */
 
   //  LinePusher line_pusher(&pusher_slider, &friction, trajectory_name, 5);    //Variable to pass to thread
@@ -75,17 +75,17 @@ int main(int argc,  char *argv[]){
   int steps_mpc;
   double h_mpc;
   //FOM control parameters
-//    Q.diagonal() << 3,3,.1,0.0;Q=Q*10;
-//    Qf.diagonal() << 3,3,.1,0.0;Qf=Qf*2000;
-//    R.diagonal() << 1,1,0.01;R = R*.01;
+    Q.diagonal() << 3,3,.1,0.0;Q=Q*10;
+    Qf.diagonal() << 3,3,.1,0.0;Qf=Qf*2000;
+    R.diagonal() << 1,1,0.01;R = R*.01;
   //LMODES control parameters
 //    Q.diagonal() << 3,3,.1,0.0;Q=Q*10;
 //    Qf.diagonal() << 3,3,.1,0.0;Qf=Qf*2000;
 //    R.diagonal() << 1,1,0.01;R = R*.5;
   //GPDataController control parameters
-  Q.diagonal() << 1,1,.01,10;Q=Q*100;
-  Qf.diagonal() << 1,1,.1,1;Qf=Qf*1000;
-  R.diagonal() << 1,.1;R = R*.1;
+//  Q.diagonal() << 1,1,.01,10;Q=Q*100;
+//  Qf.diagonal() << 1,1,.1,1;Qf=Qf*1000;
+//  R.diagonal() << 1,.1;R = R*.1;
   steps_mpc = 35;
   h_mpc = 0.03; //use .01 for GPDataController
   /* ********************************** */
