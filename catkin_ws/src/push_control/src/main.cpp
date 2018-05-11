@@ -49,8 +49,8 @@ int main(int argc,  char *argv[]){
   n1.setParam("is_exit", false);
 
   //save directorty
-  string trajectory_name = "Straight_point_pusher_vel_0_05";
-  string experiment_name = trajectory_name + "point_FOM_straight_with_perturb";
+  string trajectory_name = "8Track_point_pusher_radius_0_15_vel_0_05_infinity";
+  string experiment_name = trajectory_name + "point_LMODES_8track_no_perturb_R_0_5";
 
   //Define rosservices
   ros::ServiceClient start_rosbag = n1.serviceClient<push_control::rosbag>("start_rosbag");

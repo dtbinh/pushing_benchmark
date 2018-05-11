@@ -22,6 +22,8 @@ from push_control.srv import *
 
 task_name = 'push_learning'
 
+
+
 # ms = modeSelector(  os.environ['HOME'] +  '/Data/saved_models/push_learning_line_pusher/saved_models/' +  'mode_learning_mode_')
 ms = modeSelector(  os.environ['HOME'] +  '/Data/saved_models/push_learning/saved_models/' +  'mode_learning_mode_')
 x=.1*np.array([1,2,3,4])
@@ -31,12 +33,12 @@ ms.index_convertor(ms.predict(x))
 
 def mode_learner(req):
 
-    # t = time.time()
+    t = time.time()
     mode_list  = ms.predict(x)
     mode_schedule  = ms.index_convertor(mode_list)
     ms.index_convertor(ms.predict(req.delta_x))
     tf = time.time()
-    # print tf-t
+    print tf-t
 
     return MODE_SRVResponse(ms.index_convertor(ms.predict(req.delta_x)))
 

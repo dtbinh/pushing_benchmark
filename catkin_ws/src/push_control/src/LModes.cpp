@@ -72,6 +72,8 @@ VectorXd LMODES::learnModeSchedule(VectorXd delta_xc, double _y_star, double _th
   srv.request.delta_x = msg.data;
   double t0 = Helper::gettime();
   mode_learner.call(srv);
+  double tf = Helper::gettime();
+  cout<<"print time: "<<tf-t0<<endl;
 
 
   VectorXd _mode_schedule(list_controller[0]->steps);
@@ -91,8 +93,8 @@ VectorXd LMODES::learnModeSchedule(VectorXd delta_xc, double _y_star, double _th
       _mode_schedule(i) = srv.response.mode_schedule[i];
     }
   }
-  double tf = Helper::gettime();
-  cout<<"print time: "<<tf-t0<<endl;
+//  double tf = Helper::gettime();
+//  cout<<"print time: "<<tf-t0<<endl;
 
   return _mode_schedule;
 }
