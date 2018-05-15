@@ -8,12 +8,13 @@
 #include "Pusher.h"
 #include "MPC_thread.h"
 #include "MPC.h"
+#include "Controller.h"
 
 
 #ifndef PUSH_CONTROL_LMODES_H
 #define PUSH_CONTROL_LMODES_H
 
-class LMODES {
+class LMODES: public Controller {
     public:
         //Properties
         MPC *controller;

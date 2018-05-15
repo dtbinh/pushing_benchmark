@@ -190,6 +190,20 @@ void MPC::addICConstraints(VectorXd& xc_star, VectorXd& uc_star, int lv1, Vector
   matricesMPC.row_start_eq = matricesMPC.row_start_eq + line_pusher->numxcStates;
 }
 
+void MPC::addICConstraintsHybrid(outStateNominal out_state_nominal, int lv1, VectorXd delta_xc){
+  outBuildMotionConstraints out_solution;
+  out_solution = buildMotionConstraintsHybrid(out_state_nominal, -pusher_slider->a/2., line_pusher->d, friction->A_ls);
+
+  int x2_index = getStateIndex(lv1);
+  int u1_index = getControlIndex(lv1);
+
+  Helper::assign_sparse(matricesMPC.Aeq_vec,  MatrixXd::Identity(line_pusher->numxcStates, line_pusher->numxcStates), matricesMPC.row_start_eq, x2_index);
+  Helper::assign_sparse(matricesMPC.Aeq_vec,  -out_solution.B_bar, matricesMPC.row_start_eq, u1_index);
+  matricesMPC.beq.segment(matricesMPC.row_start_eq, line_pusher->numxcStates) = out_solution.A_bar*delta_xc;
+  matricesMPC.row_start_eq = matricesMPC.row_start_eq + line_pusher->numxcStates;
+}
+
+
 void MPC::addICConstraintsGPData(outStateNominal out_state_nominal, int lv1, VectorXd delta_xc){
   int x2_index = getStateIndex(lv1);
   int u1_index = getControlIndex(lv1);
@@ -285,7 +299,7 @@ void MPC::buildConstraintMatricesHybrid(double time, VectorXd mode_schedule, Vec
     //2. build motion constraints
 
     if (i==0){
-      addICConstraints(out_state_nominal.xcStar, out_state_nominal.ucStar, i, delta_xc);
+      addICConstraintsHybrid(out_state_nominal, i, delta_xc);
       addVelConstraints(out_state_nominal.xcStar, out_state_nominal.ucStar, i, delta_xc);
     }
     else {
@@ -317,6 +331,7 @@ void MPC::buildConstraintMatricesGPData(double time, VectorXd delta_xc){
       addMotionConstraintsGPData(out_state_nominal, i);
     }
     addVelConstraintsGPData(out_state_nominal, i);
+
     time = time + h;
   }
 }
@@ -346,8 +361,8 @@ outBuildMotionConstraints MPC::buildMotionConstraintsHybrid(outStateNominal out_
   MatrixXd B_bar_tmp(xc_star.size(),uc_star.size());
 
 //
-  A_bar_tmp = MatrixXd::Identity(xc_star.size(),xc_star.size()) + h*(line_pusher->A_fun(xc_star, uc_star, rx, d, A_ls)+ out_state_nominal.AStar);
-  B_bar_tmp = h*(line_pusher->B_fun(xc_star, uc_star, rx, d, A_ls)+out_state_nominal.BStar);
+  A_bar_tmp = MatrixXd::Identity(xc_star.size(),xc_star.size()) + h*(line_pusher->A_fun(xc_star, uc_star, rx, d, A_ls)+ 1*out_state_nominal.AStar);
+  B_bar_tmp = h*(line_pusher->B_fun(xc_star, uc_star, rx, d, A_ls)+1*out_state_nominal.BStar);
 
   outBuildMotionConstraints out_solution;
   out_solution.A_bar = A_bar_tmp;

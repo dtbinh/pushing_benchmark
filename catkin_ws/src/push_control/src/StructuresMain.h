@@ -35,6 +35,7 @@ struct thread_data{
     MatrixXd *R;
     int *steps;
     double *h;
+    int *controller_flag;
     Pusher * ppusher;
 };
 

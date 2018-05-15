@@ -15,8 +15,6 @@ using namespace Eigen;
 
 class PointPusher: public Pusher {
 public:
-
-
     //Static Methods
     PointPusher(PusherSlider* _pusher_slider, Friction* _friction, string trajectory_name, int _numuc_states);
 //    VectorXd buildUcEq();

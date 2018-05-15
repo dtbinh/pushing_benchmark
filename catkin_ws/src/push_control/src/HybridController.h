@@ -9,11 +9,12 @@
 #include "Pusher.h"
 #include "MPC_thread.h"
 #include "MPC.h"
+#include "Controller.h"
 
 #ifndef PUSH_CONTROL_HYBRIDCONTROLLER_H
 #define PUSH_CONTROL_HYBRIDCONTROLLER_H
 
-class HybridController {
+class HybridController: public Controller {
 public:
     //Properties
     MPC *controller;

@@ -39,7 +39,9 @@ class Helper {
         static void write_array_JSON(Json::Value root, int num_rows, int num_cols, double *A);
         static void write_matrix_JSON(Json::Value root, MatrixXd &A);
         static void write_vector_JSON(Json::Value root, VectorXd &b);
+        static void write_vector2_JSON(Json::Value root, VectorXd &b);
         static void write_int_JSON(Json::Value root, int& A);
+        static void write_double_JSON(Json::Value root, double& A);
         static void JSON_to_array(int rows, int cols, Json::Value root, double *A);
         static void print_array(int num_rows, int num_cols, double *A);
         static void array_to_matrix(int num_rows, int num_cols, double *A, MatrixXd &A_matrix);

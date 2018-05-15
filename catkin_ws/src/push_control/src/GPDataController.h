@@ -8,11 +8,12 @@
 #include "Pusher.h"
 #include "MPC_thread.h"
 #include "MPC.h"
+#include "Controller.h"
 
 #ifndef PUSH_CONTROL_GPCONTROLLER_H
 #define PUSH_CONTROL_GPCONTROLLER_H
 
-class GPDataController {
+class GPDataController: public Controller {
 public:
     //Properties
     MPC *controller;

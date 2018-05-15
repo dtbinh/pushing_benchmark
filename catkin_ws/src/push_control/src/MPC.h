@@ -107,6 +107,7 @@ public:
     void addMotionConstraintsGPData(outStateNominal out_state_nominal, int lv1);
     void addICConstraints(VectorXd& xc_star,VectorXd& uc_star, int lv1, VectorXd delta_xc);
     void addICConstraintsGPData(outStateNominal out_state_nominal, int lv1, VectorXd delta_xc);
+    void addICConstraintsHybrid(outStateNominal out_state_nominal, int lv1, VectorXd delta_xc);
     void addVelConstraints(VectorXd& xc_star, VectorXd& uc_star, int lv1, VectorXd delta_xc);
     void addVelConstraintsHybrid(outStateNominal out_state_nominal, int lv1, VectorXd delta_xc);
     void addVelConstraintsGPData(outStateNominal out_state_nominal, int lv1);
