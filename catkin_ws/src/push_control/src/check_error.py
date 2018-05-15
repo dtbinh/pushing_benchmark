@@ -3,6 +3,7 @@
 
 import sys
 import os, time
+import glob
 import optparse
 import json
 import numpy as np
@@ -22,14 +23,21 @@ if __name__=='__main__':
     parser = optparse.OptionParser()
     parser.add_option('-f', '--file', action="store", dest='file_JSON', 
                       help='JSON file with information', default='')
+    parser.add_option('-l', '--last', action='store_true', dest='use_last',
+        help='Use last json file created', default=False)
     (opt, args) = parser.parse_args()
     file_JSON = opt.file_JSON
+    use_last = opt.use_last
     
    
     #Load actual trajectory
     #acutal_traj_JSON = '/home/mcube/pushing_benchmark/catkin_ws/src/push_control/src/Data/'+list_act_files[counter]
     if file_JSON == '':
-        file_JSON = '/home/mcube/pushing_benchmark/catkin_ws/src/push_control/src/Data/8Track_point_pusher_radius_0.15_vel_0.05_3_lapstest_fm.json'
+        file_JSON = '8Track_point_pusher_radius_0.15_vel_0.05_3_lapstest_fm.json'
+    file_JSON = '/home/mcube/pushing_benchmark/catkin_ws/src/push_control/src/Data/' + file_JSON
+    if use_last:
+        list_of_files = glob.glob('/home/mcube/pushing_benchmark/catkin_ws/src/push_control/src/Data/*.json') 
+        file_JSON = max(list_of_files, key=os.path.getctime)
     print file_JSON
     with open(file_JSON) as json_data:
         data = json.load(json_data)
@@ -117,7 +125,7 @@ if __name__=='__main__':
     ax2.plot(vx_act,vy_act, 'b.'); 
     ax2.set_aspect('equal')
     #plt.show()
-    #plt.savefig(list_act_files[counter][0:-4] + 'png')
+    
     #plt.close()
     
     error = np.sum(np.sqrt((vx_des_interp - vx_act_interp)**2+(vy_des_interp - vy_act_interp)**2))
@@ -201,8 +209,10 @@ if __name__=='__main__':
     print ' Average errror in vy:', error/num_steps
     ax8.set_title(' Average errror in vy: {}'.format(error/num_steps))
     
+    plt.savefig(file_JSON[:-4] + 'png')
     plt.show()
     plt.close()
+        
     '''
     plt.plot(q_des[0], q_des[1], 'r')
     plt.plot(q_act[0], q_act[1], 'b')
