@@ -179,12 +179,12 @@ void *loopControl(void *thread_arg)
 //        us = ppusher->force2Velocity(xc, uc);
 
         us = mpc.get_robot_velocity(xc, uc);
-        cout<<"xc"<<endl;
-        cout<<xc<<endl;
-        cout<<"uc"<<endl;
-        cout<<uc<<endl;
-        cout<<"us"<<endl;
-        cout<<us<<endl;
+//        cout<<"xc"<<endl;
+//        cout<<xc<<endl;
+//        cout<<"uc"<<endl;
+//        cout<<uc<<endl;
+//        cout<<"us"<<endl;
+//        cout<<us<<endl;
 
 //      //-------Protected---------------------
         pthread_mutex_lock(&nonBlockMutex);
