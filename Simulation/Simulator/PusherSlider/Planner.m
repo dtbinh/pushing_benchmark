@@ -124,7 +124,7 @@ classdef Planner < dynamicprops
             xc_star_total = [];
             uc_star_total = [];  
             t_star_total = [];  
-            for lv1=1:3
+            for lv1=1:1
                 xs_star_total = [xs_star_total;xs_star2];
                 us_star_total = [us_star_total;us_star2];
                 xc_star_total = [xc_star_total;xc_star2];
@@ -172,7 +172,7 @@ classdef Planner < dynamicprops
             A_star_total = [];
             B_star_total = []; 
             t_star_total = [];  
-            for lv1=1:3
+            for lv1=1:1
                 xs_star_total = [xs_star_total;xs_star2];
                 us_star_total = [us_star_total;us_star2];
                 xc_star_total = [xc_star_total;xc_star2];
@@ -224,7 +224,7 @@ classdef Planner < dynamicprops
             A_star_total = [];
             B_star_total = []; 
             t_star_total = [];  
-            for lv1=1:3
+            for lv1=1:1
                 xs_star_total = [xs_star_total;xs_star2];
                 us_star_total = [us_star_total;us_star2];
                 xc_star_total = [xc_star_total;xc_star2];
