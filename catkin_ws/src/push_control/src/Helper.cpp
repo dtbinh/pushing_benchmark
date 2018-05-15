@@ -219,11 +219,21 @@ void Helper::write_vector_JSON(Json::Value root, VectorXd &A)
     for (int i=0;i<A.size();i++){
 			A(i) = root[i][0].asDouble();
 		}
+}//***************************************
+void Helper::write_vector2_JSON(Json::Value root, VectorXd &A)
+{
+    for (int i=0;i<A.size();i++){
+			A(i) = root[i].asDouble();
+		}
 }
 //***************************************
 void Helper::write_int_JSON(Json::Value root, int& A)
 {
 	A = root.asInt();
+}//***************************************
+void Helper::write_double_JSON(Json::Value root, double& A)
+{
+	A = root.asDouble();
 }
 //***************************************
 void Helper::print_array(int num_rows, int num_cols, double *A)

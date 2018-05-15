@@ -14,6 +14,7 @@
 #include "LModes.h"
 #include "GPDataController.h"
 #include "HybridController.h"
+#include "Controller.h"
 
 //ROS
 #include <ros/ros.h>
@@ -59,6 +60,8 @@ void *loopControl(void *thread_arg)
     MatrixXd *pR    = my_data->R;
     int *psteps = my_data->steps;
     double *ph = my_data->h;
+    int *pcontroller_flag    = my_data->controller_flag;
+
     Pusher * ppusher    = my_data->ppusher;
 
     Vector3d &q_slider     = *pq_slider;
@@ -78,6 +81,7 @@ void *loopControl(void *thread_arg)
     int &steps  = *psteps;
     double &h  = *ph;
     double &time = *ptime;
+    int &controller_flag = *pcontroller_flag;
     //--------------------------------------
     pthread_mutex_unlock(&nonBlockMutex);
 
@@ -104,15 +108,20 @@ void *loopControl(void *thread_arg)
     VectorXd _q_slider_zeroed(_q_slider.rows());
     VectorXd _q_pusher_zeroed(_q_pusher.rows());
 
+
     /* ************ TO EDIT ************** */
+    Controller* mpc;
+    if (controller_flag==0){
+      mpc = new FOM(3, &pusher_slider, ppusher, &friction, Q, Qf, R, h, steps);
+    }else if (controller_flag==1){
+      mpc = new HybridController(3, &pusher_slider, ppusher, &friction, Q, Qf, R, h, steps);
+    }else if (controller_flag==2){
+      mpc = new GPDataController(&pusher_slider, ppusher, &friction, Q, Qf, R, h, steps);
+    }else if (controller_flag==3){
+      mpc = new LMODES(&pusher_slider, ppusher, &friction, Q, Qf, R, h, steps);
+    }
 
-    FOM mpc(3, &pusher_slider, ppusher, &friction, Q, Qf, R, h, steps);
-//    LMODES mpc(&pusher_slider, ppusher, &friction, Q, Qf, R, h, steps);
-//    GPDataController mpc(&pusher_slider, ppusher, &friction, Q, Qf, R, h, steps);
-//    HybridController mpc(3, &pusher_slider, ppusher, &friction, Q, Qf, R, h, steps);
-
-
-  //8Track
+    //8Track
     _q_offset_slider << 0.3484033942222595, 0, 0; //point pusher
     _q_offset_pusher << 0.3484033942222595, 0, 0.0;//point pusher
     /* ************ TO EDIT ************** */
@@ -169,23 +178,14 @@ void *loopControl(void *thread_arg)
 
         xc =  ppusher->coordinateTransformSC(xs);
         //Compute MPC control input
-        uc = mpc.solveMPC(xc, _time);
+        uc = mpc->solveMPC(xc, _time);
 //
-
 
 //      outStateNominal out_state_nominal;
 //      out_state_nominal = ppusher->getStateNominal(_time);
-//      us = ppusher->force2Velocity(out_state_nominal.xcStar, out_state_nominal.ucStar);
+//      us = mpc.get_robot_velocity(out_state_nominal.xcStar, out_state_nominal.ucStar);
+        us = mpc->get_robot_velocity(xc, uc);
 
-//        us = ppusher->force2Velocity(xc, uc);
-
-        us = mpc.get_robot_velocity(xc, uc);
-        cout<<"xc"<<endl;
-        cout<<xc<<endl;
-        cout<<"uc"<<endl;
-        cout<<uc<<endl;
-        cout<<"us"<<endl;
-        cout<<us<<endl;
 
 //      //-------Protected---------------------
         pthread_mutex_lock(&nonBlockMutex);

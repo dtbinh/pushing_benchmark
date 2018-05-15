@@ -8,13 +8,14 @@
 #include "Pusher.h"
 #include "MPC_thread.h"
 #include "MPC.h"
+#include "Controller.h"
 
 
 #ifndef PUSH_CONTROL_FOM_H
 #define PUSH_CONTROL_FOM_H
 
-class FOM {
-    public:
+class FOM: public Controller {
+  public:
         //Properties
         MPC *controller;
         MPC_thread_data *thread_data_array;

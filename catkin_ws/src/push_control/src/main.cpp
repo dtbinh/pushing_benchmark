@@ -47,52 +47,92 @@ int main(int argc,  char *argv[]){
   bool is_exit=false;
   n1.setParam("is_exit", false);
 
+  /* ********************************** */
+  /*    Load parameters from JSON file  */
+  /* ********************************** */
+  Json::Value root;
+  Json::Reader reader;
+  char const* tmp = getenv( "PUSHING_BENCHMARK_BASE" );
+  string envStr( tmp );
+  string file_parameters;
+  file_parameters = envStr + "/catkin_ws/src/push_control/src/control_parameters.json";
+  cout<<file_parameters<<endl;
+  ifstream file(file_parameters);
+  file >> root;
+  int steps_mpc;
+  double h_mpc;
+  int controller_flag; //0:FOM, 1: Hybrid, 2: Data
 
+  Helper::write_int_JSON(root["Parameters"]["steps_mpc"], steps_mpc);
+  Helper::write_int_JSON(root["Parameters"]["controller_flag"], controller_flag);
+  Helper::write_double_JSON(root["Parameters"]["h_mpc"], h_mpc);
+
+  int num_uc;
+  if (controller_flag==2){
+    num_uc = 2;
+  }else{
+    num_uc=3;
+  }
+
+  //specified json paths
+  string trajectory_name = root["Parameters"]["trajectory_filename"].asString();
+  string experiment_name = trajectory_name + root["Parameters"]["save_data_filename"].asString();
+
+  //Define system objects on pusher type
   PusherSlider pusher_slider;
   Friction friction(&pusher_slider);
-
-  /* ***************Edit this section*************** */
-  //name of desired trajectory json file
-  string trajectory_name = "8Track_point_pusher_radius_0_15_vel_0_05_3_laps_hybrid_controller";
-//  string trajectory_name = "8Track_point_pusher_radius_0_15_vel_0_05_3_laps_gp_controller";
-  //save directory
-  string experiment_name = trajectory_name + "test";
-
-  //Depends on pusher type
-//  PointPusher point_pusher(&pusher_slider, &friction, trajectory_name, 2);//GPDataController
-  PointPusher point_pusher(&pusher_slider, &friction, trajectory_name, 3);//All other
-  /* ***************Edit this section*************** */
-
+  PointPusher point_pusher(&pusher_slider, &friction, trajectory_name, num_uc);
   //  LinePusher line_pusher(&pusher_slider, &friction, trajectory_name, 5);    //Variable to pass to thread
-  //Specify type of pusher (point or line)
   Pusher * ppusher = &point_pusher;
 //   Pusher * ppusher = &line_pusher;
 
-  /* ********************************** */
   MatrixXd Q = MatrixXd::Zero(ppusher->numxcStates, ppusher->numxcStates);
   MatrixXd Qf = MatrixXd::Zero(ppusher->numxcStates, ppusher->numxcStates);
   MatrixXd R = MatrixXd::Zero(ppusher->numucStates, ppusher->numucStates);
-  int steps_mpc;
-  double h_mpc;
+  VectorXd Q_diag = VectorXd::Zero(ppusher->numxcStates);
+  VectorXd Qf_diag = VectorXd::Zero(ppusher->numxcStates);
+  VectorXd R_diag = VectorXd::Zero(ppusher->numucStates);
+  double Q_scale;
+  double Qf_scale;
+  double R_scale;
+
+  Helper::write_vector2_JSON(root["Parameters"]["Q"], Q_diag);
+  Helper::write_vector2_JSON(root["Parameters"]["Qf"], Qf_diag);
+  Helper::write_vector2_JSON(root["Parameters"]["R"], R_diag);
+  Helper::write_double_JSON(root["Parameters"]["Q_scale"], Q_scale);
+  Helper::write_double_JSON(root["Parameters"]["Qf_scale"], Qf_scale);
+  Helper::write_double_JSON(root["Parameters"]["R_scale"], R_scale);
+
+  Q.diagonal() = Q_scale*Q_diag;
+  Qf.diagonal() = Qf_scale*Qf_diag;
+  R.diagonal() = R_scale*R_diag;
+  cout<<Q<<endl;
+  cout<<Qf<<endl;
+  cout<<R<<endl;
+
   //FOM control parameters
-    Q.diagonal() << 3,3,.1,0.0;Q=Q*10;
-    Qf.diagonal() << 3,3,.1,0.0;Qf=Qf*2000;
-    R.diagonal() << 1,1,0.01;R = R*.01;
-  //LMODES control parameters
 //    Q.diagonal() << 3,3,.1,0.0;Q=Q*10;
 //    Qf.diagonal() << 3,3,.1,0.0;Qf=Qf*2000;
-//    R.diagonal() << 1,1,0.01;R = R*.5;
-  //GPDataController control parameters
-//  Q.diagonal() << 1,1,.01,10;Q=Q*100;
-//  Qf.diagonal() << 1,1,.1,1;Qf=Qf*1000;
-//  R.diagonal() << 1,.1;R = R*.1;
+//    R.diagonal() << 1,1,0.01;R = R*.01;
   //Hybrid control parameters
 //  Q.diagonal() << 3,3,.1,0.0;Q=Q*10;
 //  Qf.diagonal() << 3,3,.1,0.0;Qf=Qf*2000;
 //  R.diagonal() << 1,1,0.01;R = R*.01;
-  steps_mpc = 35;
-  h_mpc = 0.03; //use .01 for GPDataController
+  //GPDataController control parameters
+//  Q.diagonal() << 1,1,.01,1;Q=Q*100;
+//  Qf.diagonal() << 1,1,.1,1;Qf=Qf*1000;
+//  R.diagonal() << 1,.1;R = R*.1;
+  //LMODES control parameters
+//    Q.diagonal() << 3,3,.1,0.0;Q=Q*10;
+//    Qf.diagonal() << 3,3,.1,0.0;Qf=Qf*2000;
+//    R.diagonal() << 1,1,0.01;R = R*.5;
+//  steps_mpc = 35;
+//  h_mpc = 0.03; //use .01 for GPDataController
   /* ********************************** */
+
+  /* ********************** */
+  /*    Data Saving Setup  */
+  /* ********************* */
 
   //Define rosservices
   ros::ServiceClient start_rosbag = n1.serviceClient<push_control::rosbag>("start_rosbag");
@@ -174,6 +214,7 @@ int main(int argc,  char *argv[]){
   thread_data_array.R = &R;
   thread_data_array.steps = &steps_mpc;
   thread_data_array.h = &h_mpc;
+  thread_data_array.controller_flag = &controller_flag;
   thread_data_array.ppusher = ppusher;
 
   robotStruct robot_struct;
@@ -263,11 +304,7 @@ int main(int argc,  char *argv[]){
           q_slider(1) = 0.0;
           q_slider(2) = 0.;
           q_pusher << 0.3484033942222595, 0, 0;
-//
-//          cout << "xc" <<endl<< xc<<endl;
-//          cout << "uc" <<endl<< uc<<endl;
-//          cout << "xs" <<endl<< xs <<endl;
-//          cout << "us" <<endl<< us <<endl;
+
       }
 
       //read twist_pusher FROM thread
@@ -275,7 +312,6 @@ int main(int argc,  char *argv[]){
 //      if (ppusher->num_contact_points==1){
 //        velocityOffsetABB(_q_pusher, _twist_pusher, 0.05, -0.15, ppusher->d);
 //      }
-
 
       //publish messages
       publish_float64_array(q_pusher_sensor, q_pusher_sensed_pub);
@@ -327,9 +363,9 @@ int main(int argc,  char *argv[]){
     cout << "[main][warning] isExecute set to false and/or ros!=ok"<<endl;
   }
   
-//  if (isRobot){
+  if (isRobot){
 
-      //save static variables
+      //save json variables
       for (int j =0;j<ppusher->numxcStates;j++){Q_JSON[j].append(Q(j,j));}
       for (int j =0;j<ppusher->numxcStates;j++){Qf_JSON[j].append(Qf(j,j));}
       for (int j =0;j<ppusher->numucStates;j++){R_JSON[j].append(R(j,j));}
@@ -362,7 +398,7 @@ int main(int argc,  char *argv[]){
       myOutput.close();
 
       //terminate rosbag
-//      stop_rosbag.call(srv);
-//    }
+      stop_rosbag.call(srv);
+    }
   cout<< "[main] End of Program" <<endl;
 }
