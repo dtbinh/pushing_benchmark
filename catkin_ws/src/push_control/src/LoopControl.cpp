@@ -136,7 +136,7 @@ void *loopControl(void *thread_arg)
     int counter = 0;
     ros::Rate r(125);
     while(ros::ok()) {
-        cout<<counter<<endl;
+//        cout<<counter<<endl;
 
         double t0 = Helper::gettime();
         bool is_exit;
@@ -144,7 +144,7 @@ void *loopControl(void *thread_arg)
         n1.getParam("is_exit", is_exit);
 
         if (is_exit==true){
-          break;
+            n1.getParam("is_exit", is_exit);
         }
 
 //        ---------------Protected----------------

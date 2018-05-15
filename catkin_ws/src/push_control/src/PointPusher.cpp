@@ -142,7 +142,7 @@ outStateNominal PointPusher::getStateNominalGPData(double t) {
     out_state_nominal.xsStar = xs_star.row(minIndex);
     out_state_nominal.usStar = us_star.row(minIndex);
     out_state_nominal.AStar = A_matrix;
-    out_state_nominal.BStar = B_matrix;
+    out_state_nominal.AStar = A_matrix;
 
     return out_state_nominal;
 }

@@ -102,6 +102,7 @@ int main(int argc,  char *argv[]){
   Helper::write_double_JSON(root["Parameters"]["Q_scale"], Q_scale);
   Helper::write_double_JSON(root["Parameters"]["Qf_scale"], Qf_scale);
   Helper::write_double_JSON(root["Parameters"]["R_scale"], R_scale);
+//  int N_star = ppusher->t_star.size();
 
   Q.diagonal() = Q_scale*Q_diag;
   Qf.diagonal() = Qf_scale*Qf_diag;
@@ -109,6 +110,12 @@ int main(int argc,  char *argv[]){
   cout<<Q<<endl;
   cout<<Qf<<endl;
   cout<<R<<endl;
+//  int N_star = ppusher->t_star.size();
+//  cout<<N_star<<endl;
+//  cout<<ppusher->t_star(ppusher->t_star.size()-1)<<endl;
+
+//  cout<<ppusher->t_star(N_star)<<endl;
+//  cout<<N_star<<endl;
 
   //FOM control parameters
 //    Q.diagonal() << 3,3,.1,0.0;Q=Q*10;
@@ -337,8 +344,13 @@ int main(int argc,  char *argv[]){
       for (int j =0;j<ppusher->numxcStates;j++){xc_desired[j].append(xc_des(j));}
       for (int j =0;j<ppusher->numxsStates;j++){xs_desired[j].append(xs_des(j));}
 
+
+
       pthread_mutex_unlock(&nonBlockMutex);
       //-----------------------------------
+      if (_time> ppusher->t_star(ppusher->t_star.size()-1)){
+        break;
+      }
 
       // Send veloAinty commands
 //            _twist_pusher << 0.05,0.01,0;

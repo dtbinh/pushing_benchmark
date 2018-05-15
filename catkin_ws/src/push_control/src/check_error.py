@@ -71,7 +71,12 @@ if __name__=='__main__':
     R = np.array(data['R'])
     h_mpc = np.array(data['h_mpc'])
     steps_mpc = np.array(data['steps_mpc'])
-    
+    if R.shape[0] < 3:
+        vx_act = np.array(data['uc'][0])
+        vy_act = np.array(data['uc'][1])
+        vx_des = np.array(data['uc_desired'][0])
+        vy_des = np.array(data['uc_desired'][1])
+        
     print 'Parameters.'
     print 'Q:', Q
     print 'Qf: ', Qf
@@ -208,11 +213,11 @@ if __name__=='__main__':
     print 'Total error in vy:', error
     print ' Average errror in vy:', error/num_steps
     ax8.set_title(' Average errror in vy: {}'.format(error/num_steps))
-    
-    plt.savefig(file_JSON[:-4] + 'png')
+    fig_name = file_JSON[:-5] + '_Q={}_Qf={}_R={}_h_mpc={}_steps_mpc={}.'.format(Q,Qf,R,h_mpc,steps_mpc) + 'png'
+    plt.savefig(fig_name)
     plt.show()
     plt.close()
-        
+    print fig_name
     '''
     plt.plot(q_des[0], q_des[1], 'r')
     plt.plot(q_act[0], q_act[1], 'b')

@@ -29,6 +29,7 @@ struct outStateNominal{
     VectorXd usStar;
     MatrixXd AStar;
     MatrixXd BStar;
+    double minVal;
 };
 //**************
 struct xcStateStruct{
