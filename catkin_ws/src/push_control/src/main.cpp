@@ -87,7 +87,7 @@ int main(int argc,  char *argv[]){
   Qf.diagonal() << 1,1,.1,1;Qf=Qf*1000;
   R.diagonal() << 1,.1;R = R*.1;
   steps_mpc = 35;
-  h_mpc = 0.03; //use .01 for GPDataController
+  h_mpc = 0.01; //use .01 for GPDataController
   /* ********************************** */
 
   //Define rosservices
