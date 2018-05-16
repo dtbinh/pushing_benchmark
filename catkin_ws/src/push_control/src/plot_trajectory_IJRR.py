@@ -16,6 +16,12 @@ import matplotlib.pyplot as plt
 import copy
 import pdb
 
+def load_json_file(filename):
+    
+    with open(filename) as json_data:
+        data = json.load(json_data)
+        
+    return data
 
 
 if __name__=='__main__':
@@ -42,19 +48,26 @@ if __name__=='__main__':
     with open(file_JSON) as json_data:
         data = json.load(json_data)
     print data.keys()
-
-    # t,x,y of desired trajectory
-    t_des = np.array(data['timeJSON'])
-    x_des = np.array(data['xc_desired'][0])
-    y_des = np.array(data['xc_desired'][1])
-    ori_des = np.array(data['xc_desired'][2])
-    r_des = np.array(data['xc_desired'][3])
-    vx_des = np.array(data['us_desired'][0])
-    vy_des = np.array(data['us_desired'][1])
-    q_des = np.array(data['q_pusher_commanded'])
     
+    desired_traj_JSON = os.environ['PUSHING_BENCHMARK_BASE'] + '/Data/'+'8Track_point_pusher_radius_0.15_vel_0.08_3_laps.json'
+    des_var = load_json_file(desired_traj_JSON)['Matrices']
+    
+    # t,x,y of desired trajectory
+    # import pdb;pdb.set_trace()
+
+    t_des = np.array(des_var['t_star'])[:,0]
+    x_des = np.array(des_var['xc_star'])[:,0]
+    y_des = np.array(des_var['xc_star'])[:,1]
+    ori_des = np.array(des_var['xc_star'])[:,2]
+    
+    r_des = np.array(des_var['xc_star'])[:,3]
+    vx_des = np.array(des_var['us_star'])[:,0]
+    vy_des = np.array(des_var['us_star'])[:,1]
+    q_des = np.array(data['q_pusher_sensed'])
     
     # t,x,y of actual trajectory
+    #0:-131000
+    import pdb;pdb.set_trace()
     t_act = np.array(data['timeJSON'])
     x_act = np.array(data['xc'][0])
     y_act = np.array(data['xc'][1])
@@ -63,26 +76,35 @@ if __name__=='__main__':
     vx_act = np.array(data['us'][0])
     vy_act = np.array(data['us'][1])
     q_act = np.array(data['q_pusher_sensed'])
-    # import pdb;pdb.set_trace()
+    
+    t_act = t_act[0:-131000]
+    x_act = x_act[0:-131000]
+    y_act = y_act[0:-131000]
+    ori_act = ori_act[0:-131000]
+    r_act = r_act[0:-131000]
+    vx_act = vx_act[0:-131000]
+    vy_act = vy_act[0:-131000]
+    q_act = q_act[0:-131000]
+    
     
     # Relevant parameters:
-    Q = np.array(data['Q'])
-    Qf = np.array(data['Qf'])
-    R = np.array(data['R'])
-    h_mpc = np.array(data['h_mpc'])
-    steps_mpc = np.array(data['steps_mpc'])
-    if R.shape[0] < 3:
-        vx_act = np.array(data['uc'][0])
-        vy_act = np.array(data['uc'][1])
-        vx_des = np.array(data['uc_desired'][0])
-        vy_des = np.array(data['uc_desired'][1])
+    # Q = np.array(data['Q'])
+    # Qf = np.array(data['Qf'])
+    # R = np.array(data['R'])
+    # h_mpc = np.array(data['h_mpc'])
+    # steps_mpc = np.array(data['steps_mpc'])
+    # if R.shape[0] < 3:
+        # vx_act = np.array(data['uc'][0])
+        # vy_act = np.array(data['uc'][1])
+        # vx_des = np.array(data['uc_desired'][0])
+        # vy_des = np.array(data['uc_desired'][1])
         
-    print 'Parameters.'
-    print 'Q:', Q
-    print 'Qf: ', Qf
-    print 'R: ', R 
-    print 'h_mpc: ', h_mpc
-    print 'steps_mpc: ', steps_mpc
+    # print 'Parameters.'
+    # print 'Q:', Q
+    # print 'Qf: ', Qf
+    # print 'R: ', R 
+    # print 'h_mpc: ', h_mpc
+    # print 'steps_mpc: ', steps_mpc
     
     
     # timesteps for evaluation
@@ -93,10 +115,35 @@ if __name__=='__main__':
     print time_steps.shape
     
     # Interpolate for both trajectories:
+    t_des = t_des - t_des[0] + time_steps[0]  #Assumes it starts at the same time that the first image
+    # import pdb;pdb.set_trace()
+    x_des = np.interp(time_steps, t_des, x_des)
+    y_des = np.interp(time_steps, t_des, y_des)
+    vx_des = np.interp(time_steps, t_des, vx_des)
+    vy_des = np.interp(time_steps, t_des, vy_des)
+    # z_des = np.interp(time_steps, t_des, z_des)
+    ori_des = np.interp(time_steps, t_des, ori_des)
+    r_des = np.interp(time_steps, t_des, r_des)
+    
+    x_act = np.interp(time_steps, t_act, x_act)
+    y_act = np.interp(time_steps, t_act, y_act)
+    # z_act = np.interp(time_steps, t_act, z_act)
+    ori_act = np.interp(time_steps, t_act, ori_act)
+    vx_act = np.interp(time_steps, t_act, vx_act)
+    vy_act = np.interp(time_steps, t_act, vy_act)
+    r_act = np.interp(time_steps, t_act, r_act)
+    
+    t_total = t_des
+    import pdb;pdb.set_trace()
+    t_des  = np.interp(time_steps, t_des, t_des)
+    t_act  = np.interp(time_steps, t_act, t_act)
+    
+    # Interpolate for both trajectories:
     x_des_interp = np.interp(time_steps, t_des, x_des)
     y_des_interp = np.interp(time_steps, t_des, y_des)
     x_act_interp = np.interp(time_steps, t_act, x_act)
     y_act_interp = np.interp(time_steps, t_act, y_act)
+    # import pdb;pdb.set_trace()
     vx_des_interp = np.interp(time_steps, t_des, vx_des)
     vy_des_interp = np.interp(time_steps, t_des, vy_des)
     vx_act_interp = np.interp(time_steps, t_act, vx_act)
@@ -213,14 +260,14 @@ if __name__=='__main__':
     print 'Total error in vy:', error
     print ' Average errror in vy:', error/num_steps
     ax8.set_title(' Average errror in vy: {}'.format(error/num_steps))
-    fig_name = file_JSON[:-5] + '_Q={}_Qf={}_R={}_h_mpc={}_steps_mpc={}.'.format(Q,Qf,R,h_mpc,steps_mpc) + 'png'
+    fig_name = 'test.png'#file_JSON[:-5] + '_Q={}_Qf={}_R={}_h_mpc={}_steps_mpc={}.'.format(Q,Qf,R,h_mpc,steps_mpc) + 'png'
     plt.savefig(fig_name)
     plt.show()
     plt.close()
     print fig_name
+    import pdb;pdb.set_trace()
     '''
     plt.plot(q_des[0], q_des[1], 'r')
     plt.plot(q_act[0], q_act[1], 'b')
     plt.show()
     '''
-

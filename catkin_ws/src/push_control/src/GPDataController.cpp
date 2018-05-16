@@ -4,7 +4,7 @@
 
 //
 // Created by mcube10 on 5/8/17.
-//
+//f
 
 #include "StructuresOptProgram.h"
 #include "StructuresMain.h"
@@ -53,6 +53,7 @@ VectorXd GPDataController::solveMPC(VectorXd xc, double time){
 
   //build data
   controller->buildConstraintMatricesGPData(time, delta_xc);
+  
 
   //convert triplets to sparse matrices
   Eigen::SparseMatrix<double,Eigen::RowMajor> Aeq(controller->matricesMPC.row_start_eq,controller->num_variables);
@@ -64,14 +65,23 @@ VectorXd GPDataController::solveMPC(VectorXd xc, double time){
   //solve quadratic program
   VectorXd c = VectorXd::Zero(controller->num_variables);
   VectorXd z_sol(controller->num_variables);
+  
 //
 //    cout<< "Q"<<MatrixXd(H)<<endl;
 //    if (mode_schedule(0)==2){
-    cout<<"delta_xc"<<delta_xc<<endl;
-//    cout<< "Aeq"<<MatrixXd(Aeq)<<endl;
-//    cout<< "Ain"<<MatrixXd(Ain)<<endl;
-//    cout<< "bin"<<controller->matricesMPC.bin.segment(0, controller->matricesMPC.row_start_ineq)<<endl;
-//    cout<< "beq"<< controller->matricesMPC.beq.segment(0, controller->matricesMPC.row_start_eq)<<endl;
+      // cout<<"time"<<endl;
+  // cout<<time<<endl;
+  
+  // cout<<"delta_xc"<<endl;
+  // cout<<delta_xc<<endl;
+  
+  // cout<<"delta_xc"<<endl;
+  // cout<<delta_xc<<endl;
+   // cout<< "Aeq"<<MatrixXd(Aeq)<<endl;
+   // cout<< "Ain"<<MatrixXd(Ain)<<endl;
+   // cout<< "bin"<<controller->matricesMPC.bin.segment(0, controller->matricesMPC.row_start_ineq)<<endl;
+   // cout<< "beq"<< controller->matricesMPC.beq.segment(0, controller->matricesMPC.row_start_eq)<<endl;
+   // sleep(10.);
 //
 
 

@@ -263,12 +263,10 @@ int main(int argc,  char *argv[]){
       pthread_mutex_unlock(&nonBlockMutex);
     }
     else{
-//      q_slider(0) = 0.0;
-//      q_slider(1) = 0.;
-//      q_slider(2) = 0.0;
-//      q_pusher << -0.0, 0.0, 1.57*0;
-//      _q_pusher = q_pusher;
-//      _q_slider = q_slider;
+          q_slider(0) = 0.3484033942222595;
+          q_slider(1) = 0.0;
+          q_slider(2) = 0.;
+          q_pusher << 0.3484033942222595, 0, 0;
     }
     
     if (isRobot){
