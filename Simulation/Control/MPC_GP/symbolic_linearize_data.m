@@ -65,7 +65,7 @@ Linear.dI_dx = dI_dx;
 % Linear.dv_dx_fun = matlabFunction(dv_dx,'Vars', {x,u});
 % Linear.dv_du_fun = matlabFunction(dv_du,'Vars', {x});
 % Linear.Gc_fun = planar_system_gp.Gc_fun;
-% return 
+return 
 [A,B] = GP_linearization_data([0;0;0;0], [.05;0], Linear, data, object_gp);
 % return
 
