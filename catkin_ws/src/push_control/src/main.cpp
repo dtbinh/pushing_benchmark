@@ -263,10 +263,13 @@ int main(int argc,  char *argv[]){
       pthread_mutex_unlock(&nonBlockMutex);
     }
     else{
+          time = 3.5;
+//          cout<<"time"<<_time<<endl;
+          _time = time;
           q_slider(0) = 0.3484033942222595;
-          q_slider(1) = 0.0;
-          q_slider(2) = 0.;
-          q_pusher << 0.3484033942222595, 0, 0;
+          q_slider(1) = 0.02;
+          q_slider(2) = 0.3;
+          q_pusher << .3484033942222595-0.0318, -0.0118, 0.3;
     }
     
     if (isRobot){
@@ -302,13 +305,13 @@ int main(int argc,  char *argv[]){
 //        return 0;
       }
       else {
-          time = 0;
+          time = 3.5;
 //          cout<<"time"<<_time<<endl;
           _time = time;
           q_slider(0) = 0.3484033942222595;
-          q_slider(1) = 0.0;
-          q_slider(2) = 0.;
-          q_pusher << 0.3484033942222595, 0, 0;
+          q_slider(1) = 0.02;
+          q_slider(2) = 0.3;
+          q_pusher << .3484033942222595-0.0318, -0.0118, 0.3;
 
       }
 
