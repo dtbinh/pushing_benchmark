@@ -150,6 +150,14 @@ void MPC::addMotionConstraintsGPData(outStateNominal out_state_nominal, int lv1)
   MatrixXd A_bar=MatrixXd::Identity(line_pusher->numxcStates, line_pusher->numxcStates) + h*out_state_nominal.AStar;
   MatrixXd B_bar=h*out_state_nominal.BStar;
 
+//  cout<<"h"<<h<<endl;
+//  cout<<"A_bar"<<A_bar<<endl;
+//  cout<<"B_bar"<<B_bar<<endl;
+//  cout<<out_state_nominal.AStar<<endl;
+//  cout<<out_state_nominal.BStar<<endl;
+//
+//  sleep(10.);
+
   int x1_index = getStateIndex(lv1-1);
   int x2_index = getStateIndex(lv1);
   int u1_index = getControlIndex(lv1);

@@ -67,7 +67,8 @@ VectorXd GPDataController::solveMPC(VectorXd xc, double time){
 //
 //    cout<< "Q"<<MatrixXd(H)<<endl;
 //    if (mode_schedule(0)==2){
-    cout<<"delta_xc"<<delta_xc<<endl;
+//    cout<<"delta_xc"<<delta_xc<<endl;
+//    cout<<"time"<<time<<endl;
 //    cout<< "Aeq"<<MatrixXd(Aeq)<<endl;
 //    cout<< "Ain"<<MatrixXd(Ain)<<endl;
 //    cout<< "bin"<<controller->matricesMPC.bin.segment(0, controller->matricesMPC.row_start_ineq)<<endl;
