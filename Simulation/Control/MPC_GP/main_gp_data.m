@@ -23,8 +23,8 @@ sim_time = 40;
 % x0 = [x;y;theta;xp;yp]
 % x: x position of object, y: y position of object, theta: orientation of object
 % xp: x position of pusher, yp: y position of pusher
-x0_c = [-.198674;0;0;-.00];
-% x0_c = [-0.0;0.03;15*pi/180;-.009];
+% x0_c = [-.198674;0;0;-.00];
+x0_c = [-0.0;0.03;15*pi/180;-.009];
 %%Initiaze system
 is_gp=true;
 initialize_system();

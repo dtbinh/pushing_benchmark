@@ -26,7 +26,7 @@ simulator.data = data;
 
 
 for lv1=1:1
-    planner = Planner(planar_system, simulator, Linear, data, object, '8Track_gp', 0.02, 0.15); %8track
+    planner = Planner(planar_system, simulator, Linear, data, object, '8Track_gp', 0.05, 0.15); %8track
     planner.ps.num_ucStates = 2;
 
     jsonFile = struct('xc_star', planner.xc_star,...
@@ -39,7 +39,7 @@ for lv1=1:1
                         );              
 
 
-    file_name = '../../../Data/8Track_point_pusher_radius_0_15_vel_0_02_3_laps_gp_controller.json';
+    file_name = '../../../Data/8Track_point_pusher_radius_0_15_vel_0_05_3_laps_gp_controller_debug.json';
     JsonFile = savejson('Matrices', jsonFile, file_name);
 end
 
