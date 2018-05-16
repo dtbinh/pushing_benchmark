@@ -434,11 +434,12 @@ classdef Planner < dynamicprops
             xsStarTemp = obj.ps.coordinateTransformCS(xc);
             usStarTemp = obj.ps.force2Velocity(xc, uc);
             Cbi = Helper.C3_2d(xc(3));
+            ucStarTemp = usStarTemp;
             usStarTemp = Cbi*usStarTemp;
             obj.xs_star(1,:) = xsStarTemp';
             obj.us_star(1,:) = usStarTemp';
             obj.xc_star(1,:) = xc';
-            obj.uc_star(1,:) = usStarTemp';
+            obj.uc_star(1,:) = ucStarTemp';
             [obj.A_star(1,:,:), obj.B_star(1,:,:)] = GP_linearization_data(obj.xc_star(1,:)', obj.uc_star(1,1:2)', obj.Linear, obj.data, obj.object);
             
             for lv1=1:N_star
@@ -454,19 +455,19 @@ classdef Planner < dynamicprops
                 xsStarTemp = obj.ps.coordinateTransformCS(xcStarTemp);
                 usStarTemp = obj.ps.force2Velocity(xcStarTemp, ucStarTemp);
                 Cbi = Helper.C3_2d(xc(3));
+                vel_robot = usStarTemp;
                 usStarTemp = Cbi*usStarTemp;
                 %Build control matrices A and B (symbolic linearization of motion
                 %equations)
                 obj.xs_star(lv1+1,:) = xsStarTemp';
                 obj.us_star(lv1+1,:) = usStarTemp';
                 obj.xc_star(lv1+1,:) = xcStarTemp';
-                obj.uc_star(lv1+1,:) = usStarTemp';
+                obj.uc_star(lv1+1,:) = vel_robot';
                 [obj.A_star(lv1+1,:,:), obj.B_star(lv1+1,:,:)] = GP_linearization_data(obj.xc_star(lv1+1,:)', obj.uc_star(lv1+1,1:2)', obj.Linear, obj.data, obj.object);
                 if lv1<N_star
                     obj.t_star(lv1+1)  = obj.t_star(lv1) + h_star;
                 end
             end
-            obj.uc_star(lv1+1,:) = obj.us_star(lv1+1,:);
         end
                 %% Build nominal trajectory
         function obj = buildCircleTrajectory_gp(obj, radius, velocity, x0)
