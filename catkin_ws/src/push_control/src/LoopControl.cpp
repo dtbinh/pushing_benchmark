@@ -185,20 +185,20 @@ void *loopControl(void *thread_arg)
         us = mpc.get_robot_velocity(xc, uc);
 
 //
-//        cout<<"_q_slider"<<endl;
-//        cout<<_q_slider<<endl;
-//        cout<<"_q_slider_zeroed"<<endl;
-//        cout<<_q_slider_zeroed<<endl;
-//        cout<<"_q_pusher_zeroed"<<endl;
-//        cout<<_q_pusher_zeroed<<endl;
-//
-        // cout<<"xc"<<endl;
-        // cout<<xc<<endl;
-        // cout<<"uc"<<endl;
-        // cout<<uc<<endl;
-        // cout<<"us"<<endl;
-        // cout<<us<<endl;
-        // sleep(10.);
+        cout<<"_q_slider"<<endl;
+        cout<<_q_slider<<endl;
+        cout<<"_q_slider_zeroed"<<endl;
+        cout<<_q_slider_zeroed<<endl;
+        cout<<"_q_pusher_zeroed"<<endl;
+        cout<<_q_pusher_zeroed<<endl;
+
+         cout<<"xc"<<endl;
+         cout<<xc<<endl;
+         cout<<"uc"<<endl;
+         cout<<uc<<endl;
+         cout<<"us"<<endl;
+         cout<<us<<endl;
+         sleep(10.);
 
 //      //-------Protected---------------------
         pthread_mutex_lock(&nonBlockMutex);
