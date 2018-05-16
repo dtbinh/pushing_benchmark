@@ -425,7 +425,7 @@ outBuildForceIndConstraints MPC::buildForceIndConstraints(VectorXd& xc_star,Vect
 outBuildVelConstraintsGPData MPC::buildVelConstraintsGPData(outStateNominal out_state_nominal) {
 
     float low_bound = .01;
-    float up_bound = .1;
+    float up_bound = .3;
     MatrixXd Ain(4, line_pusher->numucStates);
     Ain << 1,0,0,1,-1,0,0,-1;
     VectorXd bin(4);

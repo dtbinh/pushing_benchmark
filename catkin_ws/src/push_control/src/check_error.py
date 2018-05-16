@@ -55,15 +55,17 @@ if __name__=='__main__':
     
     
     # t,x,y of actual trajectory
-    t_act = np.array(data['timeJSON'])
-    x_act = np.array(data['xc'][0])
-    y_act = np.array(data['xc'][1])
-    ori_act = np.array(data['xc'][2])
-    r_act = np.array(data['xc'][3])
-    vx_act = np.array(data['us'][0])
-    vy_act = np.array(data['us'][1])
-    q_act = np.array(data['q_pusher_sensed'])
-    # import pdb;pdb.set_trace()
+    t_off = 0.1*0
+    t_act = np.array(data['timeJSON'])-t_off
+    it_cut = np.searchsorted(t_act, 0)
+    t_act = t_act[it_cut::]
+    x_act = np.array(data['xc'][0][it_cut::])
+    y_act = np.array(data['xc'][1][it_cut::])
+    ori_act = np.array(data['xc'][2][it_cut::])
+    r_act = np.array(data['xc'][3][it_cut::])
+    vx_act = np.array(data['us'][0][it_cut::])
+    vy_act = np.array(data['us'][1][it_cut::])
+    q_act = np.array(data['q_pusher_sensed'][it_cut::])
     
     # Relevant parameters:
     Q = np.array(data['Q'])

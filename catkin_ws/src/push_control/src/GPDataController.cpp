@@ -72,8 +72,8 @@ VectorXd GPDataController::solveMPC(VectorXd xc, double time){
       // cout<<"time"<<endl;
   // cout<<time<<endl;
   
-  // cout<<"delta_xc"<<endl;
-  // cout<<delta_xc<<endl;
+  cout<<"delta_xc"<<endl;
+  cout<<delta_xc<<endl;
   
   // cout<<"delta_xc"<<endl;
   // cout<<delta_xc<<endl;
