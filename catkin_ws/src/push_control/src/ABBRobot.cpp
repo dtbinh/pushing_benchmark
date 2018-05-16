@@ -166,7 +166,7 @@ bool getRobotPose(UDPSocket* EGMsock, string& sourceAddress, unsigned short& sou
 bool getViconPose(Eigen::Vector3d& q_slider, TransformListener& listener){
     tf::StampedTransform obj_pose;
     try{
-        listener.lookupTransform("map", "vicon/StainlessSteel/StainlessSteel_rect", ros::Time(0), obj_pose);
+        listener.lookupTransform("map", "vicon/StainlessSteel/StainlessSteel", ros::Time(0), obj_pose);
         tf::Quaternion q = obj_pose.getRotation();
         tf::Matrix3x3 m(q);
         double roll, pitch, yaw;

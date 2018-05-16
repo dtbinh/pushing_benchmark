@@ -85,21 +85,8 @@ cmd "12-learning" {
 }
 
 
-script "run_real" {
-    start cmd "0-roscore";
-    wait ms 1000;
-    start cmd "1-perception-real";
-    start cmd "3-abb";
-    start cmd "4-vicon";
-    start cmd "5-rviz";
-    start cmd "6-push-control";
-    start cmd "7-object-tracker";
-    wait ms 2000;
-    start cmd "8-controller";
-    start group "visualization";
-}
 
-script "run_FOM" {
+script "run_real" {
     start cmd "0-roscore";
     wait ms 1000;
     start cmd "1-perception-real";

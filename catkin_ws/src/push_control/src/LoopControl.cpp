@@ -120,6 +120,8 @@ void *loopControl(void *thread_arg)
 //    _q_offset_slider << 0.19867394381957065, 0, 0; //point pusher
 //    _q_offset_pusher << 0.19867394381957065, 0, 0.0;//point pusher
 
+
+
     //**********************************************************************
     //************************ Begin Loop **********************************
     //**********************************************************************
@@ -147,6 +149,7 @@ void *loopControl(void *thread_arg)
         uc_thread = uc;
         us_thread = us;
         pthread_mutex_unlock(&nonBlockMutex);
+
 //        //--------------------------------------
         //define state variables from vicon and pusher states
         outStateNominal out_state_nominal;
@@ -168,6 +171,7 @@ void *loopControl(void *thread_arg)
 
         xc =  ppusher->coordinateTransformSC(xs);
         //Compute MPC control input
+
         uc = mpc.solveMPC(xc, _time);
 //
 
@@ -179,12 +183,22 @@ void *loopControl(void *thread_arg)
 //        us = ppusher->force2Velocity(xc, uc);
 
         us = mpc.get_robot_velocity(xc, uc);
-//        cout<<"xc"<<endl;
-//        cout<<xc<<endl;
-//        cout<<"uc"<<endl;
-//        cout<<uc<<endl;
-//        cout<<"us"<<endl;
-//        cout<<us<<endl;
+
+//
+//        cout<<"_q_slider"<<endl;
+//        cout<<_q_slider<<endl;
+//        cout<<"_q_slider_zeroed"<<endl;
+//        cout<<_q_slider_zeroed<<endl;
+//        cout<<"_q_pusher_zeroed"<<endl;
+//        cout<<_q_pusher_zeroed<<endl;
+//
+        // cout<<"xc"<<endl;
+        // cout<<xc<<endl;
+        // cout<<"uc"<<endl;
+        // cout<<uc<<endl;
+        // cout<<"us"<<endl;
+        // cout<<us<<endl;
+        // sleep(10.);
 
 //      //-------Protected---------------------
         pthread_mutex_lock(&nonBlockMutex);

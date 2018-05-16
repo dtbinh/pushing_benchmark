@@ -53,10 +53,10 @@ int main(int argc,  char *argv[]){
 
   /* ***************Edit this section*************** */
   //name of desired trajectory json file
-//  string trajectory_name = "8Track_point_pusher_radius_0.15_vel_0.05_3_laps";
-  string trajectory_name = "8Track_point_pusher_radius_0_15_vel_0_05_3_laps_gp_controller";
+//  string trajectory_name = "8Track_point_pusher_radius_0.15_vel_0.08_3_laps";
+  string trajectory_name = "8Track_point_pusher_radius_0_15_vel_0_08_3_laps_gp_controller";
   //save directory
-  string experiment_name = trajectory_name + "test";
+  string experiment_name = trajectory_name + "experiment_1";
 
   //Depends on pusher type
   PointPusher point_pusher(&pusher_slider, &friction, trajectory_name, 2);//GPDataController
@@ -83,9 +83,9 @@ int main(int argc,  char *argv[]){
 //    Qf.diagonal() << 3,3,.1,0.0;Qf=Qf*2000;
 //    R.diagonal() << 1,1,0.01;R = R*.5;
   //GPDataController control parameters
-  Q.diagonal() << 1,1,.01,10;Q=Q*100;
+  Q.diagonal() << 1,1,.01,1;Q=Q*100;
   Qf.diagonal() << 1,1,.1,1;Qf=Qf*1000;
-  R.diagonal() << 1,.1;R = R*.1;
+  R.diagonal() << 1,.1;R = R*.01;
   steps_mpc = 35;
   h_mpc = 0.01; //use .01 for GPDataController
   /* ********************************** */
@@ -193,8 +193,8 @@ int main(int argc,  char *argv[]){
 //        return 0;
         initializeEGM(robot_struct, q_pusher, joint_states);
         }
-    initializeThread((void *) &thread_data_array);
 
+    initializeThread((void *) &thread_data_array);
 
     if (isRobot) {
       pauseEGM(robot_struct, 2, joint_states);
@@ -255,7 +255,7 @@ int main(int argc,  char *argv[]){
           time = 0;
 //          cout<<"time"<<_time<<endl;
           _time = time;
-          q_slider(0) = 0.0;
+          q_slider(0) = 0.3484033942222595;
           q_slider(1) = 0.0;
           q_slider(2) = 0.0;
           q_pusher << 0.0, 0, 0;
