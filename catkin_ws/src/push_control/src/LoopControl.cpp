@@ -186,19 +186,19 @@ void *loopControl(void *thread_arg)
 //      us = mpc.get_robot_velocity(out_state_nominal.xcStar, out_state_nominal.ucStar);
         us = mpc->get_robot_velocity(xc, uc);
         
-        cout<<"xc"<<endl;
-        cout<<xc<<endl;
-        
-        cout<<"xs"<<endl;
-        cout<<xs<<endl;
-        
-        cout<<"uc"<<endl;
-        cout<<uc<<endl;
-
-        cout<<"us"<<endl;
-        cout<<us<<endl;
-        
-        sleep(10.);
+//        cout<<"xc"<<endl;
+//        cout<<xc<<endl;
+//
+//        cout<<"xs"<<endl;
+//        cout<<xs<<endl;
+//
+//        cout<<"uc"<<endl;
+//        cout<<uc<<endl;
+//
+//        cout<<"us"<<endl;
+//        cout<<us<<endl;
+//
+//        sleep(10.);
 
 
 //      //-------Protected---------------------
