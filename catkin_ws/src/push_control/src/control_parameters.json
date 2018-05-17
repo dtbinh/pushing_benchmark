@@ -1,0 +1,43 @@
+{"Parameters": {
+    //"controller_flag": 2, //0:Model, 1:Hybrid, 2:Data
+    //"Q": [1,1,0.01,1],
+    //"Q_scale": 100,
+    //"Qf": [1,1,0.1,1],
+    //"Qf_scale": 1000,
+    //"R": [1,0.1],
+    //"R_scale": 0.1,
+    //"steps_mpc": 35,
+    //"h_mpc": 0.01,
+    "controller_flag": 0, //0:Model, 1:Hybrid, 2:Data.
+    "Q": [3,3,0.1,0],
+    "Q_scale": 10,
+    "Qf": [3,3,0.1,0],
+    "Qf_scale": 2000,
+    "R": [1,1,0.01],
+    "R_scale": 0.01,
+    "steps_mpc": 35,
+    "h_mpc": 0.03,
+   // "trajectory_filename": "8Track_point_pusher_radius_0_15_vel_0_05_3_laps_gp_controller",
+    "trajectory_filename": "8Track_point_pusher_radius_0.15_vel_0.08_3_laps",
+    "save_data_filename": "_test_perturb"
+}}   
+
+
+  //FOM control parameters
+  //  Q.diagonal() << 3,3,.1,0.0;Q=Q*10;
+   // Qf.diagonal() << 3,3,.1,0.0;Qf=Qf*2000;
+    //R.diagonal() << 1,1,0.01;R = R*.01;
+  //Hybrid control parameters
+//  Q.diagonal() << 3,3,.1,0.0;Q=Q*10;
+//  Qf.diagonal() << 3,3,.1,0.0;Qf=Qf*2000;
+//  R.diagonal() << 1,1,0.01;R = R*.01;
+  //GPDataController control parameters
+//  Q.diagonal() << 1,1,.01,1;Q=Q*100;
+//  Qf.diagonal() << 1,1,.1,1;Qf=Qf*1000;
+//  R.diagonal() << 1,.1;R = R*.1;
+  //LMODES control parameters
+//    Q.diagonal() << 3,3,.1,0.0;Q=Q*10;
+//    Qf.diagonal() << 3,3,.1,0.0;Qf=Qf*2000;
+//    R.diagonal() << 1,1,0.01;R = R*.5;
+  //steps_mpc = 35;
+  //h_mpc = 0.03; //use .01 for GPDataController

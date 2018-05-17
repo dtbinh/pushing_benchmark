@@ -25,9 +25,12 @@ if __name__=='__main__':
                       help='JSON file with information', default='')
     parser.add_option('-l', '--last', action='store_true', dest='use_last',
         help='Use last json file created', default=False)
+    parser.add_option('-n', '--nlast', action="store", dest='nlast', type='int',
+                  help='Which file you want', default=1)  
     (opt, args) = parser.parse_args()
     file_JSON = opt.file_JSON
     use_last = opt.use_last
+    nlast = opt.nlast
     
    
     #Load actual trajectory
@@ -38,6 +41,10 @@ if __name__=='__main__':
     if use_last:
         list_of_files = glob.glob('/home/mcube/pushing_benchmark/catkin_ws/src/push_control/src/Data/*.json') 
         file_JSON = max(list_of_files, key=os.path.getctime)
+    if nlast > 1:
+        list_of_files = glob.glob('/home/mcube/pushing_benchmark/catkin_ws/src/push_control/src/Data/*.json') 
+        list_of_files.sort(key=os.path.getctime)
+        file_JSON = list_of_files[-nlast]
     print file_JSON
     with open(file_JSON) as json_data:
         data = json.load(json_data)
