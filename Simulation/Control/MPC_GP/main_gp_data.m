@@ -12,7 +12,8 @@ close all
 
 run(strcat(getenv('HOME'),'/pushing_benchmark/Simulation/Simulator/setup.m'));
 
-symbolic_linearize_data;
+gp_model_name = 'trained_new_inputs_outputs_validation_side_0_only_5000';
+Linear = symbolic_linearize_data(gp_model_name);
 
 %% Simulation data and video are stored in /home/Data/<simulation_name>
 simulation_name = 'gp_data_2_on_analytical';
@@ -23,18 +24,18 @@ sim_time = 40;
 % x0 = [x;y;theta;xp;yp]
 % x: x position of object, y: y position of object, theta: orientation of object
 % xp: x position of pusher, yp: y position of pusher
-x0_c = [-.198674;0;0;-.00];
-% x0_c = [-0.0;0.03;15*pi/180;-.009];
+% x0_c = [-.198674;0;0;-.00];
+x0_c = [-0.0;0.01;5*pi/180;-.009];
 %%Initiaze system
 is_gp=true;
 initialize_system();
 % load('learning_output_model_from_train_size_4000');
-load('trained_new_inputs_outputs_validation_side_0_only_5000');
+load(gp_model_name);
 simulator.data = data;
 planner = Planner(planar_system, simulator, Linear, data, object, '8Track_gp', 0.05, 0.15); %8track
 planner.ps.num_ucStates = 2;
 %Controller setup
-Q = 1*diag([1,1,.01,1]);
+Q = 10*diag([1,1,.01,1]);
 Qf=  1*1000*diag([1,1,.1,.1]);
 R = .1*diag([1,1]);
 mpc = MPC(planner, Q, Qf, R, Linear, data, object);

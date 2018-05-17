@@ -5,42 +5,51 @@ clear
 clc
 close all
 
-symbolic_linearize_data;
+%edit
+des_velocity = 0.05;
+des_radius = 0.15;
+num_laps = 1;
 
-%% Simulation data and video are stored in /home/Data/<simulation_name>
-simulation_name = 'gp_data';
-%% Simulation time
-sim_time = 45;
+data_list = [100,200,500,1000,2000, 5000];
 
-%% Initial conditions 
-% x0 = [x;y;theta;xp;yp]
-% x: x position of object, y: y position of object, theta: orientation of object
-% xp: x position of pusher, yp: y position of pusher
-x0_c = [0.0;-0.03*1;15*pi/180*1;.00*1];
-%%Initiaze system
-is_gp=true;
-initialize_system();
-% load('learning_output_model_from_train_size_4000');
-load('trained_new_inputs_outputs_validation_side_0_only_5000');
-simulator.data = data;
+for counter=1:length(data_list)
+    gp_model_name = strcat('trained_new_inputs_outputs_validation_side_0_only_',num2str(data_list(counter)),'.mat');
+
+    json_filename = strcat('../../../Data/8Track_point_pusher_radius_',num2str(des_radius),'_vel_',num2str(des_velocity),'_',num2str(num_laps),'_laps_data_',num2str(data_list(counter)),'_gpdata_controller.json');
+    Linear = symbolic_linearize_data(gp_model_name);
+    load(gp_model_name);
+    %% Simulation data and video are stored in /home/Data/<simulation_name>
+    simulation_name = 'gp_data';
+    %% Simulation time
+    sim_time = 45;
+
+    %% Initial conditions 
+    % x0 = [x;y;theta;xp;yp]
+    % x: x position of object, y: y position of object, theta: orientation of object
+    % xp: x position of pusher, yp: y position of pusher
+    x0_c = [0.0;-0.03*1;15*pi/180*1;.00*1];
+    %%Initiaze system
+    is_gp=true;
+    initialize_system();
+    % load('learning_output_model_from_train_size_4000');
+    simulator.data = data;
+
+    for lv1=1:1
+        planner = Planner(planar_system, simulator, Linear, data, object, '8Track_gp', 0.02, 0.15); %8track
+        planner.ps.num_ucStates = 2;
+
+        jsonFile = struct('xc_star', planner.xc_star,...
+                           'uc_star', planner.uc_star,...
+                           'xs_star', planner.xs_star,...
+                           'us_star', planner.us_star,...
+                           'A_star', reshape(planner.A_star, length(planner.A_star), size(planner.xc_star,2)*size(planner.xc_star,2)),...
+                           'B_star', reshape(planner.B_star, length(planner.B_star), size(planner.xc_star,2)*size(planner.uc_star,2)),...
+                           't_star', planner.t_star...
+                            );              
 
 
-for lv1=1:1
-    planner = Planner(planar_system, simulator, Linear, data, object, '8Track_gp', 0.02, 0.15); %8track
-    planner.ps.num_ucStates = 2;
+        JsonFile = savejson('Matrices', jsonFile, json_filename);
+    end
 
-    jsonFile = struct('xc_star', planner.xc_star,...
-                       'uc_star', planner.uc_star,...
-                       'xs_star', planner.xs_star,...
-                       'us_star', planner.us_star,...
-                       'A_star', reshape(planner.A_star, length(planner.A_star), size(planner.xc_star,2)*size(planner.xc_star,2)),...
-                       'B_star', reshape(planner.B_star, length(planner.B_star), size(planner.xc_star,2)*size(planner.uc_star,2)),...
-                       't_star', planner.t_star...
-                        );              
-
-
-    file_name = '../../../Data/8Track_point_pusher_radius_0_15_vel_0_02_3_laps_gp_controller.json';
-    JsonFile = savejson('Matrices', jsonFile, file_name);
+    json2data=loadjson(JsonFile);
 end
-
-json2data=loadjson(JsonFile);

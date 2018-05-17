@@ -21,7 +21,7 @@ classdef Planner < dynamicprops
     end
     methods
         %% Constructor
-        function obj = Planner(ps, simulator, Linear, data, object, name, vel, radius)  
+        function obj = Planner(ps, simulator, Linear, data, object, name, vel, radius, num_laps)  
             obj.ps = ps;
             obj.Linear=Linear;
             obj.data=data;
@@ -32,7 +32,7 @@ classdef Planner < dynamicprops
             elseif strcmp(name, '8Track')
                 obj.build8track(-radius, vel, [0;0;0*pi/180;0]);
             elseif strcmp(name, '8Track_residual')
-                obj.build8track_residual(-radius, vel, [0;0;0*pi/180;0]);
+                obj.build8track_residual(-radius, vel, [0;0;0*pi/180;0],num_laps);
             elseif strcmp(name, '8Track_gp')
                 obj.build8track_gp(-radius, vel, [0;0;0*pi/180;0]);
             elseif strcmp(name, 'inf_circle')
@@ -196,7 +196,7 @@ classdef Planner < dynamicprops
             
         end
         
-         function obj = build8track_residual(obj, radius, velocity, x0)
+         function obj = build8track_residual(obj, radius, velocity, x0, num_laps)
                         
             x0_initial = x0;
             obj.buildCircleTrajectory_residual(radius, velocity, x0);
@@ -224,7 +224,7 @@ classdef Planner < dynamicprops
             A_star_total = [];
             B_star_total = []; 
             t_star_total = [];  
-            for lv1=1:1
+            for lv1=1:num_laps
                 xs_star_total = [xs_star_total;xs_star2];
                 us_star_total = [us_star_total;us_star2];
                 xc_star_total = [xc_star_total;xc_star2];
@@ -414,7 +414,7 @@ classdef Planner < dynamicprops
         end
         
         %% Build nominal trajectory
-        function obj = buildCircleTrajectory_vel_space(obj, radius, velocity, x0)
+     function obj = buildCircleTrajectory_vel_space(obj, radius, velocity, x0)
             
             xc = x0;
             uc = zeros(obj.ps.p.num_contacts * 2 + 1, 1);
@@ -434,12 +434,12 @@ classdef Planner < dynamicprops
             xsStarTemp = obj.ps.coordinateTransformCS(xc);
             usStarTemp = obj.ps.force2Velocity(xc, uc);
             Cbi = Helper.C3_2d(xc(3));
-            ucStarTemp = usStarTemp;
+            us_i = usStarTemp;
             usStarTemp = Cbi*usStarTemp;
             obj.xs_star(1,:) = xsStarTemp';
-            obj.us_star(1,:) = usStarTemp';
+            obj.us_star(1,:) = us_i';
             obj.xc_star(1,:) = xc';
-            obj.uc_star(1,:) = ucStarTemp';
+            obj.uc_star(1,:) = usStarTemp';
             [obj.A_star(1,:,:), obj.B_star(1,:,:)] = GP_linearization_data(obj.xc_star(1,:)', obj.uc_star(1,1:2)', obj.Linear, obj.data, obj.object);
             
             for lv1=1:N_star
@@ -455,19 +455,20 @@ classdef Planner < dynamicprops
                 xsStarTemp = obj.ps.coordinateTransformCS(xcStarTemp);
                 usStarTemp = obj.ps.force2Velocity(xcStarTemp, ucStarTemp);
                 Cbi = Helper.C3_2d(xc(3));
-                vel_robot = usStarTemp;
+                us_i = usStarTemp;
                 usStarTemp = Cbi*usStarTemp;
                 %Build control matrices A and B (symbolic linearization of motion
                 %equations)
                 obj.xs_star(lv1+1,:) = xsStarTemp';
-                obj.us_star(lv1+1,:) = usStarTemp';
+                obj.us_star(lv1+1,:) = us_i';
                 obj.xc_star(lv1+1,:) = xcStarTemp';
-                obj.uc_star(lv1+1,:) = vel_robot';
+                obj.uc_star(lv1+1,:) = usStarTemp';
                 [obj.A_star(lv1+1,:,:), obj.B_star(lv1+1,:,:)] = GP_linearization_data(obj.xc_star(lv1+1,:)', obj.uc_star(lv1+1,1:2)', obj.Linear, obj.data, obj.object);
                 if lv1<N_star
                     obj.t_star(lv1+1)  = obj.t_star(lv1) + h_star;
                 end
             end
+%             obj.uc_star(lv1+1,:) = obj.us_star(lv1+1,:);
         end
                 %% Build nominal trajectory
         function obj = buildCircleTrajectory_gp(obj, radius, velocity, x0)
