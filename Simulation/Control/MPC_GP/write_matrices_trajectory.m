@@ -7,7 +7,7 @@ close all
 
 %edit
 des_velocity = 0.05;
-des_radius = 0.15;
+des_radius = -0.15;
 num_laps = 1;
 
 data_list = [100,200,500,1000,2000, 5000];
@@ -15,7 +15,7 @@ data_list = [100,200,500,1000,2000, 5000];
 for counter=1:length(data_list)
     gp_model_name = strcat('trained_new_inputs_outputs_validation_side_0_only_',num2str(data_list(counter)),'.mat');
 
-    json_filename = strcat('../../../Data/8Track_point_pusher_radius_',num2str(des_radius),'_vel_',num2str(des_velocity),'_',num2str(num_laps),'_laps_data_',num2str(data_list(counter)),'_gpdata_controller.json');
+    json_filename = strcat('../../../Data/reversed_8Track_point_pusher_radius_',num2str(des_radius),'_vel_',num2str(des_velocity),'_',num2str(num_laps),'_laps_data_',num2str(data_list(counter)),'_gpdata_controller.json');
     Linear = symbolic_linearize_data(gp_model_name);
     load(gp_model_name);
     %% Simulation data and video are stored in /home/Data/<simulation_name>
@@ -35,7 +35,7 @@ for counter=1:length(data_list)
     simulator.data = data;
 
     for lv1=1:1
-        planner = Planner(planar_system, simulator, Linear, data, object, '8Track_gp', 0.02, 0.15); %8track
+        planner = Planner(planar_system, simulator, Linear, data, object, '8Track_gp', des_velocity, des_radius,num_laps); %8track
         planner.ps.num_ucStates = 2;
 
         jsonFile = struct('xc_star', planner.xc_star,...

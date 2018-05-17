@@ -1,6 +1,6 @@
 classdef MPCforce < dynamicprops  
     properties (Constant)
-        h_opt = 0.02;
+        h_opt = 0.01;
         NumFam = 3;
         steps = 35;
         num_int = 8;
@@ -260,6 +260,7 @@ classdef MPCforce < dynamicprops
             usStar = obj.planner.us_star(indexDif,:)'; 
             try
                 A = reshape(obj.planner.A_star(indexDif,:,:), 4,4);
+%                 A(:,4)=zeros(4,1);
                 B = reshape(obj.planner.B_star(indexDif,:,:), 4,3);
             catch
 
