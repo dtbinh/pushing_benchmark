@@ -13,11 +13,9 @@ num_laps = 1;
 data_list = [100,200,500,1000,2000, 5000];
 
 for counter=1:length(data_list)
-    gp_model_name = strcat('trained_new_inputs_outputs_validation_side_0_only_',num2str(data_list(counter)),'.mat');
+    gp_model_name = strcat('trained_data_residual_new_inputs_outputs_validation_side_0_only_',num2str(data_list(counter)),'.mat');
 
-    gp_model_name = 'trained_gp_model_data_residual_05_09_2018';
-
-    json_filename = strcat('../../../Data/8Track_point_pusher_radius_',num2str(des_radius),'_vel_',num2str(des_velocity),'_',num2str(num_laps),'_laps_hybrid_controller.json');
+    json_filename = strcat('../../../Data/8Track_point_pusher_radius_',num2str(des_radius),'_vel_',num2str(des_velocity),'_',num2str(num_laps),'_laps_data_',num2str(data_list(counter)),'_hybrid_controller.json');
     Linear = symbolic_linearize_residual_v2(gp_model_name);
     load(gp_model_name);
 
