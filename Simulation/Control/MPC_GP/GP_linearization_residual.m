@@ -73,9 +73,11 @@ function [A, B] = GP_linearization_residual(x, u, Linear, data, object)
     dxb_dc = (V_star/V_nom)*(Linear.Rbc_fun(x_star)*dg_dc);
     dxb_dI = [dxb_dV dxb_dc dxb_dphi];
     
+Linear.Gc_fun(x_star)
     dg_dv = double(dxb_dI*Linear.dI_dv_fun(v_star)*Linear.Gc_fun(x_star));
     dg_dx = double(dxb_dI*Linear.dI_dx + dxb_dI*Linear.dI_dv_fun(v_star)*Linear.dv_dx_fun(x_star, u_star));
     g = (V_star/V_nom)*g;
+
 
     %build expression for dry=dx(4) (note: dry = vt-)
 

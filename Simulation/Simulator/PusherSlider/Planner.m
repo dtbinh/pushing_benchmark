@@ -34,7 +34,7 @@ classdef Planner < dynamicprops
             elseif strcmp(name, '8Track_residual')
                 obj.build8track_residual(-radius, vel, [0;0;0*pi/180;0],num_laps);
             elseif strcmp(name, '8Track_gp')
-                obj.build8track_gp(-radius, vel, [0;0;0*pi/180;0]);
+                obj.build8track_gp(-radius, vel, [0;0;0*pi/180;0],num_laps);
             elseif strcmp(name, 'inf_circle')
                 obj.build_inf_circle_vel_space(-0.15, vel, [0;0;0*pi/180;0]);
             end
@@ -144,7 +144,7 @@ classdef Planner < dynamicprops
             
         end
         
-        function obj = build8track_gp(obj, radius, velocity, x0)
+        function obj = build8track_gp(obj, radius, velocity, x0, num_laps)
                         
             x0_initial = x0;
             obj.buildCircleTrajectory_vel_space(radius, velocity, x0);
@@ -172,7 +172,7 @@ classdef Planner < dynamicprops
             A_star_total = [];
             B_star_total = []; 
             t_star_total = [];  
-            for lv1=1:1
+            for lv1=1:num_laps
                 xs_star_total = [xs_star_total;xs_star2];
                 us_star_total = [us_star_total;us_star2];
                 xc_star_total = [xc_star_total;xc_star2];

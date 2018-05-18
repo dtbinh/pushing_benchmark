@@ -235,6 +235,7 @@ classdef PlanarSystem < dynamicprops
             obj.A_fun = matlabFunction(A, 'Vars', {xc,uc});
             obj.B_fun = matlabFunction(B, 'Vars', {xc,uc});
             obj.Gc_fun = matlabFunction(Gc, 'Vars', {xc});
+            J_vel_fun = matlabFunction(J_vel, 'Vars', {xc});
             obj.twist_object_i_fun = matlabFunction(f_non1, 'Vars', {xc,uc});
             obj.f_non_fun = matlabFunction(f_non, 'Vars', {xc,uc});
         end

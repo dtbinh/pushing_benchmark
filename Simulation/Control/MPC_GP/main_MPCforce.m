@@ -12,14 +12,14 @@ close all
 
 run(strcat(getenv('HOME'),'/pushing_benchmark/Simulation/Simulator/setup.m'));
 
-gp_model_name = 'trained_gp_model_data_residual_05_09_2018';
+gp_model_name = 'trained_data_residual_new_inputs_outputs_validation_side_0_only_5000';
 Linear = symbolic_linearize_residual_v2(gp_model_name);
 load(gp_model_name);
 
 %% Simulation data and video are stored in /home/Data/<simulation_name>
 simulation_name = 'mpc_force1';
 %% Simulation time
-sim_time = 15;
+sim_time = 45;
 
 %% Initial conditions 
 % x0 = [x;y;theta;xp;yp]
@@ -29,11 +29,11 @@ x0_c = [0.0;0.03*1;15*pi/180*1;-.009];
 %%Initiaze system
 is_gp=true;
 initialize_system();
-planner = Planner(planar_system, simulator, Linear, data, object, '8Track_residual', 0.05, 0.15 ); %8track
+planner = Planner(planar_system, simulator, Linear, data, object, '8Track_residual', 0.05, 0.15, 1 ); %8track
 
 %Controller setup
-Q = 10*diag([3,3,.1,0.1]);
-Qf=  1*2000*diag([3,3,1,.1]);
+Q = 100*diag([3,3,.1,1]);
+Qf=  1000*diag([3,3,1,1]);
 R = 1*diag([1,1,.1]);
 mpc = MPCforce(planner, 'is_fom', Q, Qf, R, Linear, data, object);
 %send planned trajectory to simulator for plotting
