@@ -9,17 +9,20 @@
     //"steps_mpc": 35,
     //"h_mpc": 0.01,
     "controller_flag": 0, //0:Model, 1:Hybrid, 2:Data.
-    "Q": [3,3,0.1,0],
-    "Q_scale": 10,
-    "Qf": [3,3,0.1,0],
-    "Qf_scale": 2000,
+    //"Q": [1,1,0.01,3],
+    "Q": [3,3,0.1,0.10001],
+    "Q_scale": 100,
+    "Qf": [3,3,0.1,0.1],
+    "Qf_scale": 1000,
     "R": [1,1,0.01],
-    "R_scale": 0.01,
+    //"R": [1,0.1],
+    "R_scale": 1000,
     "steps_mpc": 35,
-    "h_mpc": 0.03,
-   // "trajectory_filename": "8Track_point_pusher_radius_0_15_vel_0_05_3_laps_gp_controller",
-    "trajectory_filename": "8Track_point_pusher_radius_0.15_vel_0.08_3_laps",
-    "save_data_filename": "_test_perturb"
+    "h_mpc": 0.02,
+    //"trajectory_filename": "8Track_point_pusher_radius_0_15_vel_0_05_3_laps_gp_controller",
+    //"trajectory_filename": "8Track_point_pusher_radius_0.15_vel_0.05_1_laps_data_5000_gpdata_controller",
+    "trajectory_filename": "8Track_point_pusher_radius_0.15_vel_0.05_1_laps_data_5000_hybrid_controller",
+    "save_data_filename": "_experiment_3"
 }}   
 
 

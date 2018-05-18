@@ -227,9 +227,10 @@ if __name__=='__main__':
     plt.show()
     plt.close()
     print fig_name
-    '''
+    
     plt.plot(q_des[0], q_des[1], 'r')
     plt.plot(q_act[0], q_act[1], 'b')
+    plt.axes().set_aspect('equal')
     plt.show()
-    '''
+    
 

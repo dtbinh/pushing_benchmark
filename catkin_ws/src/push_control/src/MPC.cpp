@@ -425,7 +425,7 @@ outBuildForceIndConstraints MPC::buildForceIndConstraints(VectorXd& xc_star,Vect
 outBuildVelConstraintsGPData MPC::buildVelConstraintsGPData(outStateNominal out_state_nominal) {
 
     float low_bound = .01;
-    float up_bound = .3;
+    float up_bound = .5;
     MatrixXd Ain(4, line_pusher->numucStates);
     Ain << 1,0,0,1,-1,0,0,-1;
     VectorXd bin(4);
@@ -628,8 +628,8 @@ void MPC::addVelConstraints(VectorXd& xc_star, VectorXd& uc_star, int lv1, Vecto
   H2 = n3.transpose()*friction->A_ls*E;
   H<<H1,H2;
 
-  tp_max << 0.3, 0.4, 1;
-  tp_max2 << -0.03, 0.4, 1;
+  tp_max << 0.3, 0.2, 1;
+  tp_max2 << -0.03, 0.2, 1;
 
   //upper bound twist constraints
   Ain_tp << 1,0,0,0,1,0,0,0,1;
