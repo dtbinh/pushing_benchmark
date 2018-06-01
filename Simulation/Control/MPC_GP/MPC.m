@@ -94,8 +94,16 @@ classdef MPC < dynamicprops
             ucStar = obj.planner.uc_star(indexDif,:)'; 
             xsStar = obj.planner.xs_star(indexDif,:)';
             usStar = obj.planner.us_star(indexDif,:)';
-            A = reshape(obj.planner.A_star(indexDif,:,:), 4,4);
-            B = reshape(obj.planner.B_star(indexDif,:,:), 4,2); 
+            try
+                A_Star = obj.planner.A_star(indexDif,:)';
+                B_Star = obj.planner.B_star(indexDif,:)';
+
+                A = reshape(obj.planner.A_star(indexDif,:,:), 4,4);
+                B = reshape(obj.planner.B_star(indexDif,:,:), 4,2); 
+            catch
+                A=zeros(obj.planner.size(obj.planner.xc_star,2),obj.planner.size(obj.planner.xc_star,2));
+                B=zeros(obj.planner.size(obj.planner.xc_star,2), obj.planner.size(obj.planner.uc_star,2));
+            end
         end
         %Get nominal trajectory values at time T
         function [tStar] = getxStateNominal(obj, x)

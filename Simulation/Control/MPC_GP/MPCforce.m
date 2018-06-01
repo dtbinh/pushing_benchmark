@@ -29,7 +29,10 @@ classdef MPCforce < dynamicprops
             obj.planner = planner;
             obj.Linear=Linear;
             obj.data=data;
-            obj.object=object;
+            try
+                obj.object=object;
+            catch
+            end
             obj.solver_flag = solver_flag;
             %define weight matrices for MPC
             obj.Q = Q;
@@ -109,8 +112,8 @@ classdef MPCforce < dynamicprops
             delta_xc = [xc - xcStar];
 %             A(:,4) = zeros(4,1);
 %             B(:,3) = zeros(4,1);
-            A_nom = A*1 + 1*obj.planner.ps.A_fun(xcStar, ucStar);
-            B_nom = B*1 + 1*obj.planner.ps.B_fun(xcStar, ucStar);
+            A_nom = A*0 + 1*obj.planner.ps.A_fun(xcStar, ucStar);
+            B_nom = B*0 + 1*obj.planner.ps.B_fun(xcStar, ucStar);
             A_bar = eye(4)+obj.h_opt*A_nom;
             B_bar = obj.h_opt*B_nom;
  
@@ -260,11 +263,14 @@ classdef MPCforce < dynamicprops
             xsStar = obj.planner.xs_star(indexDif,:)';
             usStar = obj.planner.us_star(indexDif,:)'; 
             try
-                A = reshape(obj.planner.A_star(indexDif,:,:), 4,4);
-%                 A(:,4)=zeros(4,1);
-                B = reshape(obj.planner.B_star(indexDif,:,:), 4,3);
-            catch
+                A_Star = obj.planner.A_star(indexDif,:)';
+                B_Star = obj.planner.B_star(indexDif,:)';
 
+                A = reshape(obj.planner.A_star(indexDif,:,:), 4,4);
+                B = reshape(obj.planner.B_star(indexDif,:,:), 4,2); 
+            catch
+                A=zeros(size(obj.planner.xc_star,2),size(obj.planner.xc_star,2));
+                B=zeros(size(obj.planner.xc_star,2),size(obj.planner.uc_star,2));
             end
         end
         %Get nominal trajectory values at time T
@@ -283,7 +289,8 @@ classdef MPCforce < dynamicprops
                 Opt = Opt.addVariable('x', 'C', [obj.planner.ps.num_xcStates, obj.steps], -1000*ones(obj.planner.ps.num_xcStates,obj.steps), 1000*ones(obj.planner.ps.num_xcStates,obj.steps));
                 %Loop through steps of MPC
                 for lv3=1:obj.steps 
-                    [xcStar, ucStar, usStar, usStar, A, B] = obj.getStateNominal(t_init);                    
+                    [xcStar, ucStar, usStar, usStar, A, B] = obj.getStateNominal(t_init);  
+
                     %Add cost
                     Opt = obj.buildCost(Opt, lv3);
                     %Add dynamic constraints
@@ -391,8 +398,8 @@ end
         function Opt = addMotionConstraints(obj, Opt, lv1, xcStar, ucStar, A, B)
 %             A(:,4) = zeros(4,1);
 %             B(:,3) = zeros(4,1);
-            A_nom = A*1+1*obj.planner.ps.A_fun(xcStar, ucStar);
-            B_nom = B*1+1*obj.planner.ps.B_fun(xcStar, ucStar);
+            A_nom = A*0+1*obj.planner.ps.A_fun(xcStar, ucStar);
+            B_nom = B*0+1*obj.planner.ps.B_fun(xcStar, ucStar);
             A_bar = eye(obj.planner.ps.num_xcStates)+obj.h_opt*A_nom;
             B_bar = obj.h_opt*B_nom;
 
