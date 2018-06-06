@@ -6,7 +6,7 @@ close all;
 clc;
 
 %% Load data
-data_list = [100,200,500,1000,2000];
+data_list = [5000,2000,1000,500,200,100,50,20,10,5,2];
 
 for counter=1:length(data_list)
     filename = strcat('new_inputs_outputs_validation_side_0_only_',num2str(data_list(counter)),'.mat')

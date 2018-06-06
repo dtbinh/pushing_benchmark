@@ -15,10 +15,19 @@ is_square = false; %options are true: square, false: 8track
 data_list = [5000]; %this is not actually used! dummy variable required
 %------------
 
+des_velocity = 0.05;
+des_radius = 0.05; %8track: denoted curvature of circles (0.15), square: denoted curvature of corners (0.05), 
+des_dist = 0.15; %only used for square denotes line lengths
+is_reversed = false;%only used for 8track
+is_square = true; %options are true: square, false: 8track
+data_list = [5]; %datapoints in dataset [5000,2000,1000,500,200,100,50,20,10,5,2]; 
+version_list = [1]; %only used for flag3
+flag = 1;%1:old data, 2: new data, 3: 5 datapoints only (most recent)
+%------------
+
 if is_reversed && not(is_square)
     des_radius=-des_radius;
 end
-
 for counter=1:length(data_list)
     gp_model_name = strcat('trained_data_residual_new_inputs_outputs_validation_side_0_only_',num2str(data_list(counter)),'.mat');
     num_laps = 1;

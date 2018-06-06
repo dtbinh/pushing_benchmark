@@ -218,7 +218,7 @@ classdef PlanarSystem < dynamicprops
             %Motion equations (nonlinear)
             Vb = obj.A_ls*(transpose(N_tot)*fn + transpose(T_tot)*ft);
             C_tilde = [transpose(Cbi) [0; 0];0 0 1];
-            J_vel = [eye(2) Helper.S2(transpose(Cbi)*rbpb)];
+            J_vel = [eye(2) Helper.S2(rbpb)];
             B_tot = [transpose(N_tot) transpose(T_tot)];
             %Defin important quantities
             Gc = [J_vel*obj.A_ls*B_tot [0;1]];

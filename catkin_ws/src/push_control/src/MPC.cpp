@@ -631,6 +631,7 @@ void MPC::addVelConstraints(VectorXd& xc_star, VectorXd& uc_star, int lv1, Vecto
   tp_max << 0.3, 0.4, 1;
   tp_max2 << -0.005, 0.4, 1;
 
+
   //upper bound twist constraints
   Ain_tp << 1,0,0,0,1,0,0,0,1;
   bin_tp = tp_max;
