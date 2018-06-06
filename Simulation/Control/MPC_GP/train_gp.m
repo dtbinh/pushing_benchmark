@@ -2,18 +2,21 @@ clear
 clc
 close all
 
-% addpath('../../GP_learning')
+%%%%%%%%%%%%%
+%% to edit %%
+%%%%%%%%%%%%%
+%enter filename of data in format previously send via email
+%output will be the same file name with prefix "trained_" to denote the
+%trained hyperparameters used in write_matrices_trajectory.m files
+% data_list = [5000,2000,1000,500,200,100,50,20,10,5,2];
+data_list = [5];
+v_list = [1,2,3,4,5];
+% filename = strcat('new_inputs_outputs_with_05_data_only_',num2str(data_list(counter)),'.mat')
+%-------------
 
-%% Load data
-% load('data_03_19_2018.mat');
-% x = data.input(:,:);
-% y = data.output(:,:);
-% frac_train = 1;
-%% Load data
-data_list = [100,200,500,1000,2000];
-
-for counter=1:length(data_list)
-    filename = strcat('new_inputs_outputs_validation_side_0_only_',num2str(data_list(counter)),'.mat')
+%loop trough filenames (for different versions)
+for counter=1:length(v_list)
+    filename = strcat('new_inputs_outputs_5_data_v',num2str(v_list(counter)),'.mat')
     load(filename);
     x = input_training(:,:);
     y = output_training(:,:);
@@ -22,8 +25,8 @@ for counter=1:length(data_list)
     %% Split data into training/testing
     fun_total = [];
     for lv1=1:size(y, 2)
-        input_training = x(1:floor(frac_train*length(x)),:);
-        output_training = y(1:floor(frac_train*length(y)),lv1);
+        input_training = x(1:floor(frac_train*size(x,1)),:);
+        output_training = y(1:floor(frac_train*size(y,1)),lv1);
         input_test = x(floor(frac_train*length(x))+1:end,:);
         output_test = y(floor(frac_train*length(x))+1:end,lv1);
 
@@ -89,6 +92,7 @@ for counter=1:length(data_list)
     save_file = strcat('trained_', filename);
     save(save_file, 'data');
 end
+
 % save('learning_output_03_19_2018', 'data');
 % twist_b1 = matlabFunction(fun{1}, 'Vars', {u}, 'File', 'twist_b_gp1_data');
 % twist_b2 = matlabFunction(fun{2}, 'Vars', {u}, 'File', 'twist_b_gp2_data');

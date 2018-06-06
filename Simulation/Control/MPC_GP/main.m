@@ -27,13 +27,18 @@ x0_c = [0.0;0.03*0;15*pi/180*1;.00*1];
 %%Initiaze system
 is_gp=true;
 initialize_system();
-planner = Planner(planar_system, simulator, Linear, data, object, 'inf_circle', 0.05); %8track
-planner.ps.num_ucStates = 2;
+% planner = Planner(planar_system, simulator, Linear, data, object, 'inf_circle', 0.05); %8track
+
+des_velocity = 0.05;
+des_dist = 0.15;
+num_laps=1;
+planner = Planner(planar_system, simulator, Linear, data, object, 'Square', des_velocity, des_dist, num_laps); %8track
+% planner.ps.num_ucStates = 2;
 %Controller setup
 Q = 1*diag([1,1,.01,0.0000]);
 Qf=  1*2000*diag([1,1,.1,.0000]);
-R = .01*diag([1,1]);
-mpc = MPC(planner, Q, Qf, R, Linear, data, object);
+R = .01*diag([1,1,1]);
+mpc = MPC(planner, Q, Qf, R, [], [], []);
 %send planned trajectory to simulator for plotting
 simulator.x_star = planner.xs_star;
 simulator.u_star = planner.us_star;
@@ -55,9 +60,9 @@ for i1=1:simulator.N
         us = mpc.get_robot_vel(xc, uc);
         %simulate forward
         %1. analytical model
-%         xs_next = simulator.get_next_state_i(xs, us, simulator.h);
+        xs_next = simulator.get_next_state_i(xs, us, simulator.h);
         %2. gp model
-        xs_next = simulator.get_next_state_gp_i(xs, us, simulator.h);
+%         xs_next = simulator.get_next_state_gp_i(xs, us, simulator.h);
         %update plot
         simulator.update_plot(xs_next, simulator.t(i1));
 %       %Perform Euler Integration

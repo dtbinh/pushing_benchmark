@@ -71,11 +71,20 @@ classdef Simulator < dynamicprops
             z2 = z1 + dt/6*(k1 + 2*k2 + 2*k3 + k4);
         end
         
-                function z2 = get_next_state_gpData_i(obj, z1, T, dt, t)
+        function z2 = get_next_state_gpData_i(obj, z1, T, dt, t)
             k1 = obj.pointSimulatorGPData(z1,T);
             k2 = obj.pointSimulatorGPData(z1+dt/2*k1,T);
             k3 = obj.pointSimulatorGPData(z1+dt/2*k2,T);
             k4 = obj.pointSimulatorGPData(z1+dt*k3,T);
+
+            z2 = z1 + dt/6*(k1 + 2*k2 + 2*k3 + k4);
+        end
+        
+        function z2 = get_next_state_gpResidual_i(obj, z1, T, dt, t)
+            k1 = obj.pointSimulatorGPResidual(z1,T);
+            k2 = obj.pointSimulatorGPResidual(z1+dt/2*k1,T);
+            k3 = obj.pointSimulatorGPResidual(z1+dt/2*k2,T);
+            k4 = obj.pointSimulatorGPResidual(z1+dt*k3,T);
 
             z2 = z1 + dt/6*(k1 + 2*k2 + 2*k3 + k4);
         end
@@ -284,6 +293,52 @@ classdef Simulator < dynamicprops
             twist_i = [vibi;dtheta;us];
 %             twist_i(2) = -twist_i(2);
        end
+       
+       
+       function twist_i = pointSimulatorGPResidual(obj, xs, us)
+            %
+            ribi = xs(1:2);
+            theta  = xs(3);
+            ripi = xs(4:5);
+            vipi = us;
+            %
+            Cbi = Helper.C3_2d(theta);
+            rbbi = Cbi*ribi;
+            rbpi = Cbi*ripi;
+            vbpi = Cbi*vipi;
+            %Find rx, ry: In body frame
+            rbpb = rbpi - rbbi;
+            rx = rbpb(1);
+            ry = rbpb(2);
+            %convert vbpi to proper gp form
+            vn = vbpi(1);
+            vt = vbpi(2);
+            V = sqrt(vn^2+vt^2);
+            c=1/2-ry/obj.ps.o.a;
+            phi = atan(vt/vn);
+            gp_input = [c phi];
+            V_nom = .02*.2;
+            Ccb = Helper.C3_2d(phi);
+            Rbc = [transpose(Ccb) [0; 0];0 0 1];
+            %Build output vector
+%                twist_b =obj.pointSimulatorAnalytical_b(vbpi,ry);
+            twist_c = [];
+            for lv1=1:3
+                [~, K1star] = feval(obj.data.covfunc1{lv1}{:}, obj.data.theta1{lv1}, obj.data.X{lv1}, gp_input./exp(obj.data.lengthscales{lv1}(:)'));
+                twist_c = [twist_c;K1star'*obj.data.alpha{lv1}];
+            end
+            
+            twist_c_residual = (V/V_nom)*twist_c;
+            twist_b_residual = Rbc'*twist_c;
+            twist_b_analytical = obj.pointSimulatorAnalytical_b(vbpi,ry);
+            twist_b = twist_b_residual*1+twist_b_analytical;
+            
+            vbbi = twist_b(1:2);
+            dtheta = twist_b(3);
+            vibi = Cbi'*vbbi;
+            twist_i = [vibi;dtheta;us];
+
+       end
         
        
        function twist_c = pointSimulatorGPDataRaw(obj, c, phi)
@@ -382,7 +437,7 @@ classdef Simulator < dynamicprops
             %Animation parameters
             tf = 10;%obj.t(end);
             N = length(obj.t);
-            accFactor = 25;
+            accFactor = 5;
             x_state = obj.xs_state;
             videoname = strcat(obj.FilePath,'/',(obj.SimName),'.avi');
             obj.v = VideoWriter(videoname);

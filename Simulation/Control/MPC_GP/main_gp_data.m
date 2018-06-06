@@ -25,18 +25,24 @@ sim_time = 40;
 % x: x position of object, y: y position of object, theta: orientation of object
 % xp: x position of pusher, yp: y position of pusher
 % x0_c = [-.198674;0;0;-.00];
-x0_c = [-0.0;0.01;5*pi/180;-.009];
+x0_c = [-0.0;0.00;5*pi/180;-.009];
 %%Initiaze system
 is_gp=true;
 initialize_system();
 % load('learning_output_model_from_train_size_4000');
 load(gp_model_name);
 simulator.data = data;
-planner = Planner(planar_system, simulator, Linear, data, object, '8Track_gp', 0.05, 0.15); %8track
+des_velocity=0.05;
+des_radius=0.05;
+des_dist=0.15;
+num_laps=1;
+planner = Planner(planar_system, simulator, Linear, data, object, 'SquareCurved_gp', des_velocity, des_radius,num_laps,des_dist); %8track
+
+% planner = Planner(planar_system, simulator, Linear, data, object, 'Square_gp', 0.05, 0.15, 1); %8track
 planner.ps.num_ucStates = 2;
 %Controller setup
-Q = 10*diag([1,1,.01,1]);
-Qf=  1*1000*diag([1,1,.1,.1]);
+Q = 10*diag([1,1,.01,5]);
+Qf=  1*1000*diag([1,1,.1,5]);
 R = .1*diag([1,1]);
 mpc = MPC(planner, Q, Qf, R, Linear, data, object);
 %send planned trajectory to simulator for plotting

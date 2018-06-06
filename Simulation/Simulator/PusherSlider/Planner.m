@@ -21,7 +21,7 @@ classdef Planner < dynamicprops
     end
     methods
         %% Constructor
-        function obj = Planner(ps, simulator, Linear, data, object, name, vel, radius, num_laps)  
+        function obj = Planner(ps, simulator, Linear, data, object, name, vel, radius, num_laps, distance)  
             obj.ps = ps;
             obj.Linear=Linear;
             obj.data=data;
@@ -29,6 +29,14 @@ classdef Planner < dynamicprops
             obj.simulator=simulator;
             if strcmp(name,'Straight')
                 obj.buildStraightTrajectory();
+            elseif strcmp(name,'Square')
+                obj.buildSquareTrack(radius, vel, [0;0;0*pi/180;0]);
+            elseif strcmp(name,'Square_gp')
+                obj.buildSquareTrack_gp(radius, vel, [0;0;0*pi/180;0]);
+            elseif strcmp(name,'SquareCurved')
+                obj.buildSquareCurved(radius, vel, [0;0;0*pi/180;0],distance);
+            elseif strcmp(name,'SquareCurved_gp')
+                obj.buildSquareCurved_gp(radius, vel, [0;0;0*pi/180;0],distance);
             elseif strcmp(name, '8Track')
                 obj.build8track(-radius, vel, [0;0;0*pi/180;0]);
             elseif strcmp(name, '8Track_residual')
@@ -94,16 +102,515 @@ classdef Planner < dynamicprops
                 obj.uc_star(lv1+1,:) = ucStarTemp';
 %                 [obj.A_star{lv1+1}, obj.B_star{lv1+1}] = GP_linearization(obj.xc_star(lv1+1,:)', obj.us_star(lv1+1,1:2)', obj.Linear, obj.data, obj.object);
 
-                if lv1<N_star
+%                 if lv1<N_star
                     obj.t_star(lv1+1)  = obj.t_star(lv1) + h_star;
+%                 end
+            end
+        end
+        
+           
+        function obj = buildSquareTrack(obj, distance, velocity, x0)
+                        
+            x0_initial = x0;
+            obj.buildSquareTrajectory(velocity, x0, distance);
+            xs_star = obj.xs_star;
+            us_star = obj.us_star;
+            xc_star = obj.xc_star;
+            uc_star = obj.uc_star;
+            A_star = [];
+            B_star = [];
+            t_star = obj.t_star;
+            
+            x0 = xc_star(end,:)';
+            x0(3) = x0(3)-pi/2;
+            obj.buildSquareTrajectory(velocity, x0, distance);
+            xs_star = [xs_star; obj.xs_star];
+            us_star = [us_star; obj.us_star];
+            xc_star = [xc_star; obj.xc_star];
+            uc_star = [uc_star; obj.uc_star];
+            A_star = [];
+            B_star = [];
+            t_star = [t_star; t_star(end) + obj.t_star];
+            
+            x0 = xc_star(end,:)';
+            x0(3) = x0(3)-pi/2;
+            obj.buildSquareTrajectory(velocity, x0, distance);
+            xs_star = [xs_star; obj.xs_star];
+            us_star = [us_star; obj.us_star];
+            xc_star = [xc_star; obj.xc_star];
+            uc_star = [uc_star; obj.uc_star];
+            A_star = [A_star; []];
+            B_star = [B_star; []];
+            t_star = [t_star; t_star(end) + obj.t_star];
+            
+            x0 = xc_star(end,:)';
+            x0(3) = x0(3)-pi/2;
+            obj.buildSquareTrajectory(velocity, x0, distance);
+            xs_star = [xs_star; obj.xs_star];
+            us_star = [us_star; obj.us_star];
+            xc_star = [xc_star; obj.xc_star];
+            uc_star = [uc_star; obj.uc_star];
+            A_star = [A_star; []];
+            B_star = [B_star; []];
+            t_star = [t_star; t_star(end) + obj.t_star];
+            
+            xs_star_total = [];
+            us_star_total = [];
+            xc_star_total = [];
+            uc_star_total = []; 
+            A_star_total = []; 
+            B_star_total = []; 
+            t_star_total = [];  
+            for lv1=1:1
+                xs_star_total = [xs_star_total;xs_star];
+                us_star_total = [us_star_total;us_star];
+                xc_star_total = [xc_star_total;xc_star];
+                uc_star_total = [uc_star_total;uc_star];
+                A_star_total = [A_star_total;[]];
+                B_star_total = [B_star_total;[]];
+                if lv1==1
+                    t_star_total = [t_star_total; t_star];  
+                else
+                    t_star_total = [t_star_total; t_star_total(end) + t_star];  
                 end
             end
+            
+            obj.xs_star=xs_star_total;
+            obj.us_star=us_star_total;
+            obj.xc_star=xc_star_total;
+            obj.uc_star=uc_star_total;
+            obj.A_star=A_star_total;
+            obj.B_star=B_star_total;
+            obj.t_star=t_star_total;
+            
+        end
+        
+        
+        function obj = buildSquareCurved(obj, radius, velocity, x0, distance)
+                        
+            x0_initial = x0;
+            obj.buildSquareTrajectory(velocity, x0, distance);
+            xs_star = obj.xs_star;
+            us_star = obj.us_star;
+            xc_star = obj.xc_star;
+            uc_star = obj.uc_star;
+            A_star = obj.A_star;
+            B_star = obj.B_star;
+            t_star = obj.t_star;
+            
+            x0 = xc_star(end,:)';
+            obj.xs_star =[];
+            obj.xc_star =[];
+            obj.us_star =[];
+            obj.uc_star =[];
+            obj.A_star =[];
+            obj.B_star =[];
+            obj.t_star=[];
+            
+            obj.buildCircleTrajectory(-radius, velocity, x0, .25);
+            xs_star = [xs_star; obj.xs_star];
+            us_star = [us_star; obj.us_star];
+            xc_star = [xc_star; obj.xc_star];
+            uc_star = [uc_star; obj.uc_star];
+            A_star = [A_star;obj.A_star];
+            B_star = [B_star;obj.B_star];
+            t_star = [t_star; t_star(end) + obj.t_star];
+            
+            
+            x0 = xc_star(end,:)';
+            obj.xs_star =[];
+            obj.xc_star =[];
+            obj.us_star =[];
+            obj.uc_star =[];
+            obj.A_star =[];
+            obj.B_star =[];
+            obj.t_star=[];
+            
+            obj.buildSquareTrajectory(velocity, x0, distance);
+            xs_star = [xs_star; obj.xs_star];
+            us_star = [us_star; obj.us_star];
+            xc_star = [xc_star; obj.xc_star];
+            uc_star = [uc_star; obj.uc_star];
+            A_star = [A_star;obj.A_star];
+            B_star = [B_star;obj.B_star];
+            t_star = [t_star; t_star(end) + obj.t_star];
+            
+            x0 = xc_star(end,:)';
+            obj.xs_star =[];
+            obj.xc_star =[];
+            obj.us_star =[];
+            obj.uc_star =[];
+            obj.A_star =[];
+            obj.B_star =[];
+            obj.t_star=[];
+            
+            obj.buildCircleTrajectory(-radius, velocity, x0, .25);
+            xs_star = [xs_star; obj.xs_star];
+            us_star = [us_star; obj.us_star];
+            xc_star = [xc_star; obj.xc_star];
+            uc_star = [uc_star; obj.uc_star];
+            A_star = [A_star;obj.A_star];
+            B_star = [B_star;obj.B_star];
+            t_star = [t_star; t_star(end) + obj.t_star];
+                        
+            x0 = xc_star(end,:)';
+            obj.xs_star =[];
+            obj.xc_star =[];
+            obj.us_star =[];
+            obj.uc_star =[];
+            obj.A_star =[];
+            obj.B_star =[];
+            obj.t_star=[];
+            
+            obj.buildSquareTrajectory(velocity, x0, distance);
+            xs_star = [xs_star; obj.xs_star];
+            us_star = [us_star; obj.us_star];
+            xc_star = [xc_star; obj.xc_star];
+            uc_star = [uc_star; obj.uc_star];
+            A_star = [A_star;obj.A_star];
+            B_star = [B_star;obj.B_star];
+            t_star = [t_star; t_star(end) + obj.t_star];
+            
+            x0 = xc_star(end,:)';
+            obj.xs_star =[];
+            obj.xc_star =[];
+            obj.us_star =[];
+            obj.uc_star =[];
+            obj.A_star =[];
+            obj.B_star =[];
+            obj.t_star=[];
+            
+            obj.buildCircleTrajectory(-radius, velocity, x0, .25);
+            xs_star = [xs_star; obj.xs_star];
+            us_star = [us_star; obj.us_star];
+            xc_star = [xc_star; obj.xc_star];
+            uc_star = [uc_star; obj.uc_star];
+            A_star = [A_star;obj.A_star];
+            B_star = [B_star;obj.B_star];
+            t_star = [t_star; t_star(end) + obj.t_star];
+            
+                        
+            x0 = xc_star(end,:)';
+            obj.xs_star =[];
+            obj.xc_star =[];
+            obj.us_star =[];
+            obj.uc_star =[];
+            obj.A_star =[];
+            obj.B_star =[];
+            obj.t_star=[];
+            
+            obj.buildSquareTrajectory(velocity, x0, distance);
+            xs_star = [xs_star; obj.xs_star];
+            us_star = [us_star; obj.us_star];
+            xc_star = [xc_star; obj.xc_star];
+            uc_star = [uc_star; obj.uc_star];
+            A_star = [A_star;obj.A_star];
+            B_star = [B_star;obj.B_star];
+            t_star = [t_star; t_star(end) + obj.t_star];
+            
+            x0 = xc_star(end,:)';
+            obj.xs_star =[];
+            obj.xc_star =[];
+            obj.us_star =[];
+            obj.uc_star =[];
+            obj.A_star =[];
+            obj.B_star =[];
+            obj.t_star=[];
+            
+            obj.buildCircleTrajectory(-radius, velocity, x0, .25);
+            xs_star = [xs_star; obj.xs_star];
+            us_star = [us_star; obj.us_star];
+            xc_star = [xc_star; obj.xc_star];
+            uc_star = [uc_star; obj.uc_star];
+            A_star = [A_star;obj.A_star];
+            B_star = [B_star;obj.B_star];
+            t_star = [t_star; t_star(end) + obj.t_star];
+            
+            xs_star_total = [];
+            us_star_total = [];
+            xc_star_total = [];
+            uc_star_total = []; 
+            A_star_total = []; 
+            B_star_total = []; 
+            t_star_total = [];  
+            
+            for lv1=1:1
+                xs_star_total = [xs_star_total;xs_star];
+                us_star_total = [us_star_total;us_star];
+                xc_star_total = [xc_star_total;xc_star];
+                uc_star_total = [uc_star_total;uc_star];
+                A_star_total = [A_star_total;A_star];
+                B_star_total = [B_star_total;B_star];
+                if lv1==1
+                    t_star_total = [t_star_total; t_star];  
+                else
+                    t_star_total = [t_star_total; t_star_total(end) + t_star];  
+                end
+            end
+            
+            obj.xs_star=xs_star_total;
+            obj.us_star=us_star_total;
+            obj.xc_star=xc_star_total;
+            obj.uc_star=uc_star_total;
+            obj.A_star=A_star_total;
+            obj.B_star=B_star_total;
+            obj.t_star=t_star_total;
+            
+        end
+        
+        function obj = buildSquareTrack_gp(obj, distance, velocity, x0)
+                        
+            x0_initial = x0;
+            obj.buildSquareTrajectory_vel_space(velocity, x0, distance);
+            xs_star = obj.xs_star;
+            us_star = obj.us_star;
+            xc_star = obj.xc_star;
+            uc_star = obj.uc_star;
+            A_star = obj.A_star;
+            B_star = obj.B_star;
+            t_star = obj.t_star;
+            
+            x0 = xc_star(end,:)';
+            x0(3) = x0(3)-pi/2;
+            obj.buildSquareTrajectory_vel_space(velocity, x0, distance);
+            xs_star = [xs_star; obj.xs_star];
+            us_star = [us_star; obj.us_star];
+            xc_star = [xc_star; obj.xc_star];
+            uc_star = [uc_star; obj.uc_star];
+            A_star = [A_star;obj.A_star];
+            B_star = [B_star;obj.B_star];
+            t_star = [t_star; t_star(end) + obj.t_star];
+            
+            x0 = xc_star(end,:)';
+            x0(3) = x0(3)-pi/2;
+            obj.buildSquareTrajectory_vel_space(velocity, x0, distance);
+            xs_star = [xs_star; obj.xs_star];
+            us_star = [us_star; obj.us_star];
+            xc_star = [xc_star; obj.xc_star];
+            uc_star = [uc_star; obj.uc_star];
+            A_star = [A_star;obj.A_star];
+            B_star = [B_star;obj.B_star];
+            t_star = [t_star; t_star(end) + obj.t_star];
+            
+            x0 = xc_star(end,:)';
+            x0(3) = x0(3)-pi/2;
+            obj.buildSquareTrajectory_vel_space(velocity, x0, distance);
+            xs_star = [xs_star; obj.xs_star];
+            us_star = [us_star; obj.us_star];
+            xc_star = [xc_star; obj.xc_star];
+            uc_star = [uc_star; obj.uc_star];
+            A_star = [A_star;obj.A_star];
+            B_star = [B_star;obj.B_star];
+            t_star = [t_star; t_star(end) + obj.t_star];
+            
+            xs_star_total = [];
+            us_star_total = [];
+            xc_star_total = [];
+            uc_star_total = []; 
+            A_star_total = []; 
+            B_star_total = []; 
+            t_star_total = [];  
+            for lv1=1:1
+                xs_star_total = [xs_star_total;xs_star];
+                us_star_total = [us_star_total;us_star];
+                xc_star_total = [xc_star_total;xc_star];
+                uc_star_total = [uc_star_total;uc_star];
+                A_star_total = [A_star_total;A_star];
+                B_star_total = [B_star_total;B_star];
+                if lv1==1
+                    t_star_total = [t_star_total; t_star];  
+                else
+                    t_star_total = [t_star_total; t_star_total(end) + t_star];  
+                end
+            end
+            
+            obj.xs_star=xs_star_total;
+            obj.us_star=us_star_total;
+            obj.xc_star=xc_star_total;
+            obj.uc_star=uc_star_total;
+            obj.A_star=A_star_total;
+            obj.B_star=B_star_total;
+            obj.t_star=t_star_total;
+            
+        end
+        
+        
+        function obj = buildSquareCurved_gp(obj, radius, velocity, x0, distance)
+                        
+            x0_initial = x0;
+            obj.buildSquareTrajectory_vel_space(velocity, x0, distance);
+            xs_star = obj.xs_star;
+            us_star = obj.us_star;
+            xc_star = obj.xc_star;
+            uc_star = obj.uc_star;
+            A_star = obj.A_star;
+            B_star = obj.B_star;
+            t_star = obj.t_star;
+            
+            x0 = xc_star(end,:)';
+            obj.xs_star =[];
+            obj.xc_star =[];
+            obj.us_star =[];
+            obj.uc_star =[];
+            obj.A_star =[];
+            obj.B_star =[];
+            obj.t_star=[];
+            
+            obj.buildCircleTrajectory_vel_space(-radius, velocity, x0, .25);
+            xs_star = [xs_star; obj.xs_star];
+            us_star = [us_star; obj.us_star];
+            xc_star = [xc_star; obj.xc_star];
+            uc_star = [uc_star; obj.uc_star];
+            A_star = [A_star;obj.A_star];
+            B_star = [B_star;obj.B_star];
+            t_star = [t_star; t_star(end) + obj.t_star];
+            
+            
+            x0 = xc_star(end,:)';
+            obj.xs_star =[];
+            obj.xc_star =[];
+            obj.us_star =[];
+            obj.uc_star =[];
+            obj.A_star =[];
+            obj.B_star =[];
+            obj.t_star=[];
+            
+            obj.buildSquareTrajectory_vel_space(velocity, x0, distance);
+            xs_star = [xs_star; obj.xs_star];
+            us_star = [us_star; obj.us_star];
+            xc_star = [xc_star; obj.xc_star];
+            uc_star = [uc_star; obj.uc_star];
+            A_star = [A_star;obj.A_star];
+            B_star = [B_star;obj.B_star];
+            t_star = [t_star; t_star(end) + obj.t_star];
+            
+            x0 = xc_star(end,:)';
+            obj.xs_star =[];
+            obj.xc_star =[];
+            obj.us_star =[];
+            obj.uc_star =[];
+            obj.A_star =[];
+            obj.B_star =[];
+            obj.t_star=[];
+            
+            obj.buildCircleTrajectory_vel_space(-radius, velocity, x0, .25);
+            xs_star = [xs_star; obj.xs_star];
+            us_star = [us_star; obj.us_star];
+            xc_star = [xc_star; obj.xc_star];
+            uc_star = [uc_star; obj.uc_star];
+            A_star = [A_star;obj.A_star];
+            B_star = [B_star;obj.B_star];
+            t_star = [t_star; t_star(end) + obj.t_star];
+                        
+            x0 = xc_star(end,:)';
+            obj.xs_star =[];
+            obj.xc_star =[];
+            obj.us_star =[];
+            obj.uc_star =[];
+            obj.A_star =[];
+            obj.B_star =[];
+            obj.t_star=[];
+            
+            obj.buildSquareTrajectory_vel_space(velocity, x0, distance);
+            xs_star = [xs_star; obj.xs_star];
+            us_star = [us_star; obj.us_star];
+            xc_star = [xc_star; obj.xc_star];
+            uc_star = [uc_star; obj.uc_star];
+            A_star = [A_star;obj.A_star];
+            B_star = [B_star;obj.B_star];
+            t_star = [t_star; t_star(end) + obj.t_star];
+            
+            x0 = xc_star(end,:)';
+            obj.xs_star =[];
+            obj.xc_star =[];
+            obj.us_star =[];
+            obj.uc_star =[];
+            obj.A_star =[];
+            obj.B_star =[];
+            obj.t_star=[];
+            
+            obj.buildCircleTrajectory_vel_space(-radius, velocity, x0, .25);
+            xs_star = [xs_star; obj.xs_star];
+            us_star = [us_star; obj.us_star];
+            xc_star = [xc_star; obj.xc_star];
+            uc_star = [uc_star; obj.uc_star];
+            A_star = [A_star;obj.A_star];
+            B_star = [B_star;obj.B_star];
+            t_star = [t_star; t_star(end) + obj.t_star];
+            
+                        
+            x0 = xc_star(end,:)';
+            obj.xs_star =[];
+            obj.xc_star =[];
+            obj.us_star =[];
+            obj.uc_star =[];
+            obj.A_star =[];
+            obj.B_star =[];
+            obj.t_star=[];
+            
+            obj.buildSquareTrajectory_vel_space(velocity, x0, distance);
+            xs_star = [xs_star; obj.xs_star];
+            us_star = [us_star; obj.us_star];
+            xc_star = [xc_star; obj.xc_star];
+            uc_star = [uc_star; obj.uc_star];
+            A_star = [A_star;obj.A_star];
+            B_star = [B_star;obj.B_star];
+            t_star = [t_star; t_star(end) + obj.t_star];
+            
+            x0 = xc_star(end,:)';
+            obj.xs_star =[];
+            obj.xc_star =[];
+            obj.us_star =[];
+            obj.uc_star =[];
+            obj.A_star =[];
+            obj.B_star =[];
+            obj.t_star=[];
+            
+            obj.buildCircleTrajectory_vel_space(-radius, velocity, x0, .25);
+            xs_star = [xs_star; obj.xs_star];
+            us_star = [us_star; obj.us_star];
+            xc_star = [xc_star; obj.xc_star];
+            uc_star = [uc_star; obj.uc_star];
+            A_star = [A_star;obj.A_star];
+            B_star = [B_star;obj.B_star];
+            t_star = [t_star; t_star(end) + obj.t_star];
+            
+            xs_star_total = [];
+            us_star_total = [];
+            xc_star_total = [];
+            uc_star_total = []; 
+            A_star_total = []; 
+            B_star_total = []; 
+            t_star_total = [];  
+            
+            for lv1=1:1
+                xs_star_total = [xs_star_total;xs_star];
+                us_star_total = [us_star_total;us_star];
+                xc_star_total = [xc_star_total;xc_star];
+                uc_star_total = [uc_star_total;uc_star];
+                A_star_total = [A_star_total;A_star];
+                B_star_total = [B_star_total;B_star];
+                if lv1==1
+                    t_star_total = [t_star_total; t_star];  
+                else
+                    t_star_total = [t_star_total; t_star_total(end) + t_star];  
+                end
+            end
+            
+            obj.xs_star=xs_star_total;
+            obj.us_star=us_star_total;
+            obj.xc_star=xc_star_total;
+            obj.uc_star=uc_star_total;
+            obj.A_star=A_star_total;
+            obj.B_star=B_star_total;
+            obj.t_star=t_star_total;
+            
         end
         
         function obj = build8track(obj, radius, velocity, x0)
                         
             x0_initial = x0;
-            obj.buildCircleTrajectory(radius, velocity, x0);
+            obj.buildCircleTrajectory(radius, velocity, x0, 1);
             xs_star = obj.xs_star;
             us_star = obj.us_star;
             xc_star = obj.xc_star;
@@ -112,7 +619,7 @@ classdef Planner < dynamicprops
             B_star = obj.B_star;
             t_star = obj.t_star;
             x0(3) = x0(3)-2*pi;
-            obj.buildCircleTrajectory(-radius, velocity, x0);
+            obj.buildCircleTrajectory(-radius, velocity, x0, 1);
             xs_star2 = [xs_star; obj.xs_star];
             us_star2 = [us_star; obj.us_star];
             xc_star2 = [xc_star; obj.xc_star];
@@ -147,7 +654,7 @@ classdef Planner < dynamicprops
         function obj = build8track_gp(obj, radius, velocity, x0, num_laps)
                         
             x0_initial = x0;
-            obj.buildCircleTrajectory_vel_space(radius, velocity, x0);
+            obj.buildCircleTrajectory_vel_space(radius, velocity, x0, 1);
             xs_star = obj.xs_star;
             us_star = obj.us_star;
             xc_star = obj.xc_star;
@@ -156,7 +663,7 @@ classdef Planner < dynamicprops
             B_star = obj.B_star;
             t_star = obj.t_star;
             x0(3) = x0(3)-2*pi;
-            obj.buildCircleTrajectory_vel_space(-radius, velocity, x0);
+            obj.buildCircleTrajectory_vel_space(-radius, velocity, x0, 1);
             xs_star2 = [xs_star; obj.xs_star];
             us_star2 = [us_star; obj.us_star];
             xc_star2 = [xc_star; obj.xc_star];
@@ -199,7 +706,7 @@ classdef Planner < dynamicprops
          function obj = build8track_residual(obj, radius, velocity, x0, num_laps)
                         
             x0_initial = x0;
-            obj.buildCircleTrajectory_residual(radius, velocity, x0);
+            obj.buildCircleTrajectory_residual(radius, velocity, x0, 1);
             xs_star = obj.xs_star;
             us_star = obj.us_star;
             xc_star = obj.xc_star;
@@ -208,7 +715,7 @@ classdef Planner < dynamicprops
             B_star = obj.B_star;
             t_star = obj.t_star;
             x0(3) = x0(3)-2*pi;
-            obj.buildCircleTrajectory_residual(-radius, velocity, x0);
+            obj.buildCircleTrajectory_residual(-radius, velocity, x0, 1);
             xs_star2 = [xs_star; obj.xs_star];
             us_star2 = [us_star; obj.us_star];
             xc_star2 = [xc_star; obj.xc_star];
@@ -249,7 +756,7 @@ classdef Planner < dynamicprops
         end
         
           function obj = build_inf_circle(obj, radius, velocity, x0)
-            obj.buildCircleTrajectory_gp(radius, velocity, x0);
+            obj.buildCircleTrajectory_gp(radius, velocity, x0, 1);
             xs_star = obj.xs_star;
             us_star = obj.us_star;
             xc_star = obj.xc_star;
@@ -267,14 +774,14 @@ classdef Planner < dynamicprops
           end
         
         function obj = build_inf_circle_vel_space(obj, radius, velocity, x0)
-            obj.buildCircleTrajectory_vel_space(radius, velocity, x0);
+            obj.buildCircleTrajectory_vel_space(radius, velocity, x0, 1);
             xs_star = obj.xs_star;
             us_star = obj.us_star;
             xc_star = obj.xc_star;
             uc_star = obj.uc_star;
             t_star = obj.t_star;
             x0 = xc_star(end,:)';
-%             obj.buildCircleTrajectory(radius, velocity, x0);
+%             obj.buildCircleTrajectory(radius, velocity, x0, 1);
 %             %repeat same operation
 %             xs_star = [xs_star; obj.xs_star ];
 %             us_star = [us_star; obj.us_star];
@@ -282,7 +789,7 @@ classdef Planner < dynamicprops
 %             uc_star = [uc_star; obj.uc_star];
 %             t_star  = [t_star; t_star(end) + obj.t_star];
 %             x0 = xc_star(end,:)';
-%             obj.buildCircleTrajectory(radius, velocity, x0);
+%             obj.buildCircleTrajectory(radius, velocity, x0, 1);
 %             %repeat same operation
 %             xs_star = [xs_star; obj.xs_star];
 %             us_star = [us_star; obj.us_star];
@@ -290,7 +797,7 @@ classdef Planner < dynamicprops
 %             uc_star = [uc_star; obj.uc_star];
 %             t_star = [t_star; t_star(end) + obj.t_star];
 %             x0 = xc_star(end,:)';
-%             obj.buildCircleTrajectory(radius, velocity, x0);
+%             obj.buildCircleTrajectory(radius, velocity, x0, 1);
 %             %repeat same operation
 %             xs_star = [xs_star; obj.xs_star];
 %             us_star = [us_star; obj.us_star];
@@ -305,12 +812,126 @@ classdef Planner < dynamicprops
             obj.t_star=t_star;
         end
 
-                %% Build nominal trajectory
-        function obj = buildCircleTrajectory(obj, radius, velocity, x0)
+        %% Build nominal trajectory
+        function obj = buildSquareTrajectory(obj, velocity, x0, dist)
             
             xc = x0;
             uc = zeros(obj.ps.p.num_contacts * 2 + 1, 1);
-            tf = abs(2*pi*radius)/velocity;
+            tf = dist/velocity;
+            t0 = 0;
+            h_star = 0.01;
+            N_star = (1/h_star)*(tf-t0)+1;
+            obj.t_star = zeros(ceil(N_star), 1);
+            %Perform inverse dynamics
+            nominal_states = obj.inverseDynamics(inf, velocity);
+            fn = nominal_states(1:obj.ps.p.num_contacts);
+            ft = nominal_states(obj.ps.p.num_contacts + 1: obj.ps.p.num_contacts * 2);
+            ry = nominal_states(obj.ps.p.num_contacts * 2 + 1);
+            uc = [fn; ft; 0];
+            xc(4) = ry;
+            %initial state
+            xsStarTemp = obj.ps.coordinateTransformCS(xc);
+            usStarTemp = obj.ps.force2Velocity(xc, uc);
+            obj.xs_star(1,:) = xsStarTemp';
+            obj.us_star(1,:) = usStarTemp';
+            obj.xc_star(1,:) = xc';
+            obj.uc_star(1,:) = uc';
+%             [obj.A_star(1,:,:), obj.B_star(1,:,:)] = GP_linearization_u(obj.xc_star(1,:)', obj.uc_star(1,:)', obj.Linear, obj.data, obj.object);
+            
+            for lv1=1:N_star
+                %get object velocity
+                xs = obj.ps.coordinateTransformCS(xc);
+                us = obj.ps.force2Velocity(xc, uc);
+%                 dxs = obj.simulator.pointSimulatorGP(xs,us);
+                dxs = obj.ps.forceSimulator(xc, uc);
+                 dxc= [dxs(1:3); 0];
+%                  xs = xs + h_star*dxs;
+                xc = xc + h_star*dxc;
+                
+                %convert to state coordinates
+                xcStarTemp = xc;
+                ucStarTemp = uc;
+                xsStarTemp = obj.ps.coordinateTransformCS(xcStarTemp);
+                usStarTemp = obj.ps.force2Velocity(xcStarTemp, ucStarTemp);
+                %Build control matrices A and B (symbolic linearization of motion
+                %equations)
+                obj.xs_star(lv1+1,:) = xsStarTemp';
+                obj.us_star(lv1+1,:) = usStarTemp';
+                obj.xc_star(lv1+1,:) = xcStarTemp';
+                obj.uc_star(lv1+1,:) = ucStarTemp';
+%                 [obj.A_star(lv1+1,:,:), obj.B_star(lv1+1,:,:)] = GP_linearization_u(obj.xc_star(lv1+1,:)', obj.uc_star(lv1+1,:)', obj.Linear, obj.data, obj.object);
+%                 if lv1<N_star
+                    obj.t_star(lv1+1)  = obj.t_star(lv1) + h_star;
+%                 end
+            end
+        end
+        
+        
+        %% Build nominal trajectory
+     function obj = buildSquareTrajectory_vel_space(obj, velocity, x0, dist)
+            
+            xc = x0;
+            uc = zeros(obj.ps.p.num_contacts * 2 + 1, 1);
+            tf = dist/velocity;
+            t0 = 0;
+            h_star = 0.01;
+            N_star = (1/h_star)*(tf-t0);
+            obj.t_star = zeros(ceil(N_star), 1);
+            %Perform inverse dynamics
+            nominal_states = obj.inverseDynamics(inf, velocity);
+            fn = nominal_states(1:obj.ps.p.num_contacts);
+            ft = nominal_states(obj.ps.p.num_contacts + 1: obj.ps.p.num_contacts * 2);
+            ry = nominal_states(obj.ps.p.num_contacts * 2 + 1);
+            uc = [fn; ft; 0];
+            xc(4) = ry;
+            %initial state
+            xsStarTemp = obj.ps.coordinateTransformCS(xc);
+            usStarTemp = obj.ps.force2Velocity(xc, uc);
+            Cbi = Helper.C3_2d(xc(3));
+            us_i = usStarTemp;
+            usStarTemp = Cbi*usStarTemp;
+            obj.xs_star(1,:) = xsStarTemp';
+            obj.us_star(1,:) = us_i';
+            obj.xc_star(1,:) = xc';
+            obj.uc_star(1,:) = usStarTemp';
+            [obj.A_star(1,:,:), obj.B_star(1,:,:)] = GP_linearization_data(obj.xc_star(1,:)', obj.uc_star(1,1:2)', obj.Linear, obj.data, obj.object);
+            
+            for lv1=1:N_star
+%                 lv1
+                %get object velocity
+                dxs = obj.ps.forceSimulator(xc, uc);
+                dxc= [dxs(1:3); 0];
+                xc = xc + h_star*dxc;
+                
+                %convert to state coordinates
+                xcStarTemp = xc;
+                ucStarTemp = uc;
+                xsStarTemp = obj.ps.coordinateTransformCS(xcStarTemp);
+                usStarTemp = obj.ps.force2Velocity(xcStarTemp, ucStarTemp);
+                Cbi = Helper.C3_2d(xc(3));
+                us_i = usStarTemp;
+                usStarTemp = Cbi*usStarTemp;
+                %Build control matrices A and B (symbolic linearization of motion
+                %equations)
+                obj.xs_star(lv1+1,:) = xsStarTemp';
+                obj.us_star(lv1+1,:) = us_i';
+                obj.xc_star(lv1+1,:) = xcStarTemp';
+                obj.uc_star(lv1+1,:) = usStarTemp';
+                [obj.A_star(lv1+1,:,:), obj.B_star(lv1+1,:,:)] = GP_linearization_data(obj.xc_star(lv1+1,:)', obj.uc_star(lv1+1,1:2)', obj.Linear, obj.data, obj.object);
+%                 if lv1<N_star
+                    obj.t_star(lv1+1)  = obj.t_star(lv1) + h_star;
+%                 end
+            end
+%             obj.uc_star(lv1+1,:) = obj.us_star(lv1+1,:);
+        end
+        
+        %% Build nominal trajectory
+        function obj = buildCircleTrajectory(obj, radius, velocity, x0, frac)
+            
+            angle_total = abs(2*pi*radius)*frac;
+            xc = x0;
+            uc = zeros(obj.ps.p.num_contacts * 2 + 1, 1);
+            tf = angle_total/velocity;
             t0 = 0;
             h_star = 0.01;
             N_star = (1/h_star)*(tf-t0);
@@ -353,17 +974,18 @@ classdef Planner < dynamicprops
                 obj.xc_star(lv1+1,:) = xcStarTemp';
                 obj.uc_star(lv1+1,:) = ucStarTemp';
 %                 [obj.A_star(lv1+1,:,:), obj.B_star(lv1+1,:,:)] = GP_linearization_u(obj.xc_star(lv1+1,:)', obj.uc_star(lv1+1,:)', obj.Linear, obj.data, obj.object);
-                if lv1<N_star
+%                 if lv1<N_star
                     obj.t_star(lv1+1)  = obj.t_star(lv1) + h_star;
-                end
+%                 end
             end
         end
         
-        function obj = buildCircleTrajectory_residual(obj, radius, velocity, x0)
-            
+        function obj = buildCircleTrajectory_residual(obj, radius, velocity, x0, frac)
+            angle_total = abs(2*pi*radius)*frac;
+
             xc = x0;
             uc = zeros(obj.ps.p.num_contacts * 2 + 1, 1);
-            tf = abs(2*pi*radius)/velocity;
+            tf = angle_total/velocity;
             t0 = 0;
             h_star = 0.01;
             N_star = (1/h_star)*(tf-t0);
@@ -407,18 +1029,20 @@ classdef Planner < dynamicprops
                 obj.xc_star(lv1+1,:) = xcStarTemp';
                 obj.uc_star(lv1+1,:) = ucStarTemp';
                 [obj.A_star(lv1+1,:,:), obj.B_star(lv1+1,:,:)] = GP_linearization_residual(obj.xc_star(lv1+1,:)', obj.uc_star(lv1+1,:)', obj.Linear, obj.data, obj.object);
-                if lv1<N_star
+%                 if lv1<N_star
                     obj.t_star(lv1+1)  = obj.t_star(lv1) + h_star;
-                end
+%                 end
             end
         end
         
         %% Build nominal trajectory
-     function obj = buildCircleTrajectory_vel_space(obj, radius, velocity, x0)
+     function obj = buildCircleTrajectory_vel_space(obj, radius, velocity, x0, frac)
             
+            angle_total = abs(2*pi*radius)*frac;
+
             xc = x0;
             uc = zeros(obj.ps.p.num_contacts * 2 + 1, 1);
-            tf = abs(2*pi*radius)/velocity;
+            tf = angle_total/velocity;
             t0 = 0;
             h_star = 0.01;
             N_star = (1/h_star)*(tf-t0);
@@ -442,7 +1066,7 @@ classdef Planner < dynamicprops
             obj.uc_star(1,:) = usStarTemp';
             [obj.A_star(1,:,:), obj.B_star(1,:,:)] = GP_linearization_data(obj.xc_star(1,:)', obj.uc_star(1,1:2)', obj.Linear, obj.data, obj.object);
             
-            for lv1=1:N_star
+            for lv1=1:N_star                
 %                 lv1
                 %get object velocity
                 dxs = obj.ps.forceSimulator(xc, uc);
@@ -464,18 +1088,19 @@ classdef Planner < dynamicprops
                 obj.xc_star(lv1+1,:) = xcStarTemp';
                 obj.uc_star(lv1+1,:) = usStarTemp';
                 [obj.A_star(lv1+1,:,:), obj.B_star(lv1+1,:,:)] = GP_linearization_data(obj.xc_star(lv1+1,:)', obj.uc_star(lv1+1,1:2)', obj.Linear, obj.data, obj.object);
-                if lv1<N_star
+%                 if lv1<N_star
                     obj.t_star(lv1+1)  = obj.t_star(lv1) + h_star;
-                end
+%                 end
             end
 %             obj.uc_star(lv1+1,:) = obj.us_star(lv1+1,:);
         end
                 %% Build nominal trajectory
-        function obj = buildCircleTrajectory_gp(obj, radius, velocity, x0)
-            
+        function obj = buildCircleTrajectory_gp(obj, radius, velocity, x0, frac)
+            angle_total = abs(2*pi*radius)*frac;
+
             xc = x0;
             uc = zeros(obj.ps.p.num_contacts * 2 + 1, 1);
-            tf = abs(2*pi*radius)/velocity;
+            tf = angle_total/velocity;
             t0 = 0;
             h_star = 0.01;
             N_star = (1/h_star)*(tf-t0);
@@ -526,9 +1151,9 @@ classdef Planner < dynamicprops
                 obj.xc_star(lv1+1,:) = xcStarTemp';
                 obj.uc_star(lv1+1,:) = ucStarTemp';
 %                 obj.uc_star(lv1+1,4)=0.009;
-                if lv1<N_star
+%                 if lv1<N_star
                     obj.t_star(lv1+1)  = obj.t_star(lv1) + h_star;
-                end
+%                 end
             end
             
         end
