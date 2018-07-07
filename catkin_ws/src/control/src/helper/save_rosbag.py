@@ -15,8 +15,8 @@ def initialize_rosbag(req):
     name_of_bag  = str(datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")) + req.input
     # topics = ["/viewer/image_raw"]
     topics = ["/time", "/xc", "/uc", "/us", "/q_pusher_sensed", "/q_pusher_commanded", "/viewer/image_raw", "/viewer/image_raw/compressed", "/viewer/camera_info", "/frame/track_start_frame_pub", "/frame/vicon_world_frame_pub", "/frame/viewer_frame_pub"]
-    # topics = ["/viewer/image_raw"]
-
+    #topics = ["/viewer/image_raw"]
+    #topics = []
     dir_save_bagfile = os.environ['HOME'] + '/pushing_benchmark_data/'
     rosbag_proc = subprocess.Popen('rosbag record -q -O %s %s' % (name_of_bag, " ".join(topics)) , shell=True, cwd=dir_save_bagfile)
     # return MODE_SRVResponse(ms.index_convertor(ms.predict(req.delta_x)))

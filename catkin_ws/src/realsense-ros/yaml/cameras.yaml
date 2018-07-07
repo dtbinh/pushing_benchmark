@@ -1,3 +1,4 @@
+
 observer:
     serial_number: "614204002137"
     camera_info_url: "/home/mcube/pushing_benchmark/catkin_ws/src/realsense-ros/calibrations/614204002137.yaml"

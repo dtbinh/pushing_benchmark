@@ -113,7 +113,7 @@ if __name__=='__main__':
         print('Done!')
         
         # Video time
-        fps = np.floor(len(data['t_images'])/(data['t_images'][-1]-data['t_images'][0]))
+        fps = len(data['t_images'])/(data['t_images'][-1]-data['t_images'][0])
         time_steps = np.arange(data['t_images'][0], data['t_images'][-1], 1.0/fps)
         print 'fps: ', fps
         

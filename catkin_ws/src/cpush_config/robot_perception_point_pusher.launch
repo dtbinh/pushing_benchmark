@@ -21,11 +21,11 @@
   <include file="$(find cpush_config)/realsense.launch" />
 
   <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" respawn="true" />
-
+<!--
   <node name="viewer_cam_tf" pkg="tf" type="static_transform_publisher" args="9.32469439e-01 7.41843937e-03 5.58807896e-01 6.41777363e-01 6.34991100e-01 -3.04887434e-01 -3.03235504e-01 /map /viewer_rgb_optical_frame 100" />
-
+-->
   <node pkg="tf" type="static_transform_publisher" name="viconworldlink_broadcaster"
-  args=" 7.41317247e-02 8.28962929e-02 7.65220816e-03 1.26534745e-03 -7.81924138e-04 -7.08658024e-01 7.05550559e-01 /map /viconworld 100" />
+  args="8.45209490e-02 2.43981249e-02 6.72283589e-03 2.49087560e-03 -1.78092002e-03 -6.98808805e-01 7.15301949e-01 /map /viconworld 100" />
 
     <node pkg="tf" type="static_transform_publisher" name="cross_tip_broadcaster" args="0 0 0.156 0 0 0 /link_6 /cross_tip 100" /> <!-- for transferring calib tip to link6-->
 

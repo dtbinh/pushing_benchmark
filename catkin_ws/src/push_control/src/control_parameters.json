@@ -1,29 +1,223 @@
+
 {"Parameters": {
-    //"controller_flag": 2, //0:Model, 1:Hybrid, 2:Data
-    //"Q": [1,1,0.01,1],
-    //"Q_scale": 100,
-    //"Qf": [1,1,0.1,1],
-    //"Qf_scale": 1000,
-    //"R": [1,0.1],
-    //"R_scale": 0.1,
-    //"steps_mpc": 35,
-    //"h_mpc": 0.01,
+    "controller_flag": 2, //0:Model, 1:Hybrid, 2:Data
+    "Q": [6,3,0.01,3],
+    "Q_scale": 1000,
+    "Qf": [6,3,0.01,3],
+    "Qf_scale": 1000,
+    //"R": [1,1,0.01],
+    //"R": [100,1],
+    "R": [10,0.001],
+    "R_scale": 1,
+    "steps_mpc": 35,
+    "h_mpc": 0.01,
+    "trajectory_filename": "8Track_point_pusher_radius_0.15_vel_0.08_1_laps_data_5000_gpdata_controller_updated",
+    //"trajectory_filename": "5_data_8Track_point_pusher_radius_0.15_dist_0.15_vel_0.08_1_laps_version_1_gpdata_controller",
+    "save_data_filename": "_square"
+}} 
+
+
+{"Parameters": {
+    "controller_flag": 2, //0:Model, 1:Hybrid, 2:Data
+    "Q": [6,3,0.01,3],
+    "Q_scale": 1000,
+    "Qf": [6,3,0.01,3],
+    "Qf_scale": 1000,
+    //"R": [1,1,0.01],
+    //"R": [100,1],
+    "R": [10,0.1],
+    "R_scale": 1,
+    "steps_mpc": 35,
+    "h_mpc": 0.01,
+    "trajectory_filename": "reversed_8Track_point_pusher_radius_-0.15_vel_0.2_1_laps_data_5000_gpdata_controller",
+    //"trajectory_filename": "5_data_8Track_point_pusher_radius_0.15_dist_0.15_vel_0.08_1_laps_version_1_gpdata_controller",
+    "save_data_filename": "_high_velocity"
+}} 
+
+
+{"Parameters": {
     "controller_flag": 0, //0:Model, 1:Hybrid, 2:Data.
     //"Q": [1,1,0.01,3],
-    "Q": [3,3,0.1,0.10001],
-    "Q_scale": 100,
-    "Qf": [3,3,0.1,0.1],
+    "Q": [6,3,0.01,0],
+    "Q_scale": 1000,
+    "Qf": [6,3,0.01,0],
     "Qf_scale": 1000,
-    "R": [1,1,0.01],
-    //"R": [1,0.1],
-    "R_scale": 1000,
+    "R": [0.1,0.001,0.001],
+    "R_scale": 1,
     "steps_mpc": 35,
-    "h_mpc": 0.02,
+    "h_mpc": 0.01,     
+    //"trajectory_filename": "8Track_point_pusher_radius_0.15_vel_0.02_1_laps_hybrid_controller",
+    //"trajectory_filename": "square_point_pusher_radius_0.08_dist_0.15_vel_0.05_1_laps_data_5000_hybrid_controller",
+    "trajectory_filename": "8Track_point_pusher_radius_0.15_vel_0.08_1_laps_data_5000_hybrid_controller",
+    "save_data_filename": "_the_final_FOM_perturbed_1"
+}} 
+
+
+
+
+
+
+
+
+
+
+{"Parameters": {
+    "controller_flag": 2, //0:Model, 1:Hybrid, 2:Data
+    "Q": [6,3,0.01,3],
+    "Q_scale": 1000,
+    "Qf": [6,3,0.01,3],
+    "Qf_scale": 1000,
+    //"R": [1,1,0.01],
+    "R": [10,0.001],
+    "R_scale": 1,
+    "steps_mpc": 35,
+    "h_mpc": 0.01,
+    //}
+    
+    //"trajectory_filename": "new_data_square_point_pusher_radius_0.05_dist_0.15_vel_0.05_1_laps_data_5000_gpdata_controller",
+    "trajectory_filename": "8Track_point_pusher_radius_0.15_vel_0.08_1_laps_data_100_gpdata_controller",
+    //"trajectory_filename": "reversed_new_data_8Track_point_pusher_radius_-0.15_vel_0.07_1_laps_data_5000_gpdata_controller",
+    "save_data_filename": "_the_final_gp_perturbed_1"
+}}
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+//  Q.diagonal() << 3,3,.1,0.0;Q=Q*10;
+   // Qf.diagonal() << 3,3,.1,0.0;Qf=Qf*2000;
+    //R.diagonal() << 1,1,0.01;R = R*.01;
+
+{"Parameters": {
+    "controller_flag": 0, //0:Model, 1:Hybrid, 2:Data.
+    //"Q": [1,1,0.01,3],
+    "Q": [3,3,0.1,0],
+    "Q_scale": 10,
+    "Qf": [3,3,0.1,0],
+    "Qf_scale": 2000,
+    "R": [1,1,0.01],
+    "R_scale": 0.01,
+    "steps_mpc": 35,
+    "h_mpc": 0.03,     
+    //"trajectory_filename": "8Track_point_pusher_radius_0.15_vel_0.02_1_laps_hybrid_controller",
+    "trajectory_filename": "8Track_point_pusher_radius_0.15_vel_0.02_1_laps_data_5000_hybrid_controller",
+    //"trajectory_filename": "8Track_point_pusher_radius_0.15_vel_0.08_1_laps_data_5000_hybrid_controller",
+    "save_data_filename": "_final3_FOM"
+}} 
+
+
+
+
+
+
+//  Q.diagonal() << 3,3,.1,0.0;Q=Q*10;
+   // Qf.diagonal() << 3,3,.1,0.0;Qf=Qf*2000;
+    //R.diagonal() << 1,1,0.01;R = R*.01;
+
+
+
+
+
+
+
+
+
+
+
+
+
+{"Parameters": {
+    "controller_flag": 2, //0:Model, 1:Hybrid, 2:Data
+    "Q": [6,3,0.01,3],
+    "Q_scale": 1000,
+    "Qf": [6,3,0.01,3],
+    "Qf_scale": 1000000,
+    //"R": [1,1,0.01],
+    "R": [10,0.001],
+    "R_scale": 1,
+    "steps_mpc": 35,
+    "h_mpc": 0.01,
+    //}
+    
     //"trajectory_filename": "8Track_point_pusher_radius_0_15_vel_0_05_3_laps_gp_controller",
-    //"trajectory_filename": "8Track_point_pusher_radius_0.15_vel_0.05_1_laps_data_5000_gpdata_controller",
-    "trajectory_filename": "8Track_point_pusher_radius_0.15_vel_0.05_1_laps_data_5000_hybrid_controller",
-    "save_data_filename": "_experiment_3"
-}}   
+    "trajectory_filename": "Square_track_point_pusher_radius_0.15_vel_0.02_1_laps_data_5000_gpdata_controller",
+    //"trajectory_filename": ''"8Track_point_pusher_radius_0_15_vel_0_08_1_laps_gp_controller",
+    "save_data_filename": "_experiment_gp_first_results"
+}} 
+
+
+
+
+
+
+ 
+
+
+
+{"Parameters": {
+    "controller_flag": 2, //0:Model, 1:Hybrid, 2:Data
+    "Q": [3,3,0.01,3],
+    "Q_scale": 1000,
+    "Qf": [3,3,0.01,3],
+    "Qf_scale": 1000,
+    //"R": [1,1,0.01],
+    "R": [1,0.01],
+    "R_scale": 1,
+    "steps_mpc": 35,
+    "h_mpc": 0.01,
+    //}
+    
+    //"trajectory_filename": "8Track_point_pusher_radius_0_15_vel_0_05_3_laps_gp_controller",
+    "trajectory_filename": "8Track_point_pusher_radius_0.15_vel_0.02_1_laps_data_5000_gpdata_controller",
+    //"trajectory_filename": ''"8Track_point_pusher_radius_0_15_vel_0_08_1_laps_gp_controller",
+    "save_data_filename": "_experiment_gp"
+}}  
+
+
+
+
+
+
+
+
+  //GPDataController control parameters
+//  Q.diagonal() << 1,1,.01,1;Q=Q*100;
+//  Qf.diagonal() << 1,1,.1,1;Qf=Qf*1000;
+//  R.diagonal() << 1,.1;R = R*.1;
+{"Parameters": {
+    "controller_flag": 0, //0:Model, 1:Hybrid, 2:Data.
+    //"Q": [1,1,0.01,3],
+    "Q": [6,3,0.1,0],
+    "Q_scale": 1000,
+    "Qf": [6,3,0.1,0],
+    "Qf_scale": 1000,
+    "R": [0.1,0.001,0.001],
+    //"R": [1,0.1],
+    "R_scale": 1,
+    "steps_mpc": 35,
+    "h_mpc": 0.01,     
+    "trajectory_filename": "8Track_point_pusher_radius_0_15_vel_0_08_1_laps_hybrid_controller",
+    "save_data_filename": "_experiment_FOM_first_results"
+}} 
+
 
 
   //FOM control parameters

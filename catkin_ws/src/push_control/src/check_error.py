@@ -15,6 +15,7 @@ import scipy
 import matplotlib.pyplot as plt
 import copy
 import pdb
+import shutil
 
 
 
@@ -49,7 +50,7 @@ if __name__=='__main__':
     with open(file_JSON) as json_data:
         data = json.load(json_data)
     print data.keys()
-
+    
     # t,x,y of desired trajectory
     t_des = np.array(data['timeJSON'])
     x_des = np.array(data['xc_desired'][0])
@@ -73,7 +74,6 @@ if __name__=='__main__':
     vx_act = np.array(data['us'][0][it_cut::])
     vy_act = np.array(data['us'][1][it_cut::])
     q_act = np.array(data['q_pusher_sensed'][it_cut::])
-    
     # Relevant parameters:
     Q = np.array(data['Q'])
     Qf = np.array(data['Qf'])
@@ -114,7 +114,11 @@ if __name__=='__main__':
     r_des_interp = np.interp(time_steps, t_des, r_des)
     ori_act_interp = np.interp(time_steps, t_act, ori_act)
     r_act_interp = np.interp(time_steps, t_act, r_act)
-    
+    plt.plot(x_des,y_des,'k', linewidth=5.0)
+    plt.plot(x_des+0.4,y_des+0.04,'k'); 
+    plt.plot(x_des-0.4,y_des-0.04,'k'); 
+    plt.axis('equal')
+    plt.show()
     plt.figure(figsize=(20,20))
     ax1 = plt.subplot2grid((4,3), (0, 0), colspan=1, rowspan=4)
     ax1.plot(x_des,y_des,'r'); 
@@ -127,17 +131,28 @@ if __name__=='__main__':
     #plt.close()
     
     error = np.sum(np.sqrt((x_des_interp - x_act_interp)**2+(y_des_interp - y_act_interp)**2))
+    average_error = np.sqrt((x_des_interp - x_act_interp)**2+(y_des_interp - y_act_interp)**2)
+    
     
     print 'Total error:', error
     print ' Average errror:', error/num_steps
     ax1.set_title(' Average errror in trajectory: {}'.format(error/num_steps))
 
     ax2 = plt.subplot2grid((4,3), (0, 1), colspan=1, rowspan = 2)
+    
+    
     ax2.plot(vx_des_interp,vy_des_interp, 'ro'); 
     ax2.plot(vx_act_interp,vy_act_interp, 'bo'); 
     ax2.plot(vx_des,vy_des, 'r.'); 
     ax2.plot(vx_act,vy_act, 'b.'); 
     ax2.set_aspect('equal')
+    
+    '''
+    
+    ax2 = plt.subplot2grid((4,3), (1, 1), colspan=1, rowspan = 1)
+    ax2.plot(time_steps,average_error, 'bo'); 
+    
+    '''
     #plt.show()
     
     #plt.close()
@@ -222,15 +237,30 @@ if __name__=='__main__':
     print 'Total error in vy:', error
     print ' Average errror in vy:', error/num_steps
     ax8.set_title(' Average errror in vy: {}'.format(error/num_steps))
-    fig_name = file_JSON[:-5] + '_Q={}_Qf={}_R={}_h_mpc={}_steps_mpc={}.'.format(Q,Qf,R,h_mpc,steps_mpc) + 'png'
+    Qt = np.transpose(Q)
+    Qft = np.transpose(Qf)
+    Rt = np.transpose(R)
+    final_error = round(np.mean(average_error)*1000, 2)
+    final_time = time.strftime('%X_%x').replace('/',':')
+    fig_name = file_JSON[:-5] + '_err={}_R={}_Q={}_Qf={}_h={}_steps={}_t={}.png'.format(final_error,Rt[0],Qt[0],Qft[0],h_mpc[0],steps_mpc[0], final_time)
     plt.savefig(fig_name)
     plt.show()
     plt.close()
     print fig_name
+    shutil.copyfile(file_JSON, file_JSON[:-5]+'_'+final_time+'.json')
+    '''
+    plt.plot(vx_des_interp,vy_des_interp, 'ro'); 
+    plt.plot(vx_act_interp,vy_act_interp, 'bo'); 
+    plt.plot(vx_des,vy_des, 'r.'); 
+    plt.plot(vx_act,vy_act, 'b.'); 
+    '''
+    plt.plot(t_des, np.sqrt(np.power(vx_des,2)+np.power(vy_des,2)), 'r'); 
+    plt.plot(t_act, np.sqrt(np.power(vx_act,2)+np.power(vy_act,2)), 'b'); 
     
+    '''
     plt.plot(q_des[0], q_des[1], 'r')
     plt.plot(q_act[0], q_act[1], 'b')
     plt.axes().set_aspect('equal')
+    '''
     plt.show()
-    
 

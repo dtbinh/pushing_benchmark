@@ -80,7 +80,7 @@ VectorXd FOM::solveMPC(VectorXd xc, double time){
     //Find minimum objective value
     MatrixXf::Index   minIndex;
     double minVal = objList.minCoeff(&minIndex);
-
+    cout<<"Mode selected: "<<minIndex<<endl;
     VectorXd delta_uc = list_controller[minIndex]->out_solution.solution;
     VectorXd uc = delta_uc + out_state_nominal.ucStar;
 

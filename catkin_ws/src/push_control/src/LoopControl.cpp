@@ -122,8 +122,8 @@ void *loopControl(void *thread_arg)
     }
 
     //8Track
-    _q_offset_slider << 0.3484033942222595, 0, 0; //point pusher
-    _q_offset_pusher << 0.3484033942222595, 0, 0.0;//point pusher
+    _q_offset_slider << 0.3484033942222595, 0, 0.00; //point pusher
+    _q_offset_pusher << 0.3484033942222595, 0, 0.00;//point pusher
     /* ************ TO EDIT ************** */
 
     //Straight Line
@@ -178,13 +178,13 @@ void *loopControl(void *thread_arg)
 
         xc =  ppusher->coordinateTransformSC(xs);
         //Compute MPC control input
-        //uc = mpc->solveMPC(xc, _time);
+        uc = mpc->solveMPC(xc, _time);
 //
 
 //  outStateNominal out_state_nominal;
 //      out_state_nominal = ppusher->getStateNominal(_time);
-      us = mpc->get_robot_velocity(out_state_nominal.xcStar, out_state_nominal.ucStar);
-//        us = mpc->get_robot_velocity(xc, uc);
+      //us = mpc->get_robot_velocity(out_state_nominal.xcStar, out_state_nominal.ucStar);
+        us = mpc->get_robot_velocity(xc, uc);
         
 //       cout<<"xc"<<endl;
 //       cout<<xc<<endl;

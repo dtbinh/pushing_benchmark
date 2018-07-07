@@ -7,7 +7,7 @@ close all
 %%%%%%%%%%%%%
 %% to edit %%
 %%%%%%%%%%%%%
-des_velocity = 0.05;
+des_velocity = 0.10;
 des_radius = 0.15; %8track: denoted curvature of circles (0.15), square: denoted curvature of corners (0.05), 
 des_dist = 0.15; %only used for square denotes line lengths
 is_reversed = false;%only used for 8track

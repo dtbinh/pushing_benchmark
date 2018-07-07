@@ -33,7 +33,7 @@ def get_tranf_matrix(extrinsics, camera_matrix):
     
     # Transformation matrix
     transformation_matrix = np.dot(camera_matrix,extrinsics_matrix)
-    
+    print transformation_matrix
     return transformation_matrix
 
 def load_json_file(filename):
@@ -50,10 +50,24 @@ if __name__=='__main__':
     #Default camera info
     camera_matrix = np.array([[1391.26, 0.0, 939.721], [0.0, 1391.26, 531.336], [0.0, 0.0, 1.0]])    
     extrinsics = np.array([-0.011075975475308975, -0.15364479808584514, 1.0761464358218347, -0.6417773633094387, -0.6349911003061667, 0.30488743414700425, -0.3032355041462077])
+    #9.32469439e-01 7.41843937e-03 5.58807896e-01 6.41777363e-01 6.34991100e-01 -3.04887434e-01 -3.03235504e-01
     transformation_matrix = get_tranf_matrix(extrinsics, camera_matrix)
     
     #Desired trajectory
-    desired_traj_JSON = os.environ['PUSHING_BENCHMARK_BASE'] + '/Data/'+'8Track_point_pusher_radius_0_15_vel_0_05_3_laps_gp_controller.json'
+    desired_traj_JSON = os.environ['PUSHING_BENCHMARK_BASE'] + '/Data/'+'new_data_square_point_pusher_radius_0.05_dist_0.15_vel_0.03_1_laps_data_5000_gpdata_controller.json'
+    
+    #'8Track_point_pusher_radius_0.15_vel_0.02_1_laps_data_5000_gpdata_controller.json'
+    
+    #'5_data_8Track_point_pusher_radius_0.15_dist_0.15_vel_0.08_1_laps_version_1_gpdata_controller.json'
+    
+    #'8Track_point_pusher_radius_0.15_vel_0.08_1_laps_data_5000_hybrid_controller.json'
+    
+    #
+    #'5_data_8Track_point_pusher_radius_0.15_dist_0.15_vel_0.02_1_laps_version_1_gpdata_controller.json'
+    
+    #'new_data_8Track_point_pusher_radius_0.15_vel_0.05_1_laps_data_5000_gpdata_controller.json'
+    
+    #'new_data_square_point_pusher_radius_0.05_dist_0.15_vel_0.03_1_laps_data_5000_gpdata_controller.json' #'8Track_point_pusher_radius_0_15_vel_0_05_3_laps_gp_controller.json'
     #'8Track_point_pusher_radius_0.15_vel_0.08_3_laps.json'
     des_var = load_json_file(desired_traj_JSON)['Matrices']
     
@@ -65,7 +79,30 @@ if __name__=='__main__':
     act_var = load_json_file(actual_traj_JSON)
     '''
     #   Load from BAG
-    data_filename = '/home/mcube/pushing_benchmark_data/'+'2018-05-16-16-41-178Track_point_pusher_radius_0_15_vel_0_05_1_laps_hybrid_controller_test'
+    data_filename = '/home/mcube/pushing_benchmark_data/'+'2018-06-04-16-59-14new_data_square_point_pusher_radius_0.05_dist_0.15_vel_0.03_1_laps_data_5000_gpdata_controller_final_gp'
+    #'2018-06-12-15-40-578Track_point_pusher_radius_0.15_vel_0.02_1_laps_data_5000_gpdata_controller_videos_gp'
+    
+    #'2018-06-12-15-30-168Track_point_pusher_radius_0.15_vel_0.08_1_laps_data_5000_hybrid_controller_the_final_FOM_perturbed_1'
+    #'2018-06-12-15-37-115_data_8Track_point_pusher_radius_0.15_dist_0.15_vel_0.08_1_laps_version_1_gpdata_controller_videos_gp'
+    #'2018-06-12-15-39-538Track_point_pusher_radius_0.15_vel_0.08_1_laps_data_5000_gpdata_controller_videos_gp'
+    #'2018-06-12-15-38-418Track_point_pusher_radius_0.15_vel_0.08_1_laps_data_5000_gpdata_controller_videos_gp'
+    #'2018-06-12-15-35-408Track_point_pusher_radius_0.15_vel_0.08_1_laps_data_10_gpdata_controller_videos_gp'
+       
+    
+    #'2018-06-12-15-34-278Track_point_pusher_radius_0.15_vel_0.08_1_laps_data_100_gpdata_controller_videos_gp'
+    #'2018-06-12-15-33-128Track_point_pusher_radius_0.15_vel_0.08_1_laps_data_1000_gpdata_controller_videos_gp'
+    #'2018-06-12-15-31-578Track_point_pusher_radius_0.15_vel_0.08_1_laps_data_5000_gpdata_controller_videos_gp'
+    #----------------
+    #'2018-06-04-16-59-14new_data_square_point_pusher_radius_0.05_dist_0.15_vel_0.03_1_laps_data_5000_gpdata_controller_final_gp' 
+    #'2018-06-06-13-07-575_data_8Track_point_pusher_radius_0.15_dist_0.15_vel_0.02_1_laps_version_1_gpdata_controller_the_final_gp'
+    
+    #'2018-06-06-12-55-455_data_8Track_point_pusher_radius_0.15_dist_0.15_vel_0.08_1_laps_version_1_gpdata_controller_the_final_gp'
+    
+    
+    #'2018-06-05-12-48-09square_point_pusher_radius_0.08_dist_0.15_vel_0.05_1_laps_data_5000_hybrid_controller_the_final_FOM_perturbed_1'#'2018-06-04-17-43-26new_data_8Track_point_pusher_radius_0.15_vel_0.05_1_laps_data_5000_gpdata_controller_final_gp''
+    #'2018-06-04-16-59-14new_data_square_point_pusher_radius_0.05_dist_0.15_vel_0.03_1_laps_data_5000_gpdata_controller_final_gp' 
+    #'2018-05-16-16-41-178Track_point_pusher_radius_0_15_vel_0_05_1_laps_hybrid_controller_test'
+    
     print('Loading data from BAG file ...')
     num_frames = 0
     if 1 or  not os.path.isfile(data_filename+'.npz'):
@@ -73,17 +110,19 @@ if __name__=='__main__':
         data = {}
         data['images'] = []; data['t_images'] = []; data['xc'] = [];data['timeJSON'] = []
         with rosbag.Bag(data_filename+'.bag', 'r') as bag:
-                for topic, msg, t in bag.read_messages():
-                    if topic == '/viewer/image_raw':
-                        num_frames += 1
-                        print 'Adding frame number {}'.format(num_frames)
-                        cv_image = bridge.imgmsg_to_cv2(msg, "rgb8")
-                        data['images'].append(cv_image)
-                        data['t_images'].append(t.to_sec())
-                    if topic == '/xc':
-                        #print 'Adding step'
-                        data['xc'].append(np.array(msg.data))
-                        data['timeJSON'].append(t.to_sec())
+            for topic, msg, t in bag.read_messages():
+                #if num_frames > 120:
+                    #break
+                if topic == '/viewer/image_raw':
+                    num_frames += 1
+                    print 'Adding frame number {}'.format(num_frames)
+                    cv_image = bridge.imgmsg_to_cv2(msg, "rgb8")
+                    data['images'].append(cv_image)
+                    data['t_images'].append(t.to_sec())
+                if topic == '/xc':
+                    #print 'Adding step'
+                    data['xc'].append(np.array(msg.data))
+                    data['timeJSON'].append(t.to_sec())
         #np.savez(data_filename, data)
     else:
         data = np.load(data_filename+'.npz')['arr_0'][()]
@@ -91,13 +130,13 @@ if __name__=='__main__':
     print('Done!')
     
     # Video time
-    fps = np.floor(len(data['t_images'])/(data['t_images'][-1]-data['t_images'][0]))
+    fps = len(data['t_images'])/(data['t_images'][-1]-data['t_images'][0])
     time_steps = np.arange(data['t_images'][0], data['t_images'][-1], 1.0/fps)
     print 'fps: ', fps
     
     # Projection offsets
-    x_off = 0.345
-    y_off = 0
+    x_off = 0.23#0.33
+    y_off = 0.03
     z_off = 0.015
     
     #Object properties
@@ -119,10 +158,11 @@ if __name__=='__main__':
     
     # Interpolate for both trajectories:
     t_des = t_des - t_des[0] + time_steps[0]  #Assumes it starts at the same time that the first image
-    x_des = np.interp(time_steps, t_des, x_des)
-    y_des = np.interp(time_steps, t_des, y_des)
-    z_des = np.interp(time_steps, t_des, z_des)
-    ori_des = np.interp(time_steps, t_des, ori_des)
+    max_set = t_des.size
+    x_des = np.interp(time_steps, t_des, x_des[:max_set])
+    y_des = np.interp(time_steps, t_des, y_des[:max_set])
+    z_des = np.interp(time_steps, t_des, z_des[:max_set])
+    ori_des = np.interp(time_steps, t_des, ori_des[:max_set])
     
     x_act = np.interp(time_steps, t_act, x_act)
     y_act = np.interp(time_steps, t_act, y_act)
@@ -170,7 +210,7 @@ if __name__=='__main__':
         a = pixels_obj[0]/pixels_obj[2]
         b = pixels_obj[1]/pixels_obj[2]
         polygon = Polygon([(a[0], b[0]), (a[1], b[1]), (a[2], b[2]), (a[3], b[3])])
-        
+        #plt.plot(a,b, 'g')
         # Plot desired trajectory        
         x = []; y = []
         for it_2 in range(x_des.shape[0]):
@@ -192,7 +232,8 @@ if __name__=='__main__':
                 x = []; y = []
             else:
                 x.append(pix_x_act[it_2]); y.append(pix_y_act[it_2])
-        
+        #if len(x) >  0:
+        #    plt.plot(x,y, 'b')
         # Plot properties
         plt.axis('off')
         plt.subplots_adjust(top = 1, bottom = 0, right = 1, left = 0, hspace = 0, wspace = 0)
@@ -204,10 +245,11 @@ if __name__=='__main__':
         img  = img.reshape(fig.canvas.get_width_height()[::-1] + (3,))
         #   Img is rgb, convert to opencv's default bgr
         img = cv2.cvtColor(img,cv2.COLOR_RGB2BGR)[500:1400,500:2200]  #[120:380,150:600] #[90:410,220:820]
-        
+        #cv2.imwrite("test_push.png", img)
+        #break
         # Initialize video
         if it == 0:
-            video_name = data_filename + '.avi'
+            video_name = data_filename + '_whole2.avi'
             height, width, layers = img.shape
             fourcc = cv2.VideoWriter_fourcc(*'DIVX')
             video = cv2.VideoWriter(video_name,fourcc, fps, (width,height)) 

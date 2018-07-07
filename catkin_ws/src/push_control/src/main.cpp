@@ -62,7 +62,6 @@ int main(int argc,  char *argv[]){
   int steps_mpc;
   double h_mpc;
   int controller_flag; //0:FOM, 1: Hybrid, 2: Data
-
   Helper::write_int_JSON(root["Parameters"]["steps_mpc"], steps_mpc);
   Helper::write_int_JSON(root["Parameters"]["controller_flag"], controller_flag);
   Helper::write_double_JSON(root["Parameters"]["h_mpc"], h_mpc);
@@ -268,7 +267,7 @@ int main(int argc,  char *argv[]){
           _time = time;
           q_slider(0) = 0.3484033942222595;
           q_slider(1) = 0.02;
-          q_slider(2) = 0.3;
+          q_slider(2) = 0.3; //0.3
           q_pusher << .3484033942222595-0.0318, -0.0118, 0.3;
     }
     
