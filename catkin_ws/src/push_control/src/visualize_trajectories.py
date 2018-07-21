@@ -47,16 +47,38 @@ def load_json_file(filename):
 
 if __name__=='__main__':
     
-    actual_traj_list = ['2018-05-02-10-34-348Track_point_pusher_radius_0_15_vel_0.08_3_laps_nu_p_0.45',
-    '2018-05-02-10-39-328Track_point_pusher_radius_0_15_vel_0.08_3_laps_nu_p_0.60',
-    '2018-05-02-10-41-398Track_point_pusher_radius_0_15_vel_0.08_3_laps_nu_p_0.75',
-    '2018-05-02-10-46-108Track_point_pusher_radius_0_15_vel_0.08_3_laps_nu_p_1.0',
-    '2018-05-02-11-04-558Track_point_pusher_radius_0_15_vel_0.08_3_laps_horizon_5',
-    '2018-05-02-11-09-558Track_point_pusher_radius_0_15_vel_0.08_3_laps_horizon_10',
-    '2018-05-02-11-13-268Track_point_pusher_radius_0_15_vel_0.08_3_laps_horizon_30',
-    '2018-05-02-11-32-088Track_point_pusher_radius_0_15_vel_0.08_3_laps_horizon_40_60_hz',
-    '2018-05-02-11-34-508Track_point_pusher_radius_0_15_vel_0.08_3_laps_horizon_50_33_hz',
+    actual_traj_list = [
+    # '2018-05-01-17-37-508Track_point_pusher_radius_0_15_vel_0.01_3_laps_experiment',
+    '2018-05-01-18-24-148Track_point_pusher_radius_0_15_vel_0.02_3_laps_experiment', 
+     # '2018-05-01-18-44-398Track_point_pusher_radius_0_15_vel_0.04_3_laps_experiment', 
+     # '2018-05-01-18-47-518Track_point_pusher_radius_0_15_vel_0.05_3_laps_experiment',
+     # '2018-05-01-18-50-328Track_point_pusher_radius_0_15_vel_0.06_3_laps_experiment',
+     # '2018-05-01-18-52-548Track_point_pusher_radius_0_15_vel_0.07_3_laps_experiment',
+     # '2018-05-01-18-55-208Track_point_pusher_radius_0_15_vel_0.08_3_laps_experiment',
+     # '2018-05-01-18-57-148Track_point_pusher_radius_0_15_vel_0.09_3_laps_experiment',
     ];
+    
+    des_traj_list = [
+    # '8Track_point_pusher_radius_0_15_vel_0.01_3_laps.json',
+    '8Track_point_pusher_radius_0_15_vel_0.02_3_laps.json',
+    # '8Track_point_pusher_radius_0_15_vel_0.03_3_laps.json',
+    # '8Track_point_pusher_radius_0_15_vel_0.04_3_laps.json',
+    # '8Track_point_pusher_radius_0_15_vel_0.05_3_laps.json',
+    # '8Track_point_pusher_radius_0_15_vel_0.06_3_laps.json',
+    # '8Track_point_pusher_radius_0_15_vel_0.07_3_laps.json',
+    # '8Track_point_pusher_radius_0_15_vel_0.08_3_laps.json',
+    # '8Track_point_pusher_radius_0_15_vel_0.09_3_laps.json',
+    ]
+    # actual_traj_list = ['2018-05-02-10-34-348Track_point_pusher_radius_0_15_vel_0.08_3_laps_nu_p_0.45',
+    # '2018-05-02-10-39-328Track_point_pusher_radius_0_15_vel_0.08_3_laps_nu_p_0.60',
+    # '2018-05-02-10-41-398Track_point_pusher_radius_0_15_vel_0.08_3_laps_nu_p_0.75',
+    # '2018-05-02-10-46-108Track_point_pusher_radius_0_15_vel_0.08_3_laps_nu_p_1.0',
+    # '2018-05-02-11-04-558Track_point_pusher_radius_0_15_vel_0.08_3_laps_horizon_5',
+    # '2018-05-02-11-09-558Track_point_pusher_radius_0_15_vel_0.08_3_laps_horizon_10',
+    # '2018-05-02-11-13-268Track_point_pusher_radius_0_15_vel_0.08_3_laps_horizon_30',
+    # '2018-05-02-11-32-088Track_point_pusher_radius_0_15_vel_0.08_3_laps_horizon_40_60_hz',
+    # '2018-05-02-11-34-508Track_point_pusher_radius_0_15_vel_0.08_3_laps_horizon_50_33_hz',
+    # ];
     
         # '2018-05-01-18-55-208Track_point_pusher_radius_0_15_vel_0.08_3_laps_experiment',
     # '2018-05-01-19-35-138Track_point_pusher_radius_0_15_vel_0.08_3_laps_freq_10',
@@ -68,7 +90,7 @@ if __name__=='__main__':
     # '2018-05-02-10-22-368Track_point_pusher_radius_0_15_vel_0.08_3_laps_nu_p_0',
     # '2018-05-02-10-28-348Track_point_pusher_radius_0_15_vel_0.08_3_laps_nu_p_0.15',
     #'2018-05-02-10-30-178Track_point_pusher_radius_0_15_vel_0.08_3_laps_nu_p_0.30'
-    
+    counter = 0
     for item in actual_traj_list:
         # import pdb;pdb.set_trace()
         
@@ -79,7 +101,8 @@ if __name__=='__main__':
         
         #Desired trajectory
         # desired_traj_JSON = '/media/mcube/SERVER_HD/pushing_benchmark_data/'+ item
-        desired_traj_JSON = os.environ['PUSHING_BENCHMARK_BASE'] + '/Data/'+'8Track_point_pusher_radius_0.15_vel_0.08_3_laps.json'
+        desired_traj_JSON = os.environ['PUSHING_BENCHMARK_BASE'] + '/Data/'+ des_traj_list[counter]
+        counter+=1
         des_var = load_json_file(desired_traj_JSON)['Matrices']
         
         
@@ -174,6 +197,7 @@ if __name__=='__main__':
             # Get real image
             while t_im[it_im]< time_steps[it]: #What is the right image from the sequence to plot?
                 it_im += 1
+                print ('look through steps')
             plt.imshow(data['images'][it_im])
             
             # Locate object position
@@ -221,6 +245,7 @@ if __name__=='__main__':
             plt.subplots_adjust(top = 1, bottom = 0, right = 1, left = 0, hspace = 0, wspace = 0)
 
             # Convert canvas to image
+            print ('generate canvas')
             fig.canvas.draw()
             img = np.fromstring(fig.canvas.tostring_rgb(), dtype=np.uint8, sep='')
             img  = img.reshape(fig.canvas.get_width_height()[::-1] + (3,))
@@ -228,6 +253,7 @@ if __name__=='__main__':
             img = cv2.cvtColor(img,cv2.COLOR_RGB2BGR)[120:380,150:600] #[90:410,220:820]
             
             # Initialize video
+            print ('generate veideo')
             if it == 0:
                 video_name = data_filename + '.avi'
                 height, width, layers = img.shape
@@ -235,6 +261,7 @@ if __name__=='__main__':
                 video = cv2.VideoWriter(video_name,fourcc, fps, (width,height)) 
             
             # Record video
+            print ('write canvas')
             video.write(img)
 
             # Create new figure
